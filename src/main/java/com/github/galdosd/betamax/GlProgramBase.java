@@ -99,6 +99,11 @@ public abstract class GlProgramBase {
         glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
         // we don't want to show the window till we're done making it...
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
         if(getDebugMode()) glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
 
         windowHandle = glfwCreateWindow(
@@ -153,8 +158,8 @@ public abstract class GlProgramBase {
         }
 
         public void bindAndLoad(int target, int usage, float[] data) {
-            bind(GL_ARRAY_BUFFER);
-            glBufferData(GL_ARRAY_BUFFER, FloatBuffer.wrap(data), GL_STATIC_DRAW);      checkGlError();
+            bind(target);
+            glBufferData(target, FloatBuffer.wrap(data), usage);      checkGlError();
         }
     }
 
@@ -200,6 +205,10 @@ public abstract class GlProgramBase {
             int result = glGetAttribLocation(handle, varName);      checkGlError();
             return result;
         }
+
+        public void bindFragDataLocation(int colorNumber, String colorName) {
+            glBindFragDataLocation(handle, colorNumber, colorName);
+        }
     }
 
     protected final void installDebugCallback() {
@@ -217,18 +226,18 @@ public abstract class GlProgramBase {
             ShaderProgram shaderProgram, String varName,
             int arity, int type, boolean normalize, int stride, long offset) {
         int attribLocation = shaderProgram.getAttribLocation(varName);
-        glVertexAttribPointer(attribLocation, arity, type, normalize, stride, offset);      checkGlError();
         glEnableVertexAttribArray(attribLocation);                                          checkGlError();
+        glVertexAttribPointer(attribLocation, arity, type, normalize, stride, offset);      checkGlError();
     }
 
     protected final Shader loadAndCompileShader(String filename, int shaderType)  {
         String shaderSource = OurTool.loadResource(filename);
-        int shader = glCreateShader(shaderType);      checkGlError();
-        glShaderSource(shader, shaderSource);               checkGlError();
-        glCompileShader(shader);                            checkGlError();
+        int shader = glCreateShader(shaderType);                    checkGlError();
+        glShaderSource(shader, shaderSource);                       checkGlError();
+        glCompileShader(shader);                                    checkGlError();
 
         int status = glGetShaderi(shader, GL_COMPILE_STATUS);       checkGlError();
-        checkState(GL_TRUE == status, "Shader compilation failure: " + filename);
+        checkState(GL_TRUE == status, "Shader compilation failure: %s", filename);
         return new Shader(shader);
     }
 
