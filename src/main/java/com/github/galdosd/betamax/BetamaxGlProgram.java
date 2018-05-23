@@ -1,10 +1,17 @@
 package com.github.galdosd.betamax;
 
+import com.google.common.base.Charsets;
+import com.google.common.base.Preconditions;
+import com.google.common.io.Files;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
+import org.lwjgl.opengl.GL20;
 
+import java.io.File;
+import java.io.IOException;
 import java.nio.FloatBuffer;
 
+import static com.google.common.base.Preconditions.checkState;
 import static org.lwjgl.opengl.GL11.*;
 
 /**
@@ -17,14 +24,15 @@ public class BetamaxGlProgram extends GlProgramBase {
 
     @Override protected void initialize() {
         VBO vbo = genBuffer();
-        vbo.bind(GL15.GL_ARRAY_BUFFER);
-        FloatBuffer vertices = FloatBuffer.wrap(new float[]{
+        vbo.bindAndLoad(GL15.GL_ARRAY_BUFFER, GL15.GL_STATIC_DRAW, new float[]{
                  0.0f,  0.5f,
                  0.5f, -0.5f,
                 -0.5f, -0.5f,
         });
-        GL15.glBufferData(GL15.GL_ARRAY_BUFFER, vertices, GL15.GL_STATIC_DRAW);
+        Shader vertexShader = loadAndCompileShader("default-vertex.glsl");
     }
+
+
 
     @Override protected void keyboardEvent(int key, KeyAction action) { }
 
