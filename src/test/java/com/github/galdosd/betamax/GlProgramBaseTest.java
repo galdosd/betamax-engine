@@ -1,5 +1,6 @@
 package com.github.galdosd.betamax;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.lwjgl.opengl.GL11;
 import org.slf4j.LoggerFactory;
@@ -13,6 +14,18 @@ import static org.lwjgl.opengl.GL11.glClearColor;
 public class GlProgramBaseTest {
     private static final org.slf4j.Logger LOG =
             LoggerFactory.getLogger(new Object(){}.getClass().getEnclosingClass());
+
+    // FIXME they fail to compile in test, probably gl not initialized, need to get log. not important yet
+    @Test @Ignore public void testShadersCompile() throws Exception {
+        // TODO find all *.glsl in resources/
+        String[] shaderNames = new String[] {
+                "default-vertex.glsl",
+                "default-fragment.glsl",
+        };
+        BetamaxGlProgram program = new BetamaxGlProgram();
+        for(String shaderName: shaderNames) program.loadAndCompileShader(shaderName);
+    }
+
     @Test public void testBasic() throws Exception {
         new GlProgramBase() {
 

@@ -23,13 +23,19 @@ public class BetamaxGlProgram extends GlProgramBase {
     }
 
     @Override protected void initialize() {
+        // load our triangle vertices
         VBO vbo = genBuffer();
         vbo.bindAndLoad(GL15.GL_ARRAY_BUFFER, GL15.GL_STATIC_DRAW, new float[]{
                  0.0f,  0.5f,
                  0.5f, -0.5f,
                 -0.5f, -0.5f,
         });
-        Shader vertexShader = loadAndCompileShader("default-vertex.glsl");
+
+        // prepare shaders
+        ShaderProgram shaderProgram = new ShaderProgram();
+        shaderProgram.attach(loadAndCompileShader("default-vertex.glsl"));
+        shaderProgram.attach(loadAndCompileShader("default-fragment.glsl"));
+        shaderProgram.linkAndUse();
     }
 
 

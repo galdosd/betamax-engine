@@ -1,9 +1,6 @@
 package com.github.galdosd.betamax;
 
-import com.google.common.base.Charsets;
-import com.google.common.io.Files;
 import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWKeyCallback;
@@ -13,8 +10,6 @@ import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -22,7 +17,9 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkState;
 import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.opengl.GL11.GL_TRUE;
+import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL15.*;
+import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 /**
@@ -141,12 +138,12 @@ public abstract class GlProgramBase {
         int handle;
 
         public void bind(int target) {
-            GL15.glBindBuffer(target, handle);
+            glBindBuffer(target, handle);
         }
 
         public void bindAndLoad(int target, int usage, float[] data) {
-            bind(GL15.GL_ARRAY_BUFFER);
-            GL15.glBufferData(GL15.GL_ARRAY_BUFFER, FloatBuffer.wrap(data), GL15.GL_STATIC_DRAW);
+            bind(GL_ARRAY_BUFFER);
+            glBufferData(GL_ARRAY_BUFFER, FloatBuffer.wrap(data), GL_STATIC_DRAW);
         }
     }
 
@@ -154,17 +151,34 @@ public abstract class GlProgramBase {
         int handle;
     }
 
+    protected static final class ShaderProgram {
+        private final int handle;
+
+        public ShaderProgram() {
+            handle = glCreateProgram();
+        }
+
+        public void attach(Shader shader) {
+            glAttachShader(handle, shader.getHandle());
+        }
+
+        public void linkAndUse() {
+            glLinkProgram(handle);
+            glUseProgram(handle);
+        }
+    }
+
     protected final VBO genBuffer() {
-        return new VBO(GL15.glGenBuffers());
+        return new VBO(glGenBuffers());
     }
 
     protected final Shader loadAndCompileShader(String filename)  {
         String shaderSource = OurTool.loadResource(filename);
-        int shader = GL20.glCreateShader(GL20.GL_VERTEX_SHADER);
-        GL20.glShaderSource(shader, shaderSource);
-        GL20.glCompileShader(shader);
+        int shader = glCreateShader(GL_VERTEX_SHADER);
+        glShaderSource(shader, shaderSource);
+        glCompileShader(shader);
 
-        int status = GL20.glGetShaderi(shader, GL20.GL_COMPILE_STATUS);
+        int status = glGetShaderi(shader, GL_COMPILE_STATUS);
         checkState(GL_TRUE == status, "Shader compilation failure: " + filename);
         return new Shader(shader);
     }
