@@ -5,9 +5,7 @@ import lombok.Value;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWKeyCallback;
 import org.lwjgl.glfw.GLFWVidMode;
-import org.lwjgl.opengl.GL;
-import org.lwjgl.opengl.GL15;
-import org.lwjgl.opengl.GL20;
+import org.lwjgl.opengl.*;
 import org.slf4j.LoggerFactory;
 
 import java.nio.FloatBuffer;
@@ -20,12 +18,16 @@ import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL20.*;
+import static org.lwjgl.opengl.GL30.*;
+import static org.lwjgl.opengl.GL43.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 /**
  * FIXME: Document this class
  */
 public abstract class GlProgramBase {
+    //TODO make a GL low level wrapper class that calls each glXYZ method but don't care which GL version and
+    // includes the getGlError check. or use some stupid AOP. probably not though, that's too obtuse
     private static final org.slf4j.Logger LOG =
             LoggerFactory.getLogger(new Object(){}.getClass().getEnclosingClass());
 
@@ -84,6 +86,10 @@ public abstract class GlProgramBase {
         glfwShowWindow(windowHandle);
         GL.createCapabilities();
 
+        if(getDebugMode()) {
+            installDebugCallback();
+        }
+
         initialize();
 
     }
@@ -93,6 +99,7 @@ public abstract class GlProgramBase {
         glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
         // we don't want to show the window till we're done making it...
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+        if(getDebugMode()) glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
 
         windowHandle = glfwCreateWindow(
                 getWindowWidth(), getWindowHeight(), getWindowTitle(), NULL, NULL);
@@ -134,16 +141,35 @@ public abstract class GlProgramBase {
     }
 
     /** Typesafe wrapper for Vertex Buffer Object handle instead of a damned int */
-    @Value protected static final class VBO {
-        int handle;
+    protected static final class VBO {
+        private final int handle;
+
+        public VBO() {
+            handle = glGenBuffers();        checkGlError();
+        }
 
         public void bind(int target) {
-            glBindBuffer(target, handle);
+            glBindBuffer(target, handle);   checkGlError();
         }
 
         public void bindAndLoad(int target, int usage, float[] data) {
             bind(GL_ARRAY_BUFFER);
-            glBufferData(GL_ARRAY_BUFFER, FloatBuffer.wrap(data), GL_STATIC_DRAW);
+            glBufferData(GL_ARRAY_BUFFER, FloatBuffer.wrap(data), GL_STATIC_DRAW);      checkGlError();
+        }
+    }
+
+    protected static final void checkGlError() {
+        int err = glGetError();
+        checkState(0 == err, "glGetError == " + err);
+    }
+
+    protected static final class VAO {
+        private final int handle;
+        public VAO() {
+            handle = glGenVertexArrays();       checkGlError();
+        }
+        public void bind() {
+            glBindVertexArray(handle);          checkGlError();
         }
     }
 
@@ -155,30 +181,53 @@ public abstract class GlProgramBase {
         private final int handle;
 
         public ShaderProgram() {
-            handle = glCreateProgram();
+            handle = glCreateProgram();         checkGlError();
         }
 
         public void attach(Shader shader) {
-            glAttachShader(handle, shader.getHandle());
+            glAttachShader(handle, shader.getHandle());     checkGlError();
         }
 
         public void linkAndUse() {
-            glLinkProgram(handle);
-            glUseProgram(handle);
+            glLinkProgram(handle);      checkGlError();
+            int linkStatus = glGetProgrami(handle, GL_LINK_STATUS);
+            checkState(GL_TRUE == linkStatus, "glLinkProgram failed: " + glGetProgramInfoLog(handle));
+            checkGlError();
+            glUseProgram(handle);       checkGlError();
+        }
+
+        private int getAttribLocation(String varName) {
+            int result = glGetAttribLocation(handle, varName);      checkGlError();
+            return result;
         }
     }
 
-    protected final VBO genBuffer() {
-        return new VBO(glGenBuffers());
+    protected final void installDebugCallback() {
+        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);      checkGlError();
+        GLDebugMessageCallback.SAM msgCallback =
+                (int source, int type, int id, int severity, int length, long message, long _ignored) -> {
+            String msg = "" + GLDebugMessageCallback.getMessage(length, message);
+            LOG.debug("GL Sev{} (src{} ty{} id{}): {} ", severity, source, type, id, msg);
+        };
+        glDebugMessageCallback(GLDebugMessageCallback.create(msgCallback), 0);              checkGlError();
+        glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, null, true);     checkGlError();
     }
 
-    protected final Shader loadAndCompileShader(String filename)  {
-        String shaderSource = OurTool.loadResource(filename);
-        int shader = glCreateShader(GL_VERTEX_SHADER);
-        glShaderSource(shader, shaderSource);
-        glCompileShader(shader);
+    protected final void vertexAttribPointer(
+            ShaderProgram shaderProgram, String varName,
+            int arity, int type, boolean normalize, int stride, long offset) {
+        int attribLocation = shaderProgram.getAttribLocation(varName);
+        glVertexAttribPointer(attribLocation, arity, type, normalize, stride, offset);      checkGlError();
+        glEnableVertexAttribArray(attribLocation);                                          checkGlError();
+    }
 
-        int status = glGetShaderi(shader, GL_COMPILE_STATUS);
+    protected final Shader loadAndCompileShader(String filename, int shaderType)  {
+        String shaderSource = OurTool.loadResource(filename);
+        int shader = glCreateShader(shaderType);      checkGlError();
+        glShaderSource(shader, shaderSource);               checkGlError();
+        glCompileShader(shader);                            checkGlError();
+
+        int status = glGetShaderi(shader, GL_COMPILE_STATUS);       checkGlError();
         checkState(GL_TRUE == status, "Shader compilation failure: " + filename);
         return new Shader(shader);
     }
@@ -190,4 +239,5 @@ public abstract class GlProgramBase {
     protected abstract String getWindowTitle();
     protected abstract int getWindowHeight();
     protected abstract int getWindowWidth();
+    protected abstract boolean getDebugMode();
 }

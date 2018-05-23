@@ -23,7 +23,7 @@ public class GlProgramBaseTest {
                 "default-fragment.glsl",
         };
         BetamaxGlProgram program = new BetamaxGlProgram();
-        for(String shaderName: shaderNames) program.loadAndCompileShader(shaderName);
+        for(String shaderName: shaderNames) program.loadAndCompileShader(shaderName, /*FIXME*/ 0);
     }
 
     @Test public void testBasic() throws Exception {
@@ -49,6 +49,7 @@ public class GlProgramBaseTest {
             @Override protected String getWindowTitle() { return "test"; }
             @Override protected int getWindowHeight() { return 100; }
             @Override protected int getWindowWidth() { return 100; }
+            @Override protected boolean getDebugMode() { return false; }
         }.run();
     }
 }
