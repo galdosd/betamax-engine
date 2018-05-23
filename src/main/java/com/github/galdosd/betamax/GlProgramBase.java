@@ -5,6 +5,7 @@ import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWKeyCallback;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
+import org.lwjgl.opengl.GL15;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
@@ -124,6 +125,18 @@ public abstract class GlProgramBase {
         updateView();
         glfwSwapBuffers(windowHandle);
         glfwPollEvents();
+    }
+
+    /** Typesafe wrapper for Vertex Buffer Object handle instead of a damned int */
+    @AllArgsConstructor protected static final class VBO {
+        public final int handle;
+
+        public void bind(int target) {
+            GL15.glBindBuffer(target, handle);
+        }
+    }
+    protected final VBO genBuffer() {
+        return new VBO(GL15.glGenBuffers());
     }
 
     protected abstract void initialize();
