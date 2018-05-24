@@ -2,6 +2,16 @@
 <!--
     TODO
         Basic GL build
+            Debug GL
+                strace like
+                    GLIntercept. windows only!
+                    Vogl
+                    APITrace
+                shader debugging
+                    GLSL-Debugger
+                Other
+                    NVIDIA NSight
+
         Basic GL Polygon
         GL Texture
         Desired functionality

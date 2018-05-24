@@ -24,6 +24,7 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 
 /**
  * FIXME: Document this class
+ * FIXME: break up this class
  */
 public abstract class GlProgramBase {
     //TODO make a GL low level wrapper class that calls each glXYZ method but don't care which GL version and
@@ -212,6 +213,7 @@ public abstract class GlProgramBase {
     }
 
     protected final void installDebugCallback() {
+        // FIXME we should IllegalStateException on a sufficiently severe error
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);      checkGlError();
         GLDebugMessageCallback.SAM msgCallback =
                 (int source, int type, int id, int severity, int length, long message, long _ignored) -> {
