@@ -29,9 +29,9 @@ public class BetamaxGlProgram extends GlProgramBase {
         // prepare shaders
         ShaderProgram shaderProgram = new ShaderProgram();
         shaderProgram.attach(
-                loadAndCompileShader("default-vertex.glsl", GL20.GL_VERTEX_SHADER));
+                loadAndCompileShader("default.vert", GL20.GL_VERTEX_SHADER));
         shaderProgram.attach(
-                loadAndCompileShader("default-fragment.glsl", GL20.GL_FRAGMENT_SHADER));
+                loadAndCompileShader("default.frag", GL20.GL_FRAGMENT_SHADER));
         shaderProgram.bindFragDataLocation(0, "outColor");
         shaderProgram.linkAndUse();
 

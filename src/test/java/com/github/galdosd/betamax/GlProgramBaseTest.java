@@ -17,10 +17,10 @@ public class GlProgramBaseTest {
 
     // FIXME they fail to compile in test, probably gl not initialized, need to get log. not important yet
     @Test @Ignore public void testShadersCompile() throws Exception {
-        // TODO find all *.glsl in resources/
+        // TODO find all *.glsl in resources/, centralize them or something
         String[] shaderNames = new String[] {
-                "default-vertex.glsl",
-                "default-fragment.glsl",
+                "default.vert",
+                "default.frag",
         };
         BetamaxGlProgram program = new BetamaxGlProgram();
         for(String shaderName: shaderNames) program.loadAndCompileShader(shaderName, /*FIXME*/ 0);
