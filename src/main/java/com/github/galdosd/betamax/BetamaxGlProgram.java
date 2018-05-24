@@ -60,5 +60,5 @@ public class BetamaxGlProgram extends GlProgramBase {
     @Override protected String getWindowTitle() { return "BETAMAX DEMO"; }
     @Override protected int getWindowHeight() { return 600; }
     @Override protected int getWindowWidth() { return 800; }
-    @Override protected boolean getDebugMode() { return false; }
+    @Override protected boolean getDebugMode() { return true; }
 }

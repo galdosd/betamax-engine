@@ -12,6 +12,7 @@ import java.nio.FloatBuffer;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.BiConsumer;
 
 import static com.google.common.base.Preconditions.checkState;
 import static org.lwjgl.glfw.GLFW.*;
@@ -27,6 +28,8 @@ import static org.lwjgl.system.MemoryUtil.NULL;
  * FIXME: break up this class
  */
 public abstract class GlProgramBase {
+    //TODO all GL wrapped arguments passed from subclass/users of GlprogramBase should be typesafe, not
+    //some fucking ints. fuck you C people.
     //TODO make a GL low level wrapper class that calls each glXYZ method but don't care which GL version and
     // includes the getGlError check. or use some stupid AOP. probably not though, that's too obtuse
     private static final org.slf4j.Logger LOG =
@@ -101,8 +104,8 @@ public abstract class GlProgramBase {
         // we don't want to show the window till we're done making it...
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
         if(getDebugMode()) glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
@@ -175,7 +178,6 @@ public abstract class GlProgramBase {
             handle = glGenVertexArrays();       checkGlError();
         }
         public void bind() {
-            // glEnableVertexAttribArray(handle);  checkGlError();
             glBindVertexArray(handle);          checkGlError();
         }
     }
@@ -220,13 +222,25 @@ public abstract class GlProgramBase {
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);      checkGlError();
         GLDebugMessageCallback.SAM msgCallback =
                 (int source, int type, int id, int severity, int length, long message, long _ignored) -> {
-            String msg = "" + GLDebugMessageCallback.getMessage(length, message);
-            LOG.debug("GL Sev{} (src{} ty{} id{}): {} ", severity, source, type, id, msg);
+
+                    String msg = "" + GLDebugMessageCallback.getMessage(length, message);
+
+                    // yes this is gross. method references... TODO. whatever.
+                    // TODO translate source and type to constants also
+                    String logMsg = "GL (src{} ty{} id{}): {} ";
+                    if(severity == GL_DEBUG_SEVERITY_HIGH)
+                        LOG.error(logMsg, source, type, id, msg);
+                    if(severity == GL_DEBUG_SEVERITY_MEDIUM)
+                        LOG.warn(logMsg, source, type, id, msg);
+                    if(severity == GL_DEBUG_SEVERITY_LOW)
+                        LOG.info(logMsg, source, type, id, msg);
+                    if(severity == GL_DEBUG_SEVERITY_NOTIFICATION)
+                        LOG.debug(logMsg, source, type, id, msg);
         };
         glDebugMessageCallback(GLDebugMessageCallback.create(msgCallback), 0);              checkGlError();
         glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, null, true);     checkGlError();
 
-        glDisable(GL_CULL_FACE);
+        //glDisable(GL_CULL_FACE);
     }
 
     protected final void vertexAttribPointer(

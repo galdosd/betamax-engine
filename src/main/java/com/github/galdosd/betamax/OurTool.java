@@ -1,11 +1,15 @@
 package com.github.galdosd.betamax;
 
 import com.google.common.base.Charsets;
+import com.google.common.io.CharStreams;
 import com.google.common.io.Files;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.IllegalFormatCodePointException;
 
 import static com.google.common.base.Preconditions.checkState;
 
@@ -17,10 +21,8 @@ public final class OurTool {
      */
     public static String loadResource(String filename) {
         try {
-            URL resource = OurTool.class.getClassLoader().getResource(filename);
-            checkState(null != resource);
-            String absoluteFilename = resource.getFile();
-            return Files.toString(new File(absoluteFilename), Charsets.UTF_8);
+            InputStream in = OurTool.class.getResourceAsStream("/"+filename);
+            return CharStreams.toString(new InputStreamReader(in, Charsets.UTF_8));
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
