@@ -2,10 +2,13 @@ package com.github.galdosd.betamax;
 
 import lombok.AllArgsConstructor;
 import lombok.Value;
+import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWKeyCallback;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.*;
+import org.lwjgl.system.MemoryStack;
+import org.lwjgl.system.MemoryUtil;
 import org.slf4j.LoggerFactory;
 
 import java.nio.FloatBuffer;
@@ -20,6 +23,7 @@ import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL30.*;
+import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 /**
@@ -163,8 +167,14 @@ public abstract class GlProgramBase {
 
         public void bindAndLoad(int target, int usage, float[] data) {
             bind(target);
-            FloatBuffer floatBuffer = FloatBuffer.wrap(data);
-            glBufferData(target, floatBuffer, usage);      checkGlError();
+            // FIXME leak
+                FloatBuffer floatBuffer = MemoryUtil.memAllocFloat(data.length);
+                       // stack.callocFloat(data.length);
+
+                floatBuffer.put(data);
+                floatBuffer.flip();
+                glBufferData(target, floatBuffer, usage);
+                checkGlError();
         }
     }
 
