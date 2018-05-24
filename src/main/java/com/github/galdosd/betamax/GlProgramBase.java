@@ -12,15 +12,14 @@ import java.nio.FloatBuffer;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.function.BiConsumer;
 
 import static com.google.common.base.Preconditions.checkState;
+import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL30.*;
-import static org.lwjgl.opengl.GL43.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 /**
@@ -35,9 +34,7 @@ public abstract class GlProgramBase {
     private static final org.slf4j.Logger LOG =
             LoggerFactory.getLogger(new Object(){}.getClass().getEnclosingClass());
 
-    // we save the callbacks so they won't be garbage collected early -- GLFW uses weak references?
-    private GLFWKeyCallback keyCallback;
-    private GLFWErrorCallback errorCallback;
+    GLFWErrorCallback glfwErrorCallback;
     private long windowHandle;
     Set<Integer> downKeys = new HashSet<>();
 
@@ -61,26 +58,28 @@ public abstract class GlProgramBase {
             LOG.info("Initialized GLFW and OpenGL");
 
             // loop forever until the user closes the window
-            while (glfwWindowShouldClose(windowHandle) == GLFW_FALSE) {
+            while (!glfwWindowShouldClose(windowHandle)) {
                 loopOnce();
             }
 
-            glfwDestroyWindow(windowHandle);
-            keyCallback.release();
         } finally {
+            if(0!=windowHandle) {
+                glfwDestroyWindow(windowHandle);
+                glfwFreeCallbacks(windowHandle);
+            }
             glfwTerminate();
-            errorCallback.release();
+            if(null!=glfwErrorCallback) glfwErrorCallback.free();
+
         }
     }
 
     private void initializeGLDemoBase() {
-        glfwSetErrorCallback(errorCallback =
-                GLFWErrorCallback.create((errno, msg) -> LOG.error("GLFW Error {} ({})")));
-        checkState(glfwInit() == GLFW_TRUE, "Could not initialize GLFW");
+        (glfwErrorCallback = GLFWErrorCallback.createThrow()).set();
+        checkState(glfwInit(), "Could not initialize GLFW");
         createWindow();
 
         // set input callbacks
-        glfwSetKeyCallback(windowHandle, keyCallback = GLFWKeyCallback.create(this::keyCallback));
+        glfwSetKeyCallback(windowHandle, GLFWKeyCallback.create(this::keyCallback));
 
         centerWindow();
 
@@ -88,6 +87,7 @@ public abstract class GlProgramBase {
         glfwSwapInterval(1); // wait for v sync (or whatever they do these days) when swapping buffers
 
         glfwShowWindow(windowHandle);
+        // FIXME we are not multithreaded but if we were i think we have to do this more often
         GL.createCapabilities();
 
         if(getDebugMode()) {
@@ -104,8 +104,8 @@ public abstract class GlProgramBase {
         // we don't want to show the window till we're done making it...
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
         if(getDebugMode()) glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
@@ -138,7 +138,7 @@ public abstract class GlProgramBase {
     }
 
     protected final void closeWindow() {
-        glfwSetWindowShouldClose(windowHandle, GLFW_TRUE);
+        glfwSetWindowShouldClose(windowHandle, true);
     }
 
     private void loopOnce() {
@@ -163,7 +163,8 @@ public abstract class GlProgramBase {
 
         public void bindAndLoad(int target, int usage, float[] data) {
             bind(target);
-            glBufferData(target, FloatBuffer.wrap(data), usage);      checkGlError();
+            FloatBuffer floatBuffer = FloatBuffer.wrap(data);
+            glBufferData(target, floatBuffer, usage);      checkGlError();
         }
     }
 
@@ -216,30 +217,15 @@ public abstract class GlProgramBase {
     }
 
     protected final void enableDebugMode() {
-        // install GL debug message callbacks
+        // UHHH this does not work as advertised! Use the -D I guess.
+        // TODO I guess we should set the system property programatically then. i want to control
+        // all debugging centrally
+        // org.lwjgl.system.Configuration.DEBUG.set(true);
 
-        // FIXME we should IllegalStateException on a sufficiently severe error
-        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);      checkGlError();
-        GLDebugMessageCallback.SAM msgCallback =
-                (int source, int type, int id, int severity, int length, long message, long _ignored) -> {
+        // setup opengl debug messages...
+        // TODO cook the callback so it prints to our logger instead of stderr/stdout
 
-                    String msg = "" + GLDebugMessageCallback.getMessage(length, message);
-
-                    // yes this is gross. method references... TODO. whatever.
-                    // TODO translate source and type to constants also
-                    String logMsg = "GL (src{} ty{} id{}): {} ";
-                    if(severity == GL_DEBUG_SEVERITY_HIGH)
-                        LOG.error(logMsg, source, type, id, msg);
-                    if(severity == GL_DEBUG_SEVERITY_MEDIUM)
-                        LOG.warn(logMsg, source, type, id, msg);
-                    if(severity == GL_DEBUG_SEVERITY_LOW)
-                        LOG.info(logMsg, source, type, id, msg);
-                    if(severity == GL_DEBUG_SEVERITY_NOTIFICATION)
-                        LOG.debug(logMsg, source, type, id, msg);
-        };
-        glDebugMessageCallback(GLDebugMessageCallback.create(msgCallback), 0);              checkGlError();
-        glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, null, true);     checkGlError();
-
+        GLUtil.setupDebugMessageCallback();
         //glDisable(GL_CULL_FACE);
     }
 
@@ -269,5 +255,5 @@ public abstract class GlProgramBase {
     protected abstract String getWindowTitle();
     protected abstract int getWindowHeight();
     protected abstract int getWindowWidth();
-    protected abstract boolean getDebugMode();
+    protected abstract boolean getDebugMode(); //TODO get from cmd line property
 }
