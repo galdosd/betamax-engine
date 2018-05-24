@@ -10,6 +10,7 @@
                 shader debugging
                     GLSL-Debugger
                 Other
+                    RenderDoc
                     NVIDIA NSight
 
         Basic GL Polygon
@@ -18,13 +19,16 @@
             Import sprite
             Basic game loop and timeline
             Display animated sprites (loop optional)
-            TIFF import
             Trigger events at moments in sprite
             Mouse click event
             Event spawn sprites at location
             Event kill sprites
+        Further desired functionality
+            TIFF import
             Event python
             Some kind of save data / principled globals
+            Fancy mouse cursor
+            Fancy framebuffer post effects
 
 
 -->

@@ -50,6 +50,7 @@ public class BetamaxGlProgram extends GlProgramBase {
         glClearColor(1.0f, colorcycler++ / 100.0f, 0.0f, 1.0f); checkGlError();
         colorcycler = colorcycler % 100;
         glClear(GL_COLOR_BUFFER_BIT); checkGlError();
+        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         glDrawArrays(GL_TRIANGLES, 0, 3); checkGlError();
     }
 

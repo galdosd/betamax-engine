@@ -88,7 +88,7 @@ public abstract class GlProgramBase {
         GL.createCapabilities();
 
         if(getDebugMode()) {
-            installDebugCallback();
+            enableDebugMode();
         }
 
         initialize();
@@ -175,6 +175,7 @@ public abstract class GlProgramBase {
             handle = glGenVertexArrays();       checkGlError();
         }
         public void bind() {
+            // glEnableVertexAttribArray(handle);  checkGlError();
             glBindVertexArray(handle);          checkGlError();
         }
     }
@@ -212,7 +213,9 @@ public abstract class GlProgramBase {
         }
     }
 
-    protected final void installDebugCallback() {
+    protected final void enableDebugMode() {
+        // install GL debug message callbacks
+
         // FIXME we should IllegalStateException on a sufficiently severe error
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);      checkGlError();
         GLDebugMessageCallback.SAM msgCallback =
@@ -222,6 +225,8 @@ public abstract class GlProgramBase {
         };
         glDebugMessageCallback(GLDebugMessageCallback.create(msgCallback), 0);              checkGlError();
         glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, null, true);     checkGlError();
+
+        glDisable(GL_CULL_FACE);
     }
 
     protected final void vertexAttribPointer(
