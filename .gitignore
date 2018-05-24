@@ -1,3 +1,4 @@
 .idea/
 target/
 *.iml
+hs_err_*.log
