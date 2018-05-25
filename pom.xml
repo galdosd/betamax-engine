@@ -25,6 +25,7 @@
             Event kill sprites
         Further desired functionality
             TIFF import
+            Sound!!!
             Event python
             Some kind of save data / principled globals
             Fancy mouse cursor
@@ -105,7 +106,7 @@
             <version>1.1.3</version>
         </dependency>
 
-
+        <!-- all the lwjgl crap -->
         <dependency>
             <groupId>org.lwjgl</groupId>
             <artifactId>lwjgl</artifactId>
@@ -139,6 +140,7 @@
             <version>${lwjgl.version}</version>
             <classifier>${lwjgl.natives}</classifier>
         </dependency>
+        <!-- TODO do we want lwjgl-jemalloc for performance or something? who cares? -->
         <!-- FIXME specify versions of maven plugins! reproducible builds! -->
     </dependencies>
 </project>

@@ -167,14 +167,13 @@ public abstract class GlProgramBase {
 
         public void bindAndLoad(int target, int usage, float[] data) {
             bind(target);
-            // FIXME leak
-                FloatBuffer floatBuffer = MemoryUtil.memAllocFloat(data.length);
-                       // stack.callocFloat(data.length);
-
+            try(MemoryStack stack = stackPush()) {
+                FloatBuffer floatBuffer = stack.callocFloat(data.length);
                 floatBuffer.put(data);
                 floatBuffer.flip();
                 glBufferData(target, floatBuffer, usage);
                 checkGlError();
+            }
         }
     }
 
@@ -258,6 +257,7 @@ public abstract class GlProgramBase {
         return new Shader(shader);
     }
 
+    // TODO composition instead of inheritance, turn the below into an interface
     protected abstract void initialize();
     protected abstract void keyboardEvent(int key, KeyAction action);
     protected abstract void updateView();
