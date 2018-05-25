@@ -2,13 +2,12 @@ package com.github.galdosd.betamax;
 
 import lombok.AllArgsConstructor;
 import lombok.Value;
-import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWKeyCallback;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.*;
+import org.lwjgl.system.Configuration;
 import org.lwjgl.system.MemoryStack;
-import org.lwjgl.system.MemoryUtil;
 import org.slf4j.LoggerFactory;
 
 import java.nio.FloatBuffer;
@@ -58,8 +57,7 @@ public abstract class GlProgramBase {
 
     public void run() {
         try {
-            initializeGLDemoBase();
-            LOG.info("Initialized GLFW and OpenGL");
+            initializeGlBase();
 
             // loop forever until the user closes the window
             while (!glfwWindowShouldClose(windowHandle)) {
@@ -77,15 +75,26 @@ public abstract class GlProgramBase {
         }
     }
 
-    private void initializeGLDemoBase() {
+    private void initializeGlBase() {
+        if(getDebugMode()) {
+            // enable glfw debugging
+            Configuration.DEBUG.set(true);
+            Configuration.DEBUG_LOADER.set(true);
+            Configuration.DEBUG_FUNCTIONS.set(true);
+            // we only currently use try-with-resources for stack memory
+            // Configuration.DEBUG_STACK.set(true);
+            // we don't yet use MemoryUtils
+            // Configuration.DEBUG_MEMORY_ALLOCATOR.set(true);
+        }
+
         (glfwErrorCallback = GLFWErrorCallback.createThrow()).set();
         checkState(glfwInit(), "Could not initialize GLFW");
+
         createWindow();
+        centerWindow();
 
         // set input callbacks
         glfwSetKeyCallback(windowHandle, GLFWKeyCallback.create(this::keyCallback));
-
-        centerWindow();
 
         glfwMakeContextCurrent(windowHandle);
         glfwSwapInterval(1); // wait for v sync (or whatever they do these days) when swapping buffers
@@ -95,10 +104,16 @@ public abstract class GlProgramBase {
         GL.createCapabilities();
 
         if(getDebugMode()) {
-            enableDebugMode();
+            // enable opengl debugging
+            enableDebugMessageCallback();
         }
 
+        checkGlError();
+        LOG.debug("Initialized GLFW and OpenGL");
+
         initialize();
+        checkGlError();
+        LOG.debug("User initialization done");
 
     }
 
@@ -149,8 +164,10 @@ public abstract class GlProgramBase {
         // TODO maintain and report FPS
         updateLogic();
         updateView();
+        checkGlError();
         glfwSwapBuffers(windowHandle);
         glfwPollEvents();
+        checkGlError();
     }
 
     /** Typesafe wrapper for Vertex Buffer Object handle instead of a damned int */
@@ -158,11 +175,11 @@ public abstract class GlProgramBase {
         private final int handle;
 
         public VBO() {
-            handle = glGenBuffers();        checkGlError();
+            handle = glGenBuffers();
         }
 
         public void bind(int target) {
-            glBindBuffer(target, handle);   checkGlError();
+            glBindBuffer(target, handle);
         }
 
         public void bindAndLoad(int target, int usage, float[] data) {
@@ -172,7 +189,6 @@ public abstract class GlProgramBase {
                 floatBuffer.put(data);
                 floatBuffer.flip();
                 glBufferData(target, floatBuffer, usage);
-                checkGlError();
             }
         }
     }
@@ -185,10 +201,10 @@ public abstract class GlProgramBase {
     protected static final class VAO {
         private final int handle;
         public VAO() {
-            handle = glGenVertexArrays();       checkGlError();
+            handle = glGenVertexArrays();
         }
         public void bind() {
-            glBindVertexArray(handle);          checkGlError();
+            glBindVertexArray(handle);
         }
     }
 
@@ -200,23 +216,22 @@ public abstract class GlProgramBase {
         private final int handle;
 
         public ShaderProgram() {
-            handle = glCreateProgram();         checkGlError();
+            handle = glCreateProgram();
         }
 
         public void attach(Shader shader) {
-            glAttachShader(handle, shader.getHandle());     checkGlError();
+            glAttachShader(handle, shader.getHandle());
         }
 
         public void linkAndUse() {
-            glLinkProgram(handle);      checkGlError();
+            glLinkProgram(handle);
             int linkStatus = glGetProgrami(handle, GL_LINK_STATUS);
             checkState(GL_TRUE == linkStatus, "glLinkProgram failed: " + glGetProgramInfoLog(handle));
-            checkGlError();
-            glUseProgram(handle);       checkGlError();
+            glUseProgram(handle);
         }
 
         private int getAttribLocation(String varName) {
-            int result = glGetAttribLocation(handle, varName);      checkGlError();
+            int result = glGetAttribLocation(handle, varName);
             return result;
         }
 
@@ -225,15 +240,11 @@ public abstract class GlProgramBase {
         }
     }
 
-    protected final void enableDebugMode() {
-        // UHHH this does not work as advertised! Use the -D I guess.
-        // TODO I guess we should set the system property programatically then. i want to control
-        // all debugging centrally
-        // org.lwjgl.system.Configuration.DEBUG.set(true);
-
+    protected final void enableDebugMessageCallback() {
         // setup opengl debug messages...
         // TODO cook the callback so it prints to our logger instead of stderr/stdout
-
+        // TODO honestly maybe our old doing-it-ourself method may have been better?
+        // we had the ability to do things based on severity like throw IllegalStateException
         GLUtil.setupDebugMessageCallback();
         //glDisable(GL_CULL_FACE);
     }
@@ -242,17 +253,17 @@ public abstract class GlProgramBase {
             ShaderProgram shaderProgram, String varName,
             int arity, int type, boolean normalize, int stride, long offset) {
         int attribLocation = shaderProgram.getAttribLocation(varName);
-        glEnableVertexAttribArray(attribLocation);                                          checkGlError();
-        glVertexAttribPointer(attribLocation, arity, type, normalize, stride, offset);      checkGlError();
+        glEnableVertexAttribArray(attribLocation);
+        glVertexAttribPointer(attribLocation, arity, type, normalize, stride, offset);
     }
 
     protected final Shader loadAndCompileShader(String filename, int shaderType)  {
         String shaderSource = OurTool.loadResource(filename);
-        int shader = glCreateShader(shaderType);                    checkGlError();
-        glShaderSource(shader, shaderSource);                       checkGlError();
-        glCompileShader(shader);                                    checkGlError();
+        int shader = glCreateShader(shaderType);
+        glShaderSource(shader, shaderSource);
+        glCompileShader(shader);
 
-        int status = glGetShaderi(shader, GL_COMPILE_STATUS);       checkGlError();
+        int status = glGetShaderi(shader, GL_COMPILE_STATUS);
         checkState(GL_TRUE == status, "Shader compilation failure: %s", filename);
         return new Shader(shader);
     }

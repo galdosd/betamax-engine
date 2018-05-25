@@ -43,15 +43,15 @@ public class BetamaxGlProgram extends GlProgramBase {
     }
 
 
-    int colorcycler = 0;
     @Override protected void keyboardEvent(int key, KeyAction action) { }
 
+    int colorcycler = 0;
     @Override protected void updateView() {
-        glClearColor(1.0f, colorcycler++ / 100.0f, 0.0f, 1.0f); checkGlError();
+        glClearColor(1.0f, colorcycler++ / 100.0f, 0.0f, 1.0f);
         colorcycler = colorcycler % 100;
-        glClear(GL_COLOR_BUFFER_BIT); checkGlError();
-        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-        glDrawArrays(GL_TRIANGLES, 0, 3); checkGlError();
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        //glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
     }
 
     @Override protected void updateLogic() {

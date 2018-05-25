@@ -84,6 +84,8 @@
     </build>
 
     <dependencies>
+        <!-- FIXME include user-facing documentation to comply with OSS licenses
+             that require eg, putting a disclaimer stating the license etc -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
