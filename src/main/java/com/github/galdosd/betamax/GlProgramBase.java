@@ -28,6 +28,9 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 /**
  * FIXME: Document this class
  * FIXME: break up this class
+ * TODO: for safety in debug mode use glGet to make sure the right target is bound for buffers,
+ *  textures, etc. basically try as hard as possible to fight the dumbass statefullness of GL calls
+ *  that require params to be "bound"
  */
 public abstract class GlProgramBase {
     //TODO all GL wrapped arguments passed from subclass/users of GlprogramBase should be typesafe, not

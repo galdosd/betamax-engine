@@ -1,10 +1,10 @@
 package com.github.galdosd.betamax;
 
-import org.lwjgl.opengl.*;
 
 import static com.google.common.base.Preconditions.checkState;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL15.*;
+import static org.lwjgl.opengl.GL20.*;
 
 /**
  * FIXME: Document this class
@@ -27,9 +27,9 @@ public class BetamaxGlProgram extends GlProgramBase {
         // prepare shaders
         ShaderProgram shaderProgram = new ShaderProgram();
         shaderProgram.attach(
-                loadAndCompileShader("default.vert", GL20.GL_VERTEX_SHADER));
+                loadAndCompileShader("default.vert", GL_VERTEX_SHADER));
         shaderProgram.attach(
-                loadAndCompileShader("default.frag", GL20.GL_FRAGMENT_SHADER));
+                loadAndCompileShader("default.frag", GL_FRAGMENT_SHADER));
         //shaderProgram.bindFragDataLocation(0, "outColor"); //unnecessary, we only have one output color
         shaderProgram.linkAndUse();
 
@@ -41,6 +41,15 @@ public class BetamaxGlProgram extends GlProgramBase {
 
         // textures
 
+        float[] texturePixels = new float[] {
+                0.1f, 0.1f, 0.0f, 1.0f,     1.0f, 0.9f, 1.0f, 1.0f,
+                1.0f, 0.9f, 1.0f, 1.0f,     0.1f, 0.1f, 0.0f, 1.0f,
+        };
+
+        Texture checkerboardTexture = new Texture();
+        checkerboardTexture.bind(GL_TEXTURE_2D);
+        checkerboardTexture.btSetParameters();
+        checkerboardTexture.btLoadRgba(texturePixels, 2, 2);
 
 
     }
