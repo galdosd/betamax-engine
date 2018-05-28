@@ -15,8 +15,6 @@ public class BetamaxGlProgram extends GlProgramBase {
     }
 
     @Override protected void initialize() {
-        VAO vao = new VAO();
-        vao.bind();
 
         // load our triangle vertices
         VBO vbo = new VBO();
@@ -35,9 +33,14 @@ public class BetamaxGlProgram extends GlProgramBase {
         //shaderProgram.bindFragDataLocation(0, "outColor"); //unnecessary, we only have one output color
         shaderProgram.linkAndUse();
 
-
-
+        // prepare vao
+        VAO vao = new VAO();
+        vao.bind();
+        vbo.bind(GL_ARRAY_BUFFER);
         vertexAttribPointer(shaderProgram, "position", 2, GL_FLOAT, false, 0, 0);
+
+        // textures
+
 
 
     }
