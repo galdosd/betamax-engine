@@ -31,6 +31,7 @@ public final class Texture {
         // FIXME will this segfault?
         glTexParameterfv(boundTarget, GL_TEXTURE_BORDER_COLOR, new float[]{1.0f, 0.5f, 0.8f, 0.5f});
 
+        checkGlError();
         glTexParameteri(boundTarget, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
         glTexParameteri(boundTarget, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
@@ -40,7 +41,9 @@ public final class Texture {
     private void rebind() {
         // TODO use glGet to ensure this really is the bound object. thanks opengl.
         checkArgument(0!=boundTarget, "call bind() to set GL target first");
+        checkGlError();
         bind(boundTarget);
+        checkGlError();
     }
 
     public void btLoadRgba(float[] texturePixels, int width, int height) {

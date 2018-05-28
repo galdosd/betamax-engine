@@ -230,6 +230,7 @@ public abstract class GlProgramBase {
 
         private int getAttribLocation(String varName) {
             int result = glGetAttribLocation(handle, varName);
+            checkState(-1 != result);
             return result;
         }
 
@@ -247,12 +248,16 @@ public abstract class GlProgramBase {
         //glDisable(GL_CULL_FACE);
     }
 
+    // TODO we can do this in a more sophisticated less verbose way but i'm holding off
+    // in case we find somethign that already does this or a good reason not to
     protected final void vertexAttribPointer(
-            ShaderProgram shaderProgram, String varName,
+            int attribLocation,
             int arity, int type, boolean normalize, int stride, long offset) {
-        int attribLocation = shaderProgram.getAttribLocation(varName);
-        glEnableVertexAttribArray(attribLocation);
+        checkGlError();
         glVertexAttribPointer(attribLocation, arity, type, normalize, stride, offset);
+        checkGlError();
+        glEnableVertexAttribArray(attribLocation);
+        checkGlError();
     }
 
     protected final Shader loadAndCompileShader(String filename, int shaderType)  {

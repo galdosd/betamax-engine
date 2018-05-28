@@ -19,9 +19,10 @@ public class BetamaxGlProgram extends GlProgramBase {
         // load our triangle vertices
         VBO vbo = new VBO();
         vbo.bindAndLoad(GL_ARRAY_BUFFER, GL_STATIC_DRAW, new float[]{
-                 0.0f,  0.5f,
-                 0.5f, -0.5f,
-                -0.5f, -0.5f,
+               //xpos   ypos      xtex    ytex
+                 0.0f,  0.5f,     0.50f,  0.75f,
+                 0.5f, -0.5f,     0.75f,  0.25f,
+                -0.5f, -0.5f,     0.25f,  0.25f,
         });
 
         // prepare shaders
@@ -37,8 +38,8 @@ public class BetamaxGlProgram extends GlProgramBase {
         VAO vao = new VAO();
         vao.bind();
         vbo.bind(GL_ARRAY_BUFFER);
-        vertexAttribPointer(shaderProgram, "position", 2, GL_FLOAT, false, 0, 0);
-
+        vertexAttribPointer(0, 2, GL_FLOAT, false, 4 * Float.BYTES, 0);
+        vertexAttribPointer(1, 2, GL_FLOAT, false, 4 * Float.BYTES, 2 * Float.BYTES);
         // textures
 
         float[] texturePixels = new float[] {
