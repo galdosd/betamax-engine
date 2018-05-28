@@ -193,11 +193,6 @@ public abstract class GlProgramBase {
         }
     }
 
-    protected static final void checkGlError() {
-        int err = glGetError();
-        checkState(0 == err, "glGetError == " + err);
-    }
-
     protected static final class VAO {
         private final int handle;
         public VAO() {
@@ -266,6 +261,11 @@ public abstract class GlProgramBase {
         int status = glGetShaderi(shader, GL_COMPILE_STATUS);
         checkState(GL_TRUE == status, "Shader compilation failure: %s", filename);
         return new Shader(shader);
+    }
+
+    protected static final void checkGlError() {
+        int err = glGetError();
+        checkState(0 == err, "glGetError == " + err);
     }
 
     // TODO composition instead of inheritance, turn the below into an interface

@@ -32,7 +32,7 @@ public class BetamaxGlProgram extends GlProgramBase {
                 loadAndCompileShader("default.vert", GL20.GL_VERTEX_SHADER));
         shaderProgram.attach(
                 loadAndCompileShader("default.frag", GL20.GL_FRAGMENT_SHADER));
-        shaderProgram.bindFragDataLocation(0, "outColor");
+        //shaderProgram.bindFragDataLocation(0, "outColor"); //unnecessary, we only have one output color
         shaderProgram.linkAndUse();
 
 
