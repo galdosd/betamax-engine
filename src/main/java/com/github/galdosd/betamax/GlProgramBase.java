@@ -253,11 +253,8 @@ public abstract class GlProgramBase {
     protected final void vertexAttribPointer(
             int attribLocation,
             int arity, int type, boolean normalize, int stride, long offset) {
-        checkGlError();
         glVertexAttribPointer(attribLocation, arity, type, normalize, stride, offset);
-        checkGlError();
         glEnableVertexAttribArray(attribLocation);
-        checkGlError();
     }
 
     protected final Shader loadAndCompileShader(String filename, int shaderType)  {
