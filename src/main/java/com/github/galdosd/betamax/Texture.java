@@ -70,21 +70,33 @@ public final class Texture {
 
         // TODO could optimize by not allocationg a new float[] everytime
         Raster raster = image.getData();
+        final int width = raster.getWidth();
+        final int height = raster.getHeight();
         LOG.debug("Loaded image from {} (size {}x{}) {}-band, DataBuffer dataType {}",
-                filename, raster.getWidth(), raster.getHeight(), raster.getNumBands(),
+                filename, width, height, raster.getNumBands(),
                 raster.getSampleModel().getDataType());
 
-        float[] pixels = raster.getPixels(0, 0, raster.getWidth(), raster.getHeight(), (float[]) null);
+        float[] pixels = raster.getPixels(0, 0, width, height, (float[]) null);
+        final int BANDS = 4; // RGBA so 4 samples per pixel
+        checkState(pixels.length == (BANDS * width * height));
         // getPixels gives us samples in 0.0f to 255.0f but opengl wants 0.0f to 1.0f
-        for(int ii = pixels.length-1; ii > 0; ii--) pixels[ii] = pixels[ii] / 255.0f;
-        checkState(pixels.length == (4 * raster.getWidth() * raster.getHeight()));
+        for(int ii = pixels.length-1; ii >= 0; ii--) pixels[ii] = pixels[ii] / 255.0f;
+        // opengl texture coordinates start from southwest corner, but
+        // image formats usually start from northwest, so we turn it upside down
+        float[] upsideDownPixels = new float[pixels.length];
+        for(int row = height - 1; row >= 0; row--) {
+            for(int col = (width - 1) * BANDS; col >=0; col--) {
+                upsideDownPixels[BANDS * width * row + col] =
+                        pixels[BANDS * width * (height - row - 1) + col];
+            }
+        }
         // int from = 4 * (raster.getWidth() * 400 + 400);
         // LOG.debug("Some pixels: {}", Arrays.copyOfRange(pixels, from, from+32));
         rebind();
         glTexImage2D(
                 // TODO GL_INT or something would be more precise maybe but i couldn't get it to work
-                boundTarget, 0, GL_RGBA, raster.getWidth(), raster.getHeight(), 0,
-                GL_RGBA, GL_FLOAT, pixels
+                boundTarget, 0, GL_RGBA, width, height, 0,
+                GL_RGBA, GL_FLOAT, upsideDownPixels
         );
 
     }
