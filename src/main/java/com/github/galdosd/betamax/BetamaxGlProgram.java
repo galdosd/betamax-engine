@@ -20,10 +20,14 @@ public class BetamaxGlProgram extends GlProgramBase {
         VBO vbo = new VBO();
         float textureScale = 2;
         vbo.bindAndLoad(GL_ARRAY_BUFFER, GL_STATIC_DRAW, new float[]{
-               //xpos   ypos      xtex                 ytex
-                 0.0f,  0.5f,     textureScale*0.50f,  textureScale*0.75f,
-                 0.5f, -0.5f,     textureScale*0.75f,  textureScale*0.25f,
-                -0.5f, -0.5f,     textureScale*0.25f,  textureScale*0.25f,
+               //xpos   ypos      xtex  ytex
+                -1.0f,  1.0f,     0.0f, 1.0f,
+                 1.0f,  1.0f,     1.0f, 1.0f,
+                -1.0f, -1.0f,     0.0f, 0.0f,
+
+                 1.0f,  1.0f,     1.0f, 1.0f,
+                 1.0f, -1.0f,     1.0f, 0.0f,
+                -1.0f, -1.0f,     0.0f, 0.0f,
         });
 
         // prepare shaders
@@ -68,7 +72,7 @@ public class BetamaxGlProgram extends GlProgramBase {
         glClearColor(((float)Math.sin(colorcycler++*0.2f) + 1)*0.5f, 0.8f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         //glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawArrays(GL_TRIANGLES, 0, 3*2);
     }
 
     @Override protected void updateLogic() {
