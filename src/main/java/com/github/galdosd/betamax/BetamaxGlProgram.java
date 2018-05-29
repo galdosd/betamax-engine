@@ -18,7 +18,7 @@ public class BetamaxGlProgram extends GlProgramBase {
 
         // load our triangle vertices
         VBO vbo = new VBO();
-        float textureScale = 50;
+        float textureScale = 2;
         vbo.bindAndLoad(GL_ARRAY_BUFFER, GL_STATIC_DRAW, new float[]{
                //xpos   ypos      xtex                 ytex
                  0.0f,  0.5f,     textureScale*0.50f,  textureScale*0.75f,
@@ -44,14 +44,18 @@ public class BetamaxGlProgram extends GlProgramBase {
         // textures
 
         float[] texturePixels = new float[] {
-                0.1f, 0.1f, 0.0f, 1.0f,     1.0f, 0.9f, 1.0f, 1.0f,
-                1.0f, 0.9f, 1.0f, 1.0f,     0.1f, 0.1f, 0.0f, 1.0f,
+                1.0f, 0.0f, 0.0f, 1.0f,     0.0f, 0.0f, 1.0f, 1.0f,
+                0.0f, 0.0f, 1.0f, 1.0f,     1.0f, 0.0f, 0.0f, 1.0f,
         };
 
+        glEnable(GL_BLEND);
+        glEnable(GL_DEPTH_TEST);
+        glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         Texture checkerboardTexture = new Texture();
         checkerboardTexture.bind(GL_TEXTURE_2D);
         checkerboardTexture.btSetParameters();
-        checkerboardTexture.btLoadRgba(texturePixels, 2, 2);
+        //checkerboardTexture.btLoadRgba(texturePixels, 2, 2);
+        checkerboardTexture.btLoadAlphaTiff("sprite0.tif");
 
 
     }
@@ -71,7 +75,7 @@ public class BetamaxGlProgram extends GlProgramBase {
     }
 
     @Override protected String getWindowTitle() { return "BETAMAX DEMO"; }
-    @Override protected int getWindowHeight() { return 600; }
-    @Override protected int getWindowWidth() { return 800; }
+    @Override protected int getWindowHeight() { return 540; }
+    @Override protected int getWindowWidth() { return 960; }
     @Override protected boolean getDebugMode() { return true; }
 }

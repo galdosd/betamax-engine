@@ -21,10 +21,14 @@ public final class OurTool {
      */
     public static String loadResource(String filename) {
         try {
-            InputStream in = OurTool.class.getResourceAsStream("/"+filename);
+            InputStream in = streamResource(filename);
             return CharStreams.toString(new InputStreamReader(in, Charsets.UTF_8));
         } catch (IOException e) {
-            throw new IllegalStateException(e);
+            throw new RuntimeException(e);
         }
     }
+    public static InputStream streamResource(String filename) {
+        return OurTool.class.getResourceAsStream("/"+filename);
+    }
 }
+

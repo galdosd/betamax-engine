@@ -30,8 +30,6 @@ import static org.lwjgl.system.MemoryUtil.NULL;
  * Probably just submit a patch upstream with our improvements would be ideal
  */
 public final class GlDebugMessages {
-    private static final org.slf4j.Logger LOG =
-            LoggerFactory.getLogger(new Object(){}.getClass().getEnclosingClass());
 
     private GlDebugMessages() {/*uninstantiable*/}
 
