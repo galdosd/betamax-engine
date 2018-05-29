@@ -108,7 +108,8 @@ public abstract class GlProgramBase {
 
         if(getDebugMode()) {
             // enable opengl debugging
-            enableDebugMessageCallback();
+            GlDebugMessages.setupJavaStyleDebugMessageCallback(LOG);
+            //glDisable(GL_CULL_FACE);
         }
 
         checkGlError();
@@ -239,14 +240,6 @@ public abstract class GlProgramBase {
         }
     }
 
-    protected final void enableDebugMessageCallback() {
-        // setup opengl debug messages...
-        // TODO cook the callback so it prints to our logger instead of stderr/stdout
-        // TODO honestly maybe our old doing-it-ourself method may have been better?
-        // we had the ability to do things based on severity like throw IllegalStateException
-        GLUtil.setupDebugMessageCallback();
-        //glDisable(GL_CULL_FACE);
-    }
 
     // TODO we can do this in a more sophisticated less verbose way but i'm holding off
     // in case we find somethign that already does this or a good reason not to
