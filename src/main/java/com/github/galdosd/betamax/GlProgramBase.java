@@ -3,6 +3,7 @@ package com.github.galdosd.betamax;
 import com.codahale.metrics.ConsoleReporter;
 import com.codahale.metrics.Timer;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.Value;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWKeyCallback;
@@ -59,7 +60,7 @@ public abstract class GlProgramBase {
 
 
     // framecount management
-    long framecount = 0;
+    @Getter private long frameCount = 0;
 
     /** Typesafe enum for GLFW_KEY_DOWN/GLFW_KEY_UP constants */
     @AllArgsConstructor
@@ -200,7 +201,7 @@ public abstract class GlProgramBase {
         glfwSwapBuffers(windowHandle);
         glfwPollEvents();
         checkGlError();
-        framecount++;
+        frameCount++;
     }
 
     /** Typesafe wrapper for Vertex Buffer Object handle instead of a damned int */

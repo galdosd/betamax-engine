@@ -13,10 +13,12 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
+import static org.lwjgl.opengl.GL11.GL_TRIANGLES;
+import static org.lwjgl.opengl.GL11.glDrawArrays;
 
 
-/**
- * FIXME: Document this class
+/** a full screen sprite
  */
 public final class Sprite {
     private static final org.slf4j.Logger LOG =
@@ -34,7 +36,7 @@ public final class Sprite {
                 pkgName, Joiner.on("\n\t").join(spriteFilenames));
         textures = spriteFilenames.stream().map(name -> {
             Texture texture = new Texture();
-            texture.bind(GL11.GL_TEXTURE_2D);
+            texture.bind(GL_TEXTURE_2D);
             texture.btSetParameters();
             texture.loadAlphaTiff(name);
             return texture;
@@ -47,7 +49,12 @@ public final class Sprite {
     }
 
     public void render(long currentFrame) {
+        // FIXME very leaky abstraction, bring more of the VBO and VAO stuff into Sprite
+        // while removing the VBO/VAO stuff from GlProgramBase
         int frame = (int)((currentFrame - initialFrame) % textureCount);
         Texture texture = textures.get(frame);
+        texture.bind(GL_TEXTURE_2D);
+        texture.btUploadTextureUnit();
+        glDrawArrays(GL_TRIANGLES, 0, 3*2);
     }
 }
