@@ -1,6 +1,8 @@
 package com.github.galdosd.betamax;
 
 
+import com.codahale.metrics.Timer;
+
 import static com.google.common.base.Preconditions.checkState;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL15.*;
@@ -10,6 +12,11 @@ import static org.lwjgl.opengl.GL20.*;
  * FIXME: Document this class
  */
 public class BetamaxGlProgram extends GlProgramBase {
+    Timer textureLoadTimer = Global.metrics.timer("BetamaxGlProgram.textureLoadtimer");
+    Timer textureUploadTimer = Global.metrics.timer("BetamaxGlProgram.textureUploadtimer");
+
+    Texture checkerboardTexture;
+
     public static void main(String[] args) {
         new BetamaxGlProgram().run();
     }
@@ -55,11 +62,17 @@ public class BetamaxGlProgram extends GlProgramBase {
         glEnable(GL_BLEND);
         glEnable(GL_DEPTH_TEST);
         glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        Texture checkerboardTexture = new Texture();
+
+
+        // load textures
+
+        checkerboardTexture = new Texture();
         checkerboardTexture.bind(GL_TEXTURE_2D);
         checkerboardTexture.btSetParameters();
         //checkerboardTexture.btLoadRgba(texturePixels, 2, 2);
-        checkerboardTexture.btLoadAlphaTiff("sprite0.tif");
+        try(Timer.Context _unused = textureLoadTimer.time()) {
+            checkerboardTexture.loadAlphaTiff("sprite0.tif");
+        }
 
 
     }
@@ -69,6 +82,11 @@ public class BetamaxGlProgram extends GlProgramBase {
 
     int colorcycler = 0;
     @Override protected void updateView() {
+        try(Timer.Context _unused = textureUploadTimer.time()) {
+            checkerboardTexture.bind(GL_TEXTURE_2D);
+            checkerboardTexture.btUploadTextureUnit();
+        }
+
         glClearColor(((float)Math.sin(colorcycler++*0.05f) + 1)*0.5f, 0.8f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         //glClearColor(1.0f, 1.0f, 1.0f, 1.0f);

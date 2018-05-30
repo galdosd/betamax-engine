@@ -1,5 +1,7 @@
 package com.github.galdosd.betamax;
 
+import com.codahale.metrics.ConsoleReporter;
+import com.codahale.metrics.Timer;
 import lombok.AllArgsConstructor;
 import lombok.Value;
 import org.lwjgl.glfw.GLFWErrorCallback;
@@ -14,6 +16,7 @@ import java.nio.FloatBuffer;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import static com.google.common.base.Preconditions.checkState;
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
@@ -40,9 +43,19 @@ public abstract class GlProgramBase {
     private static final org.slf4j.Logger LOG =
             LoggerFactory.getLogger(new Object(){}.getClass().getEnclosingClass());
 
-    GLFWErrorCallback glfwErrorCallback;
+    // glfw window stuff
+    private GLFWErrorCallback glfwErrorCallback;
     private long windowHandle;
-    Set<Integer> downKeys = new HashSet<>();
+    private final Set<Integer> downKeys = new HashSet<>();
+
+    // FPS metrics
+    private final Timer userInitTimer = Global.metrics.timer("userInitTimer");
+    private final Timer renderTimer = Global.metrics.timer("renderTimer");
+    private final Timer logicTimer = Global.metrics.timer("logicTimer");
+    private final ConsoleReporter reporter = ConsoleReporter.forRegistry(Global.metrics)
+            .convertRatesTo(TimeUnit.SECONDS)
+            .convertDurationsTo(TimeUnit.MILLISECONDS)
+            .build();
 
     /** Typesafe enum for GLFW_KEY_DOWN/GLFW_KEY_UP constants */
     @AllArgsConstructor
@@ -115,7 +128,11 @@ public abstract class GlProgramBase {
         checkGlError();
         LOG.debug("Initialized GLFW and OpenGL");
 
-        initialize();
+        // reporter.start(60, TimeUnit.SECONDS);
+
+        try(Timer.Context _unused_context = userInitTimer.time()) {
+            initialize();
+        }
         checkGlError();
         LOG.debug("User initialization done");
 
@@ -143,6 +160,10 @@ public abstract class GlProgramBase {
         if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE) {
             closeWindow();
         }
+        // show FPS metrics upon pause/break key
+        else if (key == GLFW_KEY_PAUSE && action == GLFW_RELEASE) {
+            reporter.report();
+        }
         else if(action!=GLFW_REPEAT) {
             KeyAction keyAction = KeyAction.fromInt(action);
             if(keyAction == KeyAction.DOWN) downKeys.add(key);
@@ -165,9 +186,12 @@ public abstract class GlProgramBase {
     }
 
     private void loopOnce() {
-        // TODO maintain and report FPS
-        updateLogic();
-        updateView();
+        try(Timer.Context _unused_context = logicTimer.time()) {
+            updateLogic();
+        }
+        try(Timer.Context _unused_context = renderTimer.time()) {
+            updateView();
+        }
         checkGlError();
         glfwSwapBuffers(windowHandle);
         glfwPollEvents();
