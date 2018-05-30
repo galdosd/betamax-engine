@@ -74,7 +74,7 @@ public class BetamaxGlProgram extends GlProgramBase {
             checkerboardTexture.loadAlphaTiff("sprite0.tif");
         }
 
-
+        Sprite demowalk = new Sprite(Global.spriteBase+"demowalk");
     }
 
 

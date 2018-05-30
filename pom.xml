@@ -87,6 +87,7 @@
     <dependencies>
         <!-- FIXME include user-facing documentation to comply with OSS licenses
              that require eg, putting a disclaimer stating the license etc -->
+        <!-- FIXME update our dependencies -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -118,7 +119,11 @@
             <artifactId>metrics-core</artifactId>
             <version>${metrics.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.reflections</groupId>
+            <artifactId>reflections</artifactId>
+            <version>0.9.11</version>
+        </dependency>
         <!-- all the lwjgl crap -->
         <dependency>
             <groupId>org.lwjgl</groupId>

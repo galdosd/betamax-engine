@@ -57,6 +57,10 @@ public abstract class GlProgramBase {
             .convertDurationsTo(TimeUnit.MILLISECONDS)
             .build();
 
+
+    // framecount management
+    long framecount = 0;
+
     /** Typesafe enum for GLFW_KEY_DOWN/GLFW_KEY_UP constants */
     @AllArgsConstructor
     public static enum KeyAction {
@@ -196,6 +200,7 @@ public abstract class GlProgramBase {
         glfwSwapBuffers(windowHandle);
         glfwPollEvents();
         checkGlError();
+        framecount++;
     }
 
     /** Typesafe wrapper for Vertex Buffer Object handle instead of a damned int */

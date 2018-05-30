@@ -4,12 +4,11 @@ import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
 import com.google.common.io.Files;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.IllegalFormatCodePointException;
+import java.util.List;
 
 import static com.google.common.base.Preconditions.checkState;
 

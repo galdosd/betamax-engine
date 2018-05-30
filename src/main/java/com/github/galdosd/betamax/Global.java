@@ -6,4 +6,5 @@ import com.codahale.metrics.MetricRegistry;
 // TODO I know I know. Use DI or something. But only once it really matters. Extra magic ain't free
 public final class Global {
     public final static MetricRegistry metrics = new MetricRegistry();
+    public final static String spriteBase = "com.github.galdosd.betamax.sprites" + ".";
 }
