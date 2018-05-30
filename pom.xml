@@ -31,6 +31,12 @@
             Fancy mouse cursor
             Fancy framebuffer post effects
 
+        Preprocess textures so program load time is short
+        Seperate sprites into dayparts so we can load them in chunks rather than all at load time
+        Change speed on the fly, see sprite frame indexes
+        General performance
+        general cleanup
+
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
