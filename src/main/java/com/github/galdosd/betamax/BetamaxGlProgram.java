@@ -87,13 +87,14 @@ public class BetamaxGlProgram extends GlProgramBase {
             checkerboardTexture.btUploadTextureUnit();
         }
 
-        glClearColor(((float)Math.sin(colorcycler++*0.05f) + 1)*0.5f, 0.8f, 0.0f, 1.0f);
+        glClearColor(((float)Math.sin(colorcycler*0.05f) + 1)*0.5f, 0.8f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         //glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         glDrawArrays(GL_TRIANGLES, 0, 3*2);
     }
 
     @Override protected void updateLogic() {
+        colorcycler++;
     }
 
     @Override protected String getWindowTitle() { return "BETAMAX DEMO"; }
