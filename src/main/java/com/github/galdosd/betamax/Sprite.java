@@ -39,6 +39,7 @@ public final class Sprite {
             texture.bind(GL_TEXTURE_2D);
             texture.btSetParameters();
             texture.loadAlphaTiff(name);
+            texture.btUploadTextureUnit();
             return texture;
         }).collect(toList());
         textureCount = textures.size();
@@ -54,7 +55,6 @@ public final class Sprite {
         int frame = (int)((currentFrame - initialFrame) % textureCount);
         Texture texture = textures.get(frame);
         texture.bind(GL_TEXTURE_2D);
-        texture.btUploadTextureUnit();
         glDrawArrays(GL_TRIANGLES, 0, 3*2);
     }
 }
