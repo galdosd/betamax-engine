@@ -16,7 +16,7 @@ public class BetamaxGlProgram extends GlProgramBase {
     Timer textureUploadTimer = Global.metrics.timer("BetamaxGlProgram.textureUploadtimer");
 
     Texture checkerboardTexture;
-    Sprite demowalk, room;
+    Sprite demowalk, room, gameover;
 
     public static void main(String[] args) {
         new BetamaxGlProgram().run();
@@ -77,6 +77,7 @@ public class BetamaxGlProgram extends GlProgramBase {
 
         room = new Sprite(Global.spriteBase+"room");
         demowalk = new Sprite(Global.spriteBase+"demowalk");
+        gameover = new Sprite(Global.spriteBase+"demogameover");
     }
 
 
@@ -96,6 +97,8 @@ public class BetamaxGlProgram extends GlProgramBase {
         room.render(getFrameCount());
         glClear(GL_DEPTH_BUFFER_BIT);
         demowalk.render(getFrameCount());
+        glClear(GL_DEPTH_BUFFER_BIT);
+        gameover.render(getFrameCount());
     }
 
     @Override protected void updateLogic() {

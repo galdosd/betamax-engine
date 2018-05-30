@@ -12,6 +12,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.stream.Collectors.toList;
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
 import static org.lwjgl.opengl.GL11.GL_TRIANGLES;
@@ -32,6 +33,7 @@ public final class Sprite {
         List<String> spriteFilenames = reflections.getResources(Pattern.compile(".*\\.tif"))
                 .stream().sorted()
                 .collect(toList());
+        checkArgument(0!=spriteFilenames.size(), "no sprite frame files found!");
         if(LOG.isTraceEnabled()) LOG.trace("Loading these sprite files for {}: {}",
                 pkgName, Joiner.on("\n\t").join(spriteFilenames));
         textures = spriteFilenames.stream().map(name -> {
