@@ -60,7 +60,7 @@ public abstract class GlProgramBase {
 
 
     // framecount management
-    @Getter private long frameCount = 0;
+    private int frameCount = 0;
 
     /** Typesafe enum for GLFW_KEY_DOWN/GLFW_KEY_UP constants */
     @AllArgsConstructor
@@ -74,6 +74,10 @@ public abstract class GlProgramBase {
                     .filter(action -> action.glfwConstant == code)
                     .findFirst().get();
         }
+    }
+
+    protected FrameClock getFrameClock() {
+        return () -> frameCount;
     }
 
     public void run() {

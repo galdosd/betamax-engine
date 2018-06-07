@@ -2,6 +2,9 @@ package com.github.galdosd.betamax;
 
 
 import com.codahale.metrics.Timer;
+import com.github.galdosd.betamax.sprite.Sprite;
+import com.github.galdosd.betamax.sprite.SpriteRegistry;
+import com.github.galdosd.betamax.sprite.SpriteTemplate;
 
 import static com.google.common.base.Preconditions.checkState;
 import static org.lwjgl.opengl.GL11.*;
@@ -16,7 +19,8 @@ public class BetamaxGlProgram extends GlProgramBase {
     Timer textureUploadTimer = Global.metrics.timer("BetamaxGlProgram.textureUploadtimer");
 
     Texture checkerboardTexture;
-    Sprite demowalk, room, gameover;
+    SpriteRegistry spriteRegistry = new SpriteRegistry(getFrameClock());
+    Sprite demowalkSprite, roomSprite, gameoverSprite;
 
     public static void main(String[] args) {
         new BetamaxGlProgram().run();
@@ -74,10 +78,11 @@ public class BetamaxGlProgram extends GlProgramBase {
         try(Timer.Context _unused = textureLoadTimer.time()) {
             checkerboardTexture.loadAlphaTiff("sprite0.tif");
         }
+        FrameClock frameClock = getFrameClock();
 
-        room = new Sprite(Global.spriteBase+"room");
-        demowalk = new Sprite(Global.spriteBase+"demowalk");
-        gameover = new Sprite(Global.spriteBase+"demogameover");
+        roomSprite = spriteRegistry.getTemplate("room").create();
+        demowalkSprite = spriteRegistry.getTemplate("demowalk").create();
+        gameoverSprite = spriteRegistry.getTemplate("demogameover").create();
     }
 
 
@@ -94,11 +99,11 @@ public class BetamaxGlProgram extends GlProgramBase {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         //glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         // glDrawArrays(GL_TRIANGLES, 0, 3*2);
-        room.render(getFrameCount());
+        roomSprite.render();
         glClear(GL_DEPTH_BUFFER_BIT);
-        demowalk.render(getFrameCount());
+        demowalkSprite.render();
         glClear(GL_DEPTH_BUFFER_BIT);
-        gameover.render(getFrameCount());
+        gameoverSprite.render();
     }
 
     @Override protected void updateLogic() {

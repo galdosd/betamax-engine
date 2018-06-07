@@ -1,25 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
     TODO
-        Basic GL build
-            Debug GL
-                strace like
-                    GLIntercept. windows only!
-                    Vogl
-                    APITrace
-                shader debugging
-                    GLSL-Debugger
-                Other
-                    RenderDoc
-                    NVIDIA NSight
-
-        Basic GL Polygon
-        GL Texture
         Desired functionality
-            Import sprite
-            Basic game loop and timeline
-            Display animated sprites (loop optional)
-            Trigger events at moments in sprite
+            Do FPS correctly
+            Seperate Sprite/SpriteTemplate
+            Trivial Jython script that can just write to log and is triggered at sprite frames/create/destroy
             Mouse click event
             Event spawn sprites at location
             Event kill sprites
