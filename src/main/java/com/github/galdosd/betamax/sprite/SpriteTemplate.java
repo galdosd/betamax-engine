@@ -13,9 +13,8 @@ import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.stream.Collectors.toList;
-import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
-import static org.lwjgl.opengl.GL11.GL_TRIANGLES;
-import static org.lwjgl.opengl.GL11.glDrawArrays;
+import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
 
 
 /** a full screen sprite
@@ -57,6 +56,7 @@ public final class SpriteTemplate {
         // while removing the VBO/VAO stuff from GlProgramBase
         Texture texture = textures.get(whichFrame);
         texture.bind(GL_TEXTURE_2D);
+        glClear(GL_DEPTH_BUFFER_BIT);
         glDrawArrays(GL_TRIANGLES, 0, 3*2);
     }
 
