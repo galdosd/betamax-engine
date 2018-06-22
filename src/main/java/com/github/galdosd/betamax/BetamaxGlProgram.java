@@ -19,8 +19,8 @@ public class BetamaxGlProgram extends GlProgramBase {
     Timer textureUploadTimer = Global.metrics.timer("BetamaxGlProgram.textureUploadtimer");
 
     Texture checkerboardTexture;
+    ScriptWorld scriptWorld;
     SpriteRegistry spriteRegistry = new SpriteRegistry(getFrameClock());
-    Sprite demowalkSprite, roomSprite, gameoverSprite;
 
     public static void main(String[] args) {
         new BetamaxGlProgram().run();
@@ -32,6 +32,8 @@ public class BetamaxGlProgram extends GlProgramBase {
         VBO vbo = new VBO();
         float textureScale = 2;
         vbo.bindAndLoad(GL_ARRAY_BUFFER, GL_STATIC_DRAW, new float[]{
+            // two right triangles that cover the full screen
+            // all our sprites are fullscreen! wow!
                //xpos   ypos      xtex  ytex
                 -1.0f,  1.0f,     0.0f, 1.0f,
                  1.0f,  1.0f,     1.0f, 1.0f,
@@ -57,32 +59,14 @@ public class BetamaxGlProgram extends GlProgramBase {
         vbo.bind(GL_ARRAY_BUFFER);
         vertexAttribPointer(0, 2, GL_FLOAT, false, 4 * Float.BYTES, 0);
         vertexAttribPointer(1, 2, GL_FLOAT, false, 4 * Float.BYTES, 2 * Float.BYTES);
-        // textures
 
-        float[] texturePixels = new float[] {
-                1.0f, 0.0f, 0.0f, 1.0f,     0.0f, 0.0f, 1.0f, 1.0f,
-                0.0f, 0.0f, 1.0f, 1.0f,     1.0f, 0.0f, 0.0f, 1.0f,
-        };
-
+        // enable transparency
         glEnable(GL_BLEND);
         glEnable(GL_DEPTH_TEST);
         glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-
-        // load textures
-
-        checkerboardTexture = new Texture();
-        checkerboardTexture.bind(GL_TEXTURE_2D);
-        checkerboardTexture.btSetParameters();
-        //checkerboardTexture.btLoadRgba(texturePixels, 2, 2);
-        try(Timer.Context _unused = textureLoadTimer.time()) {
-            checkerboardTexture.loadAlphaTiff("sprite0.tif");
-        }
-        FrameClock frameClock = getFrameClock();
-
-        roomSprite = spriteRegistry.getTemplate("room").create();
-        demowalkSprite = spriteRegistry.getTemplate("demowalk").create();
-        gameoverSprite = spriteRegistry.getTemplate("demogameover").create();
+        scriptWorld = new ScriptWorld("example.py", spriteRegistry);
+        scriptWorld.onBegin();
     }
 
 
@@ -92,20 +76,14 @@ public class BetamaxGlProgram extends GlProgramBase {
     /** cycle background color; can be helpful in debugging */
     private int colorcycler = 0;
     @Override protected void updateView() {
-        try(Timer.Context _unused = textureUploadTimer.time()) {
-            checkerboardTexture.bind(GL_TEXTURE_2D);
-            checkerboardTexture.btUploadTextureUnit();
-        }
-
         glClearColor(((float)Math.sin(colorcycler*0.05f) + 1)*0.5f, 0.8f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        roomSprite.render();
-        demowalkSprite.render();
-        gameoverSprite.render();
+        spriteRegistry.renderAll();
     }
 
     @Override protected void updateLogic() {
         colorcycler++;
+        spriteRegistry.dispatchEvents(scriptWorld);
     }
 
     @Override protected String getWindowTitle() { return "BETAMAX DEMO"; }
