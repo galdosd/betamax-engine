@@ -1,17 +1,15 @@
 package com.github.galdosd.betamax.scripting;
 
+import com.github.galdosd.betamax.sprite.Sprite;
+
 import java.util.Map;
+import java.util.function.Consumer;
 
 /** Provide all needed services to the python scripts. Used by betamax.py
  */
 public interface ScriptServicer {
-
-    void provideScriptWorld(ScriptWorld scriptWorld);
-
     void log(String msg);
-
     void fatal(String msg);
-
     void exit();
 
     /**
@@ -21,15 +19,14 @@ public interface ScriptServicer {
      */
     Map<String, Object> getState(); // TODO is this the right interface for this?
 
+    // FIXME spritenames should be a typesafe String enum dammit
+    Sprite getSpriteByName(String spriteName);
     void createSprite(String templateName, String spriteName);
-
     void destroySprite(String spriteName);
 
-    void resetSpriteFramecount(String spriteName);
+    interface SpriteCallback {
+        void invoke();
+    }
+    void registerCallback(EventType eventType, String spriteName, SpriteCallback spriteCallback);
 
-    void resetSpriteFramecount(String spriteName, int framecount);
-
-    int getSpriteFramecount(String spriteName);
-
-    void advanceSpriteFramecount(String spriteName, int framecount);
 }
