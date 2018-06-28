@@ -7,4 +7,5 @@ import com.codahale.metrics.MetricRegistry;
 public final class Global {
     public final static MetricRegistry metrics = new MetricRegistry();
     public final static String spriteBase = "com.github.galdosd.betamax.sprites" + ".";
+    public final static String mainScript = "example.py";
 }

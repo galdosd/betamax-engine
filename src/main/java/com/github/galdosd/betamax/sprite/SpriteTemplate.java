@@ -3,7 +3,6 @@ package com.github.galdosd.betamax.sprite;
 import com.github.galdosd.betamax.FrameClock;
 import com.github.galdosd.betamax.Texture;
 import com.google.common.base.Joiner;
-import lombok.Getter;
 import org.reflections.Reflections;
 import org.reflections.scanners.ResourcesScanner;
 import org.slf4j.LoggerFactory;
@@ -28,7 +27,7 @@ public final class SpriteTemplate {
 
     public SpriteTemplate(String pkgName, FrameClock frameClock) {
         this.frameClock = frameClock;
-        Reflections reflections = new Reflections(pkgName , new ResourcesScanner());
+        Reflections reflections = new Reflections(pkgName, new ResourcesScanner());
         List<String> spriteFilenames = reflections.getResources(Pattern.compile(".*\\.tif"))
                 .stream().sorted()
                 .collect(toList());
@@ -74,16 +73,18 @@ public final class SpriteTemplate {
         }
 
         @Override public void render() {
-            int currentFrame = frameClock.getCurrentFrame();
-            int renderedFrame = (currentFrame - initialFrame) % textureCount;
-            renderTemplate(renderedFrame);
+            renderTemplate(getRenderedFrame());
         }
 
-        @Override public void resetFramecount() {
+        @Override public void resetRenderedFrame() {
             initialFrame = frameClock.getCurrentFrame();
         }
 
-        @Override public void advanceFramecount(int frames) {
+        @Override public int getRenderedFrame() {
+            return (frameClock.getCurrentFrame() - initialFrame) % textureCount;
+        }
+
+        @Override public void advanceRenderedFrame(int frames) {
             initialFrame += frames;
         }
 

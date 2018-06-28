@@ -2,9 +2,8 @@ package com.github.galdosd.betamax;
 
 
 import com.codahale.metrics.Timer;
-import com.github.galdosd.betamax.sprite.Sprite;
+import com.github.galdosd.betamax.scripting.ScriptWorld;
 import com.github.galdosd.betamax.sprite.SpriteRegistry;
-import com.github.galdosd.betamax.sprite.SpriteTemplate;
 
 import static com.google.common.base.Preconditions.checkState;
 import static org.lwjgl.opengl.GL11.*;
@@ -15,10 +14,6 @@ import static org.lwjgl.opengl.GL20.*;
  * FIXME: Document this class
  */
 public class BetamaxGlProgram extends GlProgramBase {
-    Timer textureLoadTimer = Global.metrics.timer("BetamaxGlProgram.textureLoadtimer");
-    Timer textureUploadTimer = Global.metrics.timer("BetamaxGlProgram.textureUploadtimer");
-
-    Texture checkerboardTexture;
     ScriptWorld scriptWorld;
     SpriteRegistry spriteRegistry = new SpriteRegistry(getFrameClock());
 
@@ -65,8 +60,8 @@ public class BetamaxGlProgram extends GlProgramBase {
         glEnable(GL_DEPTH_TEST);
         glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-        scriptWorld = new ScriptWorld("example.py", spriteRegistry);
-        scriptWorld.onBegin();
+        scriptWorld = new ScriptWorld(spriteRegistry);
+        scriptWorld.loadScript(Global.mainScript);
     }
 
 

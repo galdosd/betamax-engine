@@ -197,6 +197,7 @@ public abstract class GlProgramBase {
     private void loopOnce() {
         try(Timer.Context _unused_context = logicTimer.time()) {
             updateLogic();
+            frameCount++;
         }
         try(Timer.Context _unused_context = renderTimer.time()) {
             updateView();
@@ -205,7 +206,6 @@ public abstract class GlProgramBase {
         glfwSwapBuffers(windowHandle);
         glfwPollEvents();
         checkGlError();
-        frameCount++;
     }
 
     /** Typesafe wrapper for Vertex Buffer Object handle instead of a damned int */
