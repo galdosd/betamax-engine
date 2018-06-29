@@ -115,6 +115,12 @@
             <artifactId>reflections</artifactId>
             <version>0.9.11</version>
         </dependency>
+        <dependency>
+            <groupId>org.python</groupId>
+            <artifactId>jython-standalone</artifactId>
+            <version>2.7.1</version>
+        </dependency>
+
         <!-- all the lwjgl crap -->
         <dependency>
             <groupId>org.lwjgl</groupId>

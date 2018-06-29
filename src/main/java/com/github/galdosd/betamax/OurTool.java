@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.IllegalFormatCodePointException;
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 
 /** miscellaneous utilities */
@@ -27,7 +28,9 @@ public final class OurTool {
         }
     }
     public static InputStream streamResource(String filename) {
-        return OurTool.class.getResourceAsStream("/"+filename);
+        InputStream resourceAsStream = OurTool.class.getResourceAsStream("/" + filename);
+        checkArgument(null!=resourceAsStream, "no such resource found: /" + filename);
+        return resourceAsStream;
     }
 }
 

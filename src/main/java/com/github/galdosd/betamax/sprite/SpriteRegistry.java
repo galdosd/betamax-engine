@@ -14,6 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 /**
  * FIXME: Document this class
@@ -24,6 +25,7 @@ public class SpriteRegistry {
 
     // TODO sprite destruction will be O(number of sprites on screen)
     // this will probably never significantly impact performance tho
+    // could just store the index anyway
     private final Map<String,Sprite> registeredSprites = new HashMap<>();
     private final List<Sprite> orderedSprites = new LinkedList<>();
 
@@ -31,6 +33,11 @@ public class SpriteRegistry {
         this.frameClock = frameClock;
     }
 
+    // TODO it might be nice to have some mechanism by which templates not used for a while are unloaded
+    // that said it probably makes sense to have that partially manually controlled (to group templates into
+    // dayparts for example) rather than entirely automagical, especially since the performance implications are
+    // quite serious if the magic gets it wrong
+    // conversely, automatic background loading of things that will be needed in the future might be worthwhile
     public SpriteTemplate getTemplate(String name) {
         SpriteTemplate template = registeredTemplates.get(name);
         if(null==template) {
@@ -48,6 +55,20 @@ public class SpriteRegistry {
         checkArgument(!registeredSprites.containsKey(name), "duplicate sprite name: " + name);
         registeredSprites.put(name, sprite);
         orderedSprites.add(sprite);
+    }
+
+    public Sprite getSpriteByName(String spriteName) {
+        Sprite sprite = registeredSprites.get(spriteName);
+        checkArgument(null!=sprite, "No such sprite: " + spriteName);
+        return sprite;
+    }
+
+    public void removeSprite(String spriteName) {
+        Sprite sprite = getSpriteByName(spriteName);
+        registeredSprites.remove(spriteName);
+        boolean wasRemovedFromList = orderedSprites.remove(sprite);
+        checkState(wasRemovedFromList);
+
     }
 
     public void renderAll() {

@@ -17,6 +17,8 @@ import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
 
 
 /** a full screen sprite
+ * a single SpriteTemplate can be used to have several sprites on the screen at once or at different times
+ * each of which can be at different points in time in their animation (see Sprite interface)
  */
 public final class SpriteTemplate {
     private static final org.slf4j.Logger LOG =
