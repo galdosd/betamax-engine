@@ -1,26 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
     TODO
-        Desired functionality
-            Do FPS correctly
-            Seperate Sprite/SpriteTemplate
-            Trivial Jython script that can just write to log and is triggered at sprite frames/create/destroy
+        Working set features
+            Register and dispatch events - trigger on moment
+            Kill sprites
             Mouse click event
-            Event spawn sprites at location
-            Event kill sprites
-        Further desired functionality
+            Other events
+            Manipulate sprite rendered frame
+        Backlog features
+            Do FPS correctly
+            Rewind/fast forward
+            Display/write moment info
+            Ergonomic scripting
             TIFF import
             Sound!!!
-            Event python
             Some kind of save data / principled globals
             Fancy mouse cursor
-            Fancy framebuffer post effects
+            Fancy framebuffer CRT style post effects
+            basic steam support
+            windows testing
+            osx support
+            steam achievements
 
-        Preprocess textures so program load time is short
-        Seperate sprites into dayparts so we can load them in chunks rather than all at load time
-        Change speed on the fly, see sprite frame indexes
-        General performance
-        general cleanup
+        Maintenance
+            Refactoring
+            Triage TODOs
+            Testing
+            Enforce glossary terms / reify as objects for type safety ;)
+        Performance
+            Pre-process textures so program load time is short
+            Separate sprites into dayparts so we can load them in chunks rather than all at load time
+
+     GLOSSARY
+        Global clock frame (clock frame)
+        Sprite moment (rendered frame)
+        Sprite
+        Sprite template
+        Sprite name
+
 
 
 -->
