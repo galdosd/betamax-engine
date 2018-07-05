@@ -10,7 +10,8 @@
         Backlog features
             Do FPS correctly
             Rewind/fast forward
-            Display/write moment info
+            Display list of sprites and their current moments
+            Single button to tag a moment on the disk file
             Ergonomic scripting
             TIFF import
             Sound!!!

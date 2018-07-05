@@ -2,15 +2,9 @@ package com.github.galdosd.betamax.scripting;
 
 import com.github.galdosd.betamax.Global;
 import com.github.galdosd.betamax.OurTool;
-import com.github.galdosd.betamax.sprite.Sprite;
 import com.github.galdosd.betamax.sprite.SpriteRegistry;
-import org.python.jsr223.PyScriptEngineFactory;
 import org.python.util.PythonInterpreter;
 import org.slf4j.LoggerFactory;
-
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
 
 import java.io.InputStream;
 
@@ -24,7 +18,7 @@ import static com.google.common.base.Preconditions.checkState;
  * thin wrapper anyway, it's trivial to abstract that out ourselves. JSR223 sounds cool as hell but actually adds
  * little value, which is probably why it's broken, nobody else cared enough to whine about it either!
  */
-
+// TODO something is terrible and needs refactoring about ScriptWorld/SpriteRegistry/ScriptServicer
 public class ScriptWorld implements LogicHandler {
     private static final org.slf4j.Logger LOG =
             LoggerFactory.getLogger(new Object(){}.getClass().getEnclosingClass());
@@ -35,18 +29,25 @@ public class ScriptWorld implements LogicHandler {
 
     public ScriptWorld(SpriteRegistry spriteRegistry) {
         this.spriteRegistry = spriteRegistry;
-        servicer = new ScriptServicerImpl(spriteRegistry);
+        servicer = new ScriptServicer(spriteRegistry);
         pythonInterpreter = new PythonInterpreter();
     }
 
-
-    @Override public void onSpriteEvent(Sprite sprite, EventType eventType) {
-
+    @Override public void onSpriteEvent(SpriteEvent event) {
+        ScriptCallback callback = servicer.getCallback(event);
+        if(null!=callback) {
+            callback.invoke();
+        }
     }
 
     @Override public void onBegin() {
        // spriteRegistry.createSprite("room", "sprite_room");
       //  spriteRegistry.createSprite("demowalk", "sprite_demowalk");
+        LOG.info("onBegin");
+        ScriptCallback callback = servicer.getCallback(EventType.BEGIN);
+        if(null!=callback) {
+            callback.invoke();
+        }
     }
 
     public void loadScript(String scriptName) {

@@ -2,9 +2,12 @@ package com.github.galdosd.betamax.sprite;
 
 import com.github.galdosd.betamax.FrameClock;
 import com.github.galdosd.betamax.Global;
+import com.github.galdosd.betamax.scripting.EventType;
 import com.github.galdosd.betamax.scripting.LogicHandler;
 import com.github.galdosd.betamax.scripting.ScriptWorld;
+import com.github.galdosd.betamax.scripting.SpriteEvent;
 import com.google.common.base.Preconditions;
+import lombok.Getter;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -48,10 +51,11 @@ public class SpriteRegistry {
     }
 
     public void createSprite(String templateName, SpriteName spriteName) {
-        addSprite(spriteName, getTemplate(templateName).create());
+        addSprite(getTemplate(templateName).create(spriteName));
     }
 
-    private void addSprite(SpriteName name, Sprite sprite) {
+    private void addSprite(Sprite sprite) {
+        SpriteName name = sprite.getName();
         checkArgument(!registeredSprites.containsKey(name), "duplicate sprite name: " + name);
         registeredSprites.put(name, sprite);
         orderedSprites.add(sprite);
@@ -77,12 +81,30 @@ public class SpriteRegistry {
         }
     }
 
-    boolean alreadyBegun = false;
     public void dispatchEvents(LogicHandler logicHandler) {
+        dispatchBeginEvent(logicHandler);
+        // TODO handle SPRITE_CREATE, SPRITE_DESTROY
+        dispatchSpriteMomentEvents(logicHandler);
+    }
+
+    @Getter boolean alreadyBegun = false;
+    private void dispatchBeginEvent(LogicHandler logicHandler) {
         if(!alreadyBegun) {
             alreadyBegun = true;
             logicHandler.onBegin();
         }
+    }
 
+    private void dispatchSpriteMomentEvents(LogicHandler logicHandler) {
+        for(Sprite sprite: orderedSprites) {
+            // TODO: sprites created by handler callbacks will not have their first moment #0 event processed
+            // the same issue will apply to SPRITE_CREATE/DESTROY. we can surround this in a BFS like loop to ensure it
+            SpriteEvent momentEvent = new SpriteEvent(
+                    EventType.SPRITE_MOMENT,
+                    sprite.getName(),
+                    sprite.getRenderedFrame()
+            );
+            logicHandler.onSpriteEvent(momentEvent);
+        }
     }
 }

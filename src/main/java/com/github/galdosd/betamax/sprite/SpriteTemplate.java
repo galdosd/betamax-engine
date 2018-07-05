@@ -47,8 +47,8 @@ public final class SpriteTemplate {
         textureCount = textures.size();
     }
 
-    public Sprite create() {
-        return new SpriteImpl();
+    public Sprite create(SpriteName name) {
+        return new SpriteImpl(name);
     }
 
 
@@ -68,10 +68,12 @@ public final class SpriteTemplate {
      * different placees, for example.
      */
     private class SpriteImpl implements Sprite {
-        int initialFrame = 0;
+        private int initialFrame = 0;
+        private final SpriteName name;
 
-        private SpriteImpl(){
+        private SpriteImpl(SpriteName name){
             initialFrame = frameClock.getCurrentFrame();
+            this.name = name;
         }
 
         @Override public void render() {
@@ -88,6 +90,10 @@ public final class SpriteTemplate {
 
         @Override public void advanceRenderedFrame(int frames) {
             initialFrame += frames;
+        }
+
+        @Override public SpriteName getName() {
+            return name;
         }
 
     }

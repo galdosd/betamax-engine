@@ -8,4 +8,5 @@ public interface Sprite {
     void resetRenderedFrame();
     int getRenderedFrame();
     void advanceRenderedFrame(int frames);
+    SpriteName getName();
 }
