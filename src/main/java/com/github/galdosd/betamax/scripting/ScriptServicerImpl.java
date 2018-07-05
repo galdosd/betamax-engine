@@ -3,11 +3,14 @@ package com.github.galdosd.betamax.scripting;
 import com.github.galdosd.betamax.sprite.Sprite;
 import com.github.galdosd.betamax.sprite.SpriteName;
 import com.github.galdosd.betamax.sprite.SpriteRegistry;
-import lombok.Value;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static com.google.common.base.Preconditions.checkArgument;
 
 public class ScriptServicerImpl implements ScriptServicer {
     private static final org.slf4j.Logger LOG =
@@ -18,11 +21,21 @@ public class ScriptServicerImpl implements ScriptServicer {
         this.spriteRegistry = spriteRegistry;
     }
 
-    @Value private static final class Situation {
-        EventType eventType;
-        SpriteName spriteName;
+    @ToString @EqualsAndHashCode private static final class Situation {
+        public final EventType eventType;
+        public final SpriteName spriteName;
         /** ignored and must be 0 except for eventType==SPRITE_MOMENT */
-        int moment;
+        public final int moment;
+
+        private Situation(EventType eventType, SpriteName spriteName, int moment) {
+            checkArgument(eventType==EventType.SPRITE_MOMENT || moment == 0, "moment may only be set for EventType.SPRITE_MOMENT");
+            checkArgument(spriteName!=null || eventType == EventType.BEGIN, "sprite must be set for sprite events");
+            checkArgument(spriteName==null || eventType != EventType.BEGIN, "sprite may not be set for BEGIN event");
+
+            this.eventType = eventType;
+            this.spriteName = spriteName;
+            this.moment = moment;
+        }
     }
 
     Map<Situation,SpriteCallback> callbacks = new HashMap<>();
@@ -57,7 +70,9 @@ public class ScriptServicerImpl implements ScriptServicer {
     }
 
     @Override public void registerCallback(EventType eventType, SpriteName spriteName, int moment, SpriteCallback spriteCallback) {
-        throw new UnsupportedOperationException("FIXME unimplemented");
+        Situation situation = new Situation(eventType, spriteName, moment);
+        checkArgument(!callbacks.containsKey(situation), "Callback already registered for %s", situation);
+        callbacks.put(situation, spriteCallback);
     }
 
     @Override public SpriteName spriteName(String name) {
