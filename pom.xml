@@ -27,6 +27,7 @@
             Triage TODOs
             Testing
             Enforce glossary terms / reify as objects for type safety ;)
+            static analysis
         Performance
             Pre-process textures so program load time is short
             Separate sprites into dayparts so we can load them in chunks rather than all at load time

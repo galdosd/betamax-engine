@@ -1,6 +1,7 @@
 package com.github.galdosd.betamax.scripting;
 
 import com.github.galdosd.betamax.sprite.Sprite;
+import com.github.galdosd.betamax.sprite.SpriteName;
 
 import java.util.Map;
 import java.util.function.Consumer;
@@ -20,13 +21,16 @@ public interface ScriptServicer {
     Map<String, Object> getState(); // TODO is this the right interface for this?
 
     // FIXME spritenames should be a typesafe String enum dammit
-    Sprite getSpriteByName(String spriteName);
-    void createSprite(String templateName, String spriteName);
-    void destroySprite(String spriteName);
+    Sprite getSpriteByName(SpriteName spriteName);
+    void createSprite(String templateName, SpriteName spriteName);
+    void destroySprite(SpriteName spriteName);
+
+    /** moment should be 0 unless eventType is SPRITE_MOMENT */
+    void registerCallback(EventType eventType, SpriteName spriteName, int moment, SpriteCallback spriteCallback);
+
+    SpriteName spriteName(String name);
 
     interface SpriteCallback {
         void invoke();
     }
-    void registerCallback(EventType eventType, String spriteName, SpriteCallback spriteCallback);
-
 }

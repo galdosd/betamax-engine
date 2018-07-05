@@ -26,7 +26,7 @@ public class SpriteRegistry {
     // TODO sprite destruction will be O(number of sprites on screen)
     // this will probably never significantly impact performance tho
     // could just store the index anyway
-    private final Map<String,Sprite> registeredSprites = new HashMap<>();
+    private final Map<SpriteName,Sprite> registeredSprites = new HashMap<>();
     private final List<Sprite> orderedSprites = new LinkedList<>();
 
     public SpriteRegistry(FrameClock frameClock) {
@@ -47,23 +47,23 @@ public class SpriteRegistry {
         return template;
     }
 
-    public void createSprite(String templateName, String spriteName) {
+    public void createSprite(String templateName, SpriteName spriteName) {
         addSprite(spriteName, getTemplate(templateName).create());
     }
 
-    private void addSprite(String name, Sprite sprite) {
+    private void addSprite(SpriteName name, Sprite sprite) {
         checkArgument(!registeredSprites.containsKey(name), "duplicate sprite name: " + name);
         registeredSprites.put(name, sprite);
         orderedSprites.add(sprite);
     }
 
-    public Sprite getSpriteByName(String spriteName) {
+    public Sprite getSpriteByName(SpriteName spriteName) {
         Sprite sprite = registeredSprites.get(spriteName);
         checkArgument(null!=sprite, "No such sprite: " + spriteName);
         return sprite;
     }
 
-    public void removeSprite(String spriteName) {
+    public void removeSprite(SpriteName spriteName) {
         Sprite sprite = getSpriteByName(spriteName);
         registeredSprites.remove(spriteName);
         boolean wasRemovedFromList = orderedSprites.remove(sprite);
