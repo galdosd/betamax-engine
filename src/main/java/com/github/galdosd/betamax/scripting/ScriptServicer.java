@@ -66,8 +66,8 @@ public final class ScriptServicer {
         callbacks.put(spriteEvent, scriptCallback);
     }
 
-    public void registerSpriteMomentCallback(SpriteName spriteName, int moment, ScriptCallback scriptCallback) {
-        SpriteEvent spriteEvent = new SpriteEvent(EventType.SPRITE_MOMENT, spriteName, moment);
+    public void registerSpriteCallback(EventType eventType, SpriteName spriteName, int moment, ScriptCallback scriptCallback) {
+        SpriteEvent spriteEvent = new SpriteEvent(eventType, spriteName, moment);
         registerCallback(spriteEvent, scriptCallback);
     }
 
