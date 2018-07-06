@@ -2,24 +2,21 @@
 <!--
     TODO
         Working set features
-            Register and dispatch events - trigger on moment
-            Kill sprites
             Mouse click event
-            Other events
-            Manipulate sprite rendered frame
-        Backlog features
             Do FPS correctly
-            Rewind/fast forward
+            Frame control / pause / fast forward
             Display list of sprites and their current moments
-            Single button to tag a moment on the disk file
-            Ergonomic scripting
-            TIFF import
-            Sound!!!
-            Some kind of save data / principled globals
+            Single button to tag a moment on the disk file?
+            Managed state, just integers
+            Rewind
+        Backlog features
+            Sound
+            Sprite positions
+            Advance sprite frame / pause sprite execution
+            Saving/Loading state
             Fancy mouse cursor
             Fancy framebuffer CRT style post effects
             basic steam support
-            windows testing
             osx support
             steam achievements
 
@@ -29,6 +26,8 @@
             Testing
             Enforce glossary terms / reify as objects for type safety ;)
             static analysis
+            Windows testing
+
         Performance
             Pre-process textures so program load time is short
             Separate sprites into dayparts so we can load them in chunks rather than all at load time
