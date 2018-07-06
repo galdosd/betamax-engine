@@ -102,7 +102,7 @@ public final class SpriteTemplate {
         }
         @Override public boolean isClickableAtCoordinate(TextureCoordinate coord) {
             boolean transparentAtCoordinate = textures.get(getRenderedFrame()).isTransparentAtCoordinate(coord);
-            LOG.debug("{}.isClickableAtCoordinate({}) == {}", this, coord, !transparentAtCoordinate);
+            LOG.trace("{}.isClickableAtCoordinate({}) == {}", this, coord, !transparentAtCoordinate);
             return !transparentAtCoordinate;
         }
 

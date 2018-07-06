@@ -122,7 +122,7 @@ public final class Texture {
     }
 
     private ColorSample getPixel(int x, int y) {
-        int offset = BANDS * width * y + x;
+        int offset = BANDS * (width * y + x);
         return new ColorSample(
                 pixelData.get(offset),
                 pixelData.get(offset+1),
@@ -133,8 +133,8 @@ public final class Texture {
 
     private ColorSample getPixel(TextureCoordinate coordinate) {
         // XXX: should this be rounding or truncating? i have no idea
-        int x = (int) coordinate.getX() / width;
-        int y = (int) coordinate.getY() / height;
+        int x = (int) (coordinate.getX() * width);
+        int y = (int) (coordinate.getY() * height);
         return getPixel(x,y);
     }
 
@@ -152,7 +152,7 @@ public final class Texture {
     public boolean isTransparentAtCoordinate(TextureCoordinate coordinate) {
         ColorSample color = getPixel(coordinate);
         boolean transparentEnough = color.isTransparentEnough();
-        LOG.debug("{}.isTransparentEnough() == {}", color, transparentEnough);
+        LOG.trace("{}.isTransparentEnough() == {}", color, transparentEnough);
         return transparentEnough;
     }
 

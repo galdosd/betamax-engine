@@ -179,6 +179,7 @@ public abstract class GlProgramBase {
         checkState(NULL != windowHandle);
     }
 
+    private boolean paused = false;
     private void keyCallback(long window, int key, int scancode, int action, int mods) {
         // exit upon ESC key
         if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE) {
@@ -186,7 +187,10 @@ public abstract class GlProgramBase {
         }
         // show FPS metrics upon pause/break key
         else if (key == GLFW_KEY_PAUSE && action == GLFW_RELEASE) {
-            reporter.report();
+            paused = !paused;
+            // FIXME this will fuck up the metrics,we need a cooked Clock for Metrics to ignore
+            // the passage of time during pause
+            if(paused) reporter.report();
         }
         else if(action!=GLFW_REPEAT) {
             KeyAction keyAction = KeyAction.fromInt(action);
@@ -211,12 +215,14 @@ public abstract class GlProgramBase {
 
     private void loopOnce() {
         try(Timer.Context _unused_context = logicTimer.time()) {
+            // XXX: the pause function is very rudimentary for debugging, so it does not
+            // actually stop logic updates! they will just happen over and over!!!!!
             updateLogic();
         }
         try(Timer.Context _unused_context = renderTimer.time()) {
             updateView();
         }
-        frameCount++;
+        if (!paused) frameCount++;
         checkGlError();
         glfwSwapBuffers(windowHandle);
         glfwPollEvents();
