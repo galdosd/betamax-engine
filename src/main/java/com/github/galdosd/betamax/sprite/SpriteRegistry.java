@@ -96,6 +96,7 @@ public class SpriteRegistry {
     }
 
     private void dispatchSpriteMomentEvents(LogicHandler logicHandler) {
+        // TODO negative moments should be implemented, count backwards from end python style
         for(Sprite sprite: orderedSprites) {
             // TODO: sprites created by handler callbacks will not have their first moment #0 event processed
             // the same issue will apply to SPRITE_CREATE/DESTROY. we can surround this in a BFS like loop to ensure it

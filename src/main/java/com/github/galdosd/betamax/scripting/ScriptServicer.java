@@ -19,11 +19,12 @@ public final class ScriptServicer {
             LoggerFactory.getLogger(new Object(){}.getClass().getEnclosingClass());
 
     private final SpriteRegistry spriteRegistry;
+    private final Map<SpriteEvent,ScriptCallback> callbacks = new HashMap<>();
+    private final Map<EventType,ScriptCallback> globalCallbacks = new HashMap<>();
+
     public ScriptServicer(SpriteRegistry spriteRegistry) {
         this.spriteRegistry = spriteRegistry;
     }
-
-    private final Map<SpriteEvent,ScriptCallback> callbacks = new HashMap<>();
 
     public void log(String msg) {
         LOG.debug("[jython] {}", msg);
@@ -76,8 +77,6 @@ public final class ScriptServicer {
     public SpriteName newSpriteName(String name) {
         return new SpriteName(name);
     }
-
-    private final Map<EventType,ScriptCallback> globalCallbacks = new HashMap<>();
 
     public void registerGlobalCallback(@NonNull EventType eventType, ScriptCallback callback){
         checkArgument(!globalCallbacks.containsKey(eventType), "Callback already registered for %s", eventType);
