@@ -67,7 +67,7 @@ public class SpriteRegistry {
         return sprite;
     }
 
-    public void removeSprite(SpriteName spriteName) {
+    public void destroySprite(SpriteName spriteName) {
         Sprite sprite = getSpriteByName(spriteName);
         registeredSprites.remove(spriteName);
         boolean wasRemovedFromList = orderedSprites.remove(sprite);

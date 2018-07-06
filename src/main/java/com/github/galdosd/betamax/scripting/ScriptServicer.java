@@ -51,7 +51,7 @@ public final class ScriptServicer {
     }
 
     public void destroySprite(SpriteName spriteName) {
-        destroySprite(spriteName);
+        spriteRegistry.destroySprite(spriteName);
     }
 
     public void registerCallback(SpriteEvent spriteEvent, ScriptCallback scriptCallback) {
