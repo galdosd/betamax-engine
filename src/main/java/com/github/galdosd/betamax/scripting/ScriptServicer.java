@@ -71,6 +71,10 @@ public final class ScriptServicer {
         registerCallback(spriteEvent, scriptCallback);
     }
 
+    void loadTemplate(String templateName) {
+        spriteRegistry.getTemplate(templateName);
+    }
+
     ScriptCallback getCallback(@NonNull SpriteEvent event) {
         return callbacks.get(event);
     }
