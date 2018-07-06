@@ -3,7 +3,6 @@ package com.github.galdosd.betamax;
 import com.codahale.metrics.ConsoleReporter;
 import com.codahale.metrics.Timer;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
 import lombok.Value;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFWErrorCallback;
@@ -159,7 +158,7 @@ public abstract class GlProgramBase {
             glfwGetCursorPos(window, xMousePosBuffer, yMousePosBuffer);
             double x = xMousePosBuffer.get(0);
             double y = yMousePosBuffer.get(0);
-            leftMouseClickEvent(x/(double)getWindowWidth(), y/(double)getWindowHeight());
+            leftMouseClickEvent(new TextureCoordinate(x/(double)getWindowWidth(), 1.0 - y/(double)getWindowHeight()));
         }
     }
 
@@ -319,7 +318,7 @@ public abstract class GlProgramBase {
     // TODO composition instead of inheritance, turn the below into an interface
     protected abstract void initialize();
     protected abstract void keyboardEvent(int key, KeyAction action);
-    protected abstract void leftMouseClickEvent(double x, double y);
+    protected abstract void leftMouseClickEvent(TextureCoordinate coord);
     /** updateView could be called every frame, more than once per frame, less often, etc. it must be idempotent */
     protected abstract void updateView();
     /** updateLogic will be called exactly once per logical frame, ie, once for frame 0, then once for frame 1, etc */

@@ -2,6 +2,7 @@ package com.github.galdosd.betamax.sprite;
 
 import com.github.galdosd.betamax.FrameClock;
 import com.github.galdosd.betamax.Texture;
+import com.github.galdosd.betamax.TextureCoordinate;
 import com.google.common.base.Joiner;
 import org.reflections.Reflections;
 import org.reflections.scanners.ResourcesScanner;
@@ -96,8 +97,13 @@ public final class SpriteTemplate {
             return name;
         }
 
-        @Override public boolean isClickableAtCoordinate(double x, double y) {
-            return textures.get(getRenderedFrame()).isTransparentAtCoordinate(x, y);
+        @Override public String toString() {
+            return "Sprite(" + getName() + ")";
+        }
+        @Override public boolean isClickableAtCoordinate(TextureCoordinate coord) {
+            boolean transparentAtCoordinate = textures.get(getRenderedFrame()).isTransparentAtCoordinate(coord);
+            LOG.debug("{}.isClickableAtCoordinate({}) == {}", this, coord, !transparentAtCoordinate);
+            return !transparentAtCoordinate;
         }
 
     }

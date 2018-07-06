@@ -2,6 +2,7 @@ package com.github.galdosd.betamax;
 
 import com.codahale.metrics.Timer;
 import com.google.common.base.Preconditions;
+import lombok.Value;
 import org.lwjgl.opengl.*;
 import org.lwjgl.system.MemoryUtil;
 import org.slf4j.LoggerFactory;
@@ -27,10 +28,12 @@ public final class Texture {
     private static final org.slf4j.Logger LOG =
             LoggerFactory.getLogger(new Object(){}.getClass().getEnclosingClass());
 
+    final int BANDS = 4; // RGBA so 4 samples per pixel
     final int handle;
     int boundTarget = 0;
     FloatBuffer pixelData;
     int width, height;
+
     public Texture() {
         handle = GL11.glGenTextures();
     }
@@ -58,13 +61,6 @@ public final class Texture {
         // TODO use glGet to ensure this really is the bound object. thanks opengl.
         checkArgument(0!=boundTarget, "call bind() to set GL target first");
         bind(boundTarget);
-    }
-
-    public void btLoadRgba(float[] texturePixels, int width, int height) {
-        checkArgument(null==pixelData, "already loaded something else");
-
-        rebind();
-        glTexImage2D(boundTarget, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_FLOAT, texturePixels);
     }
 
     /** for textures that don't live the whole life of the program, you must call this
@@ -97,7 +93,6 @@ public final class Texture {
                 raster.getSampleModel().getDataType());
 
         float[] pixels = raster.getPixels(0, 0, width, height, (float[]) null);
-        final int BANDS = 4; // RGBA so 4 samples per pixel
         checkState(pixels.length == (BANDS * width * height));
         // opengl texture coordinates start from southwest corner, but
         // image formats usually start from northwest, so we turn it upside down
@@ -115,6 +110,34 @@ public final class Texture {
         pixelData.put(upsideDownPixels, 0, upsideDownPixels.length);
         pixelData.flip();
     }
+
+    @Value private static final class ColorSample {
+        float r, g, b, a;
+
+        /** is this transparent enough to be considered transparent to the eye?
+         */
+        public boolean isTransparentEnough() {
+            return a < 0.8;
+        }
+    }
+
+    private ColorSample getPixel(int x, int y) {
+        int offset = BANDS * width * y + x;
+        return new ColorSample(
+                pixelData.get(offset),
+                pixelData.get(offset+1),
+                pixelData.get(offset+2),
+                pixelData.get(offset+3)
+        );
+    }
+
+    private ColorSample getPixel(TextureCoordinate coordinate) {
+        // XXX: should this be rounding or truncating? i have no idea
+        int x = (int) coordinate.getX() / width;
+        int y = (int) coordinate.getY() / height;
+        return getPixel(x,y);
+    }
+
     public void btUploadTextureUnit() {
         checkArgument(null!=pixelData);
         checkState(0!=width && 0!=height);
@@ -126,7 +149,11 @@ public final class Texture {
         );
     }
 
-    public boolean isTransparentAtCoordinate(double x, double y) {
-        return true;
+    public boolean isTransparentAtCoordinate(TextureCoordinate coordinate) {
+        ColorSample color = getPixel(coordinate);
+        boolean transparentEnough = color.isTransparentEnough();
+        LOG.debug("{}.isTransparentEnough() == {}", color, transparentEnough);
+        return transparentEnough;
     }
+
 }

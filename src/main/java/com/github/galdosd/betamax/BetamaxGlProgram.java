@@ -75,9 +75,9 @@ public class BetamaxGlProgram extends GlProgramBase {
 
     @Override protected void keyboardEvent(int key, KeyAction action) { }
 
-    @Override protected void leftMouseClickEvent(double x, double y) {
-        LOG.debug("Clicked at {} x {}", x, y);
-        Optional<SpriteName> clickedSprite = spriteRegistry.getSpriteAtCoordinate(x,y);
+    @Override protected void leftMouseClickEvent(TextureCoordinate coordinate) {
+        LOG.debug("Clicked at {} x {}", coordinate.getX(), coordinate.getY());
+        Optional<SpriteName> clickedSprite = spriteRegistry.getSpriteAtCoordinate(coordinate);
         if(clickedSprite.isPresent()) {
             LOG.info("Clicked on sprite {}", clickedSprite.get());
             spriteRegistry.enqueueSpriteEvent(new SpriteEvent(EventType.SPRITE_CLICK, clickedSprite.get(), 0));

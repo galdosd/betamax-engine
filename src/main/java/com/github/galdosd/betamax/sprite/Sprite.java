@@ -1,5 +1,7 @@
 package com.github.galdosd.betamax.sprite;
 
+import com.github.galdosd.betamax.TextureCoordinate;
+
 /**
  * FIXME: Document this class
  */
@@ -10,5 +12,5 @@ public interface Sprite {
     void advanceRenderedFrame(int frames);
     SpriteName getName();
 
-    boolean isClickableAtCoordinate(double x, double y);
+    boolean isClickableAtCoordinate(TextureCoordinate coordinate);
 }

@@ -2,6 +2,7 @@ package com.github.galdosd.betamax.sprite;
 
 import com.github.galdosd.betamax.FrameClock;
 import com.github.galdosd.betamax.Global;
+import com.github.galdosd.betamax.TextureCoordinate;
 import com.github.galdosd.betamax.scripting.EventType;
 import com.github.galdosd.betamax.scripting.LogicHandler;
 import lombok.Getter;
@@ -128,12 +129,12 @@ public class SpriteRegistry {
         }
     }
 
-    public Optional<SpriteName> getSpriteAtCoordinate(double x, double y) {
+    public Optional<SpriteName> getSpriteAtCoordinate(TextureCoordinate coordinate) {
         // look through sprites in reverse draw order, ie from front to back
         Iterator<Sprite> spriteIterator = orderedSprites.descendingIterator();
         while(spriteIterator.hasNext()) {
             Sprite sprite = spriteIterator.next();
-            if (!sprite.isClickableAtCoordinate(x,y)) {
+            if (sprite.isClickableAtCoordinate(coordinate)) {
                 return Optional.of(sprite.getName());
             }
         }
