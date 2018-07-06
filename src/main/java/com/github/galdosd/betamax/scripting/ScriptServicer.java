@@ -71,7 +71,7 @@ public final class ScriptServicer {
         registerCallback(spriteEvent, scriptCallback);
     }
 
-    void loadTemplate(String templateName) {
+    public void loadTemplate(String templateName) {
         spriteRegistry.getTemplate(templateName);
     }
 
