@@ -11,10 +11,10 @@
             Rewind
         Backlog features
             Sound
-            Sprite positions
-            Advance sprite frame / pause sprite execution
             Saving/Loading state
             Fancy mouse cursor
+            Sprite positions
+            Advance sprite frame / pause sprite execution
             Fancy framebuffer CRT style post effects
             basic steam support
             osx support
