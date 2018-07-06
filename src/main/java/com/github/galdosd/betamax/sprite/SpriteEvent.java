@@ -1,5 +1,6 @@
-package com.github.galdosd.betamax.scripting;
+package com.github.galdosd.betamax.sprite;
 
+import com.github.galdosd.betamax.scripting.EventType;
 import com.github.galdosd.betamax.sprite.SpriteName;
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;
@@ -7,8 +8,10 @@ import lombok.ToString;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-/**
- * FIXME: Document this class
+/** An event such as an input or timing event that pertains to a single specific sprite
+ *
+ * XXX: not sure if this C union style is best here as opposed to an oop hierarchy, but tbqh i think it's the right
+ * way for a thing that has no polymorphic methods applicable anyway that belong here.
  */
 @ToString
 @EqualsAndHashCode

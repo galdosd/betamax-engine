@@ -32,6 +32,7 @@ public class GlProgramBaseTest {
             private boolean startedThread;
             @Override protected void initialize() { }
             @Override protected void keyboardEvent(int key, KeyAction action) { }
+            @Override protected void leftMouseClickEvent(double x, double y) { }
 
             @Override protected void updateView() {
                 glClearColor(1.0f, 1.0f, 0.0f, 0.0f);

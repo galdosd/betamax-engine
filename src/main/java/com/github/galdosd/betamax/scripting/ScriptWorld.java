@@ -2,6 +2,7 @@ package com.github.galdosd.betamax.scripting;
 
 import com.github.galdosd.betamax.Global;
 import com.github.galdosd.betamax.OurTool;
+import com.github.galdosd.betamax.sprite.SpriteEvent;
 import com.github.galdosd.betamax.sprite.SpriteRegistry;
 import org.python.util.PythonInterpreter;
 import org.slf4j.LoggerFactory;

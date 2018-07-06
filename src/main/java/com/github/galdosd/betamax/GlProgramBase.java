@@ -5,14 +5,17 @@ import com.codahale.metrics.Timer;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Value;
+import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWKeyCallback;
+import org.lwjgl.glfw.GLFWMouseButtonCallback;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.*;
 import org.lwjgl.system.Configuration;
 import org.lwjgl.system.MemoryStack;
 import org.slf4j.LoggerFactory;
 
+import java.nio.DoubleBuffer;
 import java.nio.FloatBuffer;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -95,7 +98,7 @@ public abstract class GlProgramBase {
                 glfwFreeCallbacks(windowHandle);
             }
             glfwTerminate();
-            if(null!=glfwErrorCallback) glfwErrorCallback.free();
+            if(null!=glfwErrorCallback) glfwErrorCallback.free(); // IDRC if we need to do this
 
         }
     }
@@ -120,6 +123,7 @@ public abstract class GlProgramBase {
 
         // set input callbacks
         glfwSetKeyCallback(windowHandle, GLFWKeyCallback.create(this::keyCallback));
+        glfwSetMouseButtonCallback(windowHandle, GLFWMouseButtonCallback.create(this::mouseButtonCallback));
 
         glfwMakeContextCurrent(windowHandle);
         glfwSwapInterval(1); // wait for v sync (or whatever they do these days) when swapping buffers
@@ -145,6 +149,18 @@ public abstract class GlProgramBase {
         checkGlError();
         LOG.debug("User initialization done");
 
+    }
+
+    private final DoubleBuffer xMousePosBuffer = BufferUtils.createDoubleBuffer(1);
+    private final DoubleBuffer yMousePosBuffer = BufferUtils.createDoubleBuffer(1);
+
+    private void mouseButtonCallback(long window, int button, int action, int mods){
+        if(action == GLFW_PRESS && button == GLFW_MOUSE_BUTTON_LEFT) {
+            glfwGetCursorPos(window, xMousePosBuffer, yMousePosBuffer);
+            double x = xMousePosBuffer.get(0);
+            double y = yMousePosBuffer.get(0);
+            leftMouseClickEvent(x/(double)getWindowWidth(), y/(double)getWindowHeight());
+        }
     }
 
     private void createWindow() {
@@ -303,6 +319,7 @@ public abstract class GlProgramBase {
     // TODO composition instead of inheritance, turn the below into an interface
     protected abstract void initialize();
     protected abstract void keyboardEvent(int key, KeyAction action);
+    protected abstract void leftMouseClickEvent(double x, double y);
     /** updateView could be called every frame, more than once per frame, less often, etc. it must be idempotent */
     protected abstract void updateView();
     /** updateLogic will be called exactly once per logical frame, ie, once for frame 0, then once for frame 1, etc */

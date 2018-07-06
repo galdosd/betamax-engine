@@ -4,16 +4,10 @@ import com.github.galdosd.betamax.FrameClock;
 import com.github.galdosd.betamax.Global;
 import com.github.galdosd.betamax.scripting.EventType;
 import com.github.galdosd.betamax.scripting.LogicHandler;
-import com.github.galdosd.betamax.scripting.ScriptWorld;
-import com.github.galdosd.betamax.scripting.SpriteEvent;
-import com.google.common.base.Preconditions;
 import lombok.Getter;
+import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.*;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -23,6 +17,9 @@ import static com.google.common.base.Preconditions.checkState;
  * FIXME: Document this class
  */
 public class SpriteRegistry {
+    private static final org.slf4j.Logger LOG =
+            LoggerFactory.getLogger(new Object(){}.getClass().getEnclosingClass());
+
     private final FrameClock frameClock;
     private final Map<String,SpriteTemplate> registeredTemplates = new HashMap<>();
 
@@ -30,7 +27,8 @@ public class SpriteRegistry {
     // this will probably never significantly impact performance tho
     // could just store the index anyway
     private final Map<SpriteName,Sprite> registeredSprites = new HashMap<>();
-    private final List<Sprite> orderedSprites = new LinkedList<>();
+    private final Queue<Sprite> orderedSprites = new LinkedList<>();
+    private final Queue<SpriteEvent> enqueuedSpriteEvents = new LinkedList<>();
 
     public SpriteRegistry(FrameClock frameClock) {
         this.frameClock = frameClock;
@@ -50,8 +48,16 @@ public class SpriteRegistry {
         return template;
     }
 
+    // this should only be called from script handlers, or else a duplicate moment#0 event may be dispatched on the
+    // first loop of a sprite created by the outer program
+    // this should also not be called before the BEGIN event is processed or moment events would happen early
+    // again, leave that to scripts
     public void createSprite(String templateName, SpriteName spriteName) {
         addSprite(getTemplate(templateName).create(spriteName));
+        enqueueSpriteEvent(new SpriteEvent(EventType.SPRITE_CREATE, spriteName, 0));
+        // dispatchSpriteMomentEvents will only catch sprites that already existed before this frame and the frame
+        // will then increment, so without this we'd miss the first sprite moment#0 event
+        enqueueSpriteEvent(new SpriteEvent(EventType.SPRITE_MOMENT, spriteName, 0));
     }
 
     private void addSprite(Sprite sprite) {
@@ -72,7 +78,7 @@ public class SpriteRegistry {
         registeredSprites.remove(spriteName);
         boolean wasRemovedFromList = orderedSprites.remove(sprite);
         checkState(wasRemovedFromList);
-
+        enqueueSpriteEvent(new SpriteEvent(EventType.SPRITE_DESTROY, spriteName, 0));
     }
 
     public void renderAll() {
@@ -82,9 +88,18 @@ public class SpriteRegistry {
     }
 
     public void dispatchEvents(LogicHandler logicHandler) {
-        dispatchBeginEvent(logicHandler);
-        // TODO handle SPRITE_CREATE, SPRITE_DESTROY
+        // TODO I'm not sure the choreography is consistent yet of making sure you get events
+        // in a well defined order, which I care about because of rewing/replay, particularly the first moment#0 event
         dispatchSpriteMomentEvents(logicHandler);
+        dispatchBeginEvent(logicHandler);
+        for(int jj = 0; !enqueuedSpriteEvents.isEmpty(); jj++) {
+            dispatchEnqueuedSpriteEvents(logicHandler);
+            // a stupid jython script could cause us to recurse forever, eg, by creating a sprite from within its
+            // own destruction handler and then destroying it from within its creation handler, so we try to detect it
+            if(jj > 1000) { // if 1000 is good enough for java's recursion limit I guess it's good enough for us
+                throw new IllegalStateException("Event handling recursion limit exceeded; your jython script is buggy");
+            }
+        }
     }
 
     @Getter boolean alreadyBegun = false;
@@ -98,8 +113,6 @@ public class SpriteRegistry {
     private void dispatchSpriteMomentEvents(LogicHandler logicHandler) {
         // TODO negative moments should be implemented, count backwards from end python style
         for(Sprite sprite: orderedSprites) {
-            // TODO: sprites created by handler callbacks will not have their first moment #0 event processed
-            // the same issue will apply to SPRITE_CREATE/DESTROY. we can surround this in a BFS like loop to ensure it
             SpriteEvent momentEvent = new SpriteEvent(
                     EventType.SPRITE_MOMENT,
                     sprite.getName(),
@@ -107,5 +120,19 @@ public class SpriteRegistry {
             );
             logicHandler.onSpriteEvent(momentEvent);
         }
+    }
+    private void dispatchEnqueuedSpriteEvents(LogicHandler logicHandler) {
+        SpriteEvent event;
+        while(null != (event = enqueuedSpriteEvents.poll())) {
+            logicHandler.onSpriteEvent(event);
+        }
+    }
+
+    public Optional<SpriteName> getSpriteAtCoordinate(double x, double y) {
+        return Optional.empty(); // FIXME
+    }
+
+    public void enqueueSpriteEvent(SpriteEvent spriteEvent) {
+        enqueuedSpriteEvents.add(spriteEvent);
     }
 }

@@ -1,9 +1,14 @@
 package com.github.galdosd.betamax;
 
 
-import com.codahale.metrics.Timer;
+import com.github.galdosd.betamax.scripting.EventType;
 import com.github.galdosd.betamax.scripting.ScriptWorld;
+import com.github.galdosd.betamax.sprite.SpriteEvent;
+import com.github.galdosd.betamax.sprite.SpriteName;
 import com.github.galdosd.betamax.sprite.SpriteRegistry;
+import org.slf4j.LoggerFactory;
+
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkState;
 import static org.lwjgl.opengl.GL11.*;
@@ -14,6 +19,9 @@ import static org.lwjgl.opengl.GL20.*;
  * FIXME: Document this class
  */
 public class BetamaxGlProgram extends GlProgramBase {
+    private static final org.slf4j.Logger LOG =
+            LoggerFactory.getLogger(new Object(){}.getClass().getEnclosingClass());
+
     ScriptWorld scriptWorld;
     SpriteRegistry spriteRegistry = new SpriteRegistry(getFrameClock());
 
@@ -66,6 +74,14 @@ public class BetamaxGlProgram extends GlProgramBase {
 
 
     @Override protected void keyboardEvent(int key, KeyAction action) { }
+
+    @Override protected void leftMouseClickEvent(double x, double y) {
+        LOG.debug("Clicked at {} x {}", x, y);
+        Optional<SpriteName> clickedSprite = spriteRegistry.getSpriteAtCoordinate(x,y);
+        if(clickedSprite.isPresent()) {
+            spriteRegistry.enqueueSpriteEvent(new SpriteEvent(EventType.SPRITE_CLICK, clickedSprite.get(), 0));
+        }
+    }
 
 
     /** cycle background color; can be helpful in debugging */
