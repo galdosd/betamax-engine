@@ -125,4 +125,8 @@ public final class Texture {
                 GL_RGBA, GL_FLOAT, pixelData
         );
     }
+
+    public boolean isTransparentAtCoordinate(double x, double y) {
+        return true;
+    }
 }

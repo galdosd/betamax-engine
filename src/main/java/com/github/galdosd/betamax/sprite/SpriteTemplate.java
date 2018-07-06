@@ -65,7 +65,7 @@ public final class SpriteTemplate {
      * A specific instance of a particular sprite template
      * the visual data is in the template, but the sprite has the state like current frame, layer depth,
      * position, etc. After all, you could have a Goomba SpriteTemplate but 28 goomba Sprites on the screen all in
-     * different placees, for example.
+     * different places, for example.
      */
     private class SpriteImpl implements Sprite {
         private int initialFrame = 0;
@@ -94,6 +94,10 @@ public final class SpriteTemplate {
 
         @Override public SpriteName getName() {
             return name;
+        }
+
+        @Override public boolean isClickableAtCoordinate(double x, double y) {
+            return textures.get(getRenderedFrame()).isTransparentAtCoordinate(x, y);
         }
 
     }

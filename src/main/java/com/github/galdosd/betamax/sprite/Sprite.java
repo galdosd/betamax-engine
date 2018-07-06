@@ -9,4 +9,6 @@ public interface Sprite {
     int getRenderedFrame();
     void advanceRenderedFrame(int frames);
     SpriteName getName();
+
+    boolean isClickableAtCoordinate(double x, double y);
 }

@@ -27,7 +27,7 @@ public class SpriteRegistry {
     // this will probably never significantly impact performance tho
     // could just store the index anyway
     private final Map<SpriteName,Sprite> registeredSprites = new HashMap<>();
-    private final Queue<Sprite> orderedSprites = new LinkedList<>();
+    private final Deque<Sprite> orderedSprites = new LinkedList<>();
     private final Queue<SpriteEvent> enqueuedSpriteEvents = new LinkedList<>();
 
     public SpriteRegistry(FrameClock frameClock) {
@@ -129,7 +129,16 @@ public class SpriteRegistry {
     }
 
     public Optional<SpriteName> getSpriteAtCoordinate(double x, double y) {
-        return Optional.empty(); // FIXME
+        // look through sprites in reverse draw order, ie from front to back
+        Iterator<Sprite> spriteIterator = orderedSprites.descendingIterator();
+        while(spriteIterator.hasNext()) {
+            Sprite sprite = spriteIterator.next();
+            if (!sprite.isClickableAtCoordinate(x,y)) {
+                return Optional.of(sprite.getName());
+            }
+        }
+        return Optional.empty();
+
     }
 
     public void enqueueSpriteEvent(SpriteEvent spriteEvent) {
