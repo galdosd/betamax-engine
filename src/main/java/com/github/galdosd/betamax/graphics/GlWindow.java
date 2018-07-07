@@ -64,8 +64,6 @@ public final class GlWindow implements AutoCloseable {
         glfwSetKeyCallback(windowHandle, GLFWKeyCallback.create(keyCallback));
         glfwSetMouseButtonCallback(windowHandle, GLFWMouseButtonCallback.create(mouseButtonCallback));
 
-        centerWindow();
-        glfwShowWindow(windowHandle); // XXX does this need to be done before setting up GL context?
 
         checkGlError();
         LOG.debug("Created and showed window {} and completed setup of OpenGL context", windowHandle);
@@ -83,10 +81,12 @@ public final class GlWindow implements AutoCloseable {
 
         long createdWindowHandle = glfwCreateWindow(width, height, title, NULL, NULL);
         checkState(NULL != createdWindowHandle);
+        centerWindow(createdWindowHandle);
 
-        glfwMakeContextCurrent(windowHandle);
-        glfwSwapInterval(1); // wait for v sync (or whatever they do these days) when swapping buffers
+        glfwMakeContextCurrent(createdWindowHandle);
+        glfwShowWindow(createdWindowHandle); // this has to be done before GL.createCapabilities()
         GL.createCapabilities();
+        glfwSwapInterval(1); // wait for v sync (or whatever they do these days) when swapping buffers
 
         if(debugMode) {
             // enable opengl debugging
@@ -102,10 +102,10 @@ public final class GlWindow implements AutoCloseable {
         return glfwWindowShouldClose(windowHandle);
     }
 
-    private void centerWindow() {
+    private void centerWindow(long createdWindowHandle) {
         GLFWVidMode vidMode = glfwGetVideoMode(glfwGetPrimaryMonitor()); // get the resolution
         glfwSetWindowPos(
-                windowHandle,
+                createdWindowHandle,
                 (vidMode.width() - width) / 2,
                 (vidMode.height() - height) / 2
         );
