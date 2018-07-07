@@ -2,7 +2,6 @@
 <!--
     TODO
         Working set features
-            Mouse click event
             Do FPS correctly
             Frame control / pause / fast forward
             Display list of sprites and their current moments
@@ -29,7 +28,8 @@
             Windows testing
 
         Performance
-            Pre-process textures so program load time is short
+            Pre-process textures so program load time is short (LZ4)
+            Possibly store texture compressed in memory to save main RAM (LZ4)
             Separate sprites into dayparts so we can load them in chunks rather than all at load time
 
      GLOSSARY
