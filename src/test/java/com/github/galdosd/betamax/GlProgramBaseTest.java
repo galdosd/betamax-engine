@@ -1,5 +1,7 @@
 package com.github.galdosd.betamax;
 
+import com.github.galdosd.betamax.graphics.Shader;
+import com.github.galdosd.betamax.graphics.TextureCoordinate;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.lwjgl.opengl.GL11;
@@ -23,7 +25,7 @@ public class GlProgramBaseTest {
                 "default.frag",
         };
         BetamaxGlProgram program = new BetamaxGlProgram();
-        for(String shaderName: shaderNames) program.loadAndCompileShader(shaderName, /*FIXME*/ 0);
+        for(String shaderName: shaderNames) Shader.loadAndCompileShader(shaderName, /*FIXME*/ 0);
     }
 
     @Test public void testBasic() throws Exception {

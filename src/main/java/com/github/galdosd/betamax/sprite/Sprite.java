@@ -1,6 +1,6 @@
 package com.github.galdosd.betamax.sprite;
 
-import com.github.galdosd.betamax.TextureCoordinate;
+import com.github.galdosd.betamax.graphics.TextureCoordinate;
 
 /**
  * FIXME: Document this class

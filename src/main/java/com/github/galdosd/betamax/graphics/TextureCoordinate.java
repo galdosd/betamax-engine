@@ -1,4 +1,4 @@
-package com.github.galdosd.betamax;
+package com.github.galdosd.betamax.graphics;
 
 import lombok.Value;
 

@@ -2,8 +2,9 @@ package com.github.galdosd.betamax;
 
 import com.codahale.metrics.ConsoleReporter;
 import com.codahale.metrics.Timer;
+import com.github.galdosd.betamax.graphics.GlDebugMessages;
+import com.github.galdosd.betamax.graphics.TextureCoordinate;
 import lombok.AllArgsConstructor;
-import lombok.Value;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWKeyCallback;
@@ -11,11 +12,9 @@ import org.lwjgl.glfw.GLFWMouseButtonCallback;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.*;
 import org.lwjgl.system.Configuration;
-import org.lwjgl.system.MemoryStack;
 import org.slf4j.LoggerFactory;
 
 import java.nio.DoubleBuffer;
-import java.nio.FloatBuffer;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -25,10 +24,6 @@ import static com.google.common.base.Preconditions.checkState;
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL15.*;
-import static org.lwjgl.opengl.GL20.*;
-import static org.lwjgl.opengl.GL30.*;
-import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 /**
@@ -229,94 +224,8 @@ public abstract class GlProgramBase {
         checkGlError();
     }
 
-    /** Typesafe wrapper for Vertex Buffer Object handle instead of a damned int */
-    protected static final class VBO {
-        private final int handle;
 
-        public VBO() {
-            handle = glGenBuffers();
-        }
-
-        public void bind(int target) {
-            glBindBuffer(target, handle);
-        }
-
-        public void bindAndLoad(int target, int usage, float[] data) {
-            bind(target);
-            try(MemoryStack stack = stackPush()) {
-                FloatBuffer floatBuffer = stack.callocFloat(data.length);
-                floatBuffer.put(data);
-                floatBuffer.flip();
-                glBufferData(target, floatBuffer, usage);
-            }
-        }
-    }
-
-    protected static final class VAO {
-        private final int handle;
-        public VAO() {
-            handle = glGenVertexArrays();
-        }
-        public void bind() {
-            glBindVertexArray(handle);
-        }
-    }
-
-    @Value protected static final class Shader {
-        int handle;
-    }
-
-    protected static final class ShaderProgram {
-        private final int handle;
-
-        public ShaderProgram() {
-            handle = glCreateProgram();
-        }
-
-        public void attach(Shader shader) {
-            glAttachShader(handle, shader.getHandle());
-        }
-
-        public void linkAndUse() {
-            glLinkProgram(handle);
-            int linkStatus = glGetProgrami(handle, GL_LINK_STATUS);
-            checkState(GL_TRUE == linkStatus, "glLinkProgram failed: " + glGetProgramInfoLog(handle));
-            glUseProgram(handle);
-        }
-
-        private int getAttribLocation(String varName) {
-            int result = glGetAttribLocation(handle, varName);
-            checkState(-1 != result);
-            return result;
-        }
-
-        public void bindFragDataLocation(int colorNumber, String colorName) {
-            glBindFragDataLocation(handle, colorNumber, colorName);
-        }
-    }
-
-
-    // TODO we can do this in a more sophisticated less verbose way but i'm holding off
-    // in case we find somethign that already does this or a good reason not to
-    protected final void vertexAttribPointer(
-            int attribLocation,
-            int arity, int type, boolean normalize, int stride, long offset) {
-        glVertexAttribPointer(attribLocation, arity, type, normalize, stride, offset);
-        glEnableVertexAttribArray(attribLocation);
-    }
-
-    protected final Shader loadAndCompileShader(String filename, int shaderType)  {
-        String shaderSource = OurTool.loadResource(filename);
-        int shader = glCreateShader(shaderType);
-        glShaderSource(shader, shaderSource);
-        glCompileShader(shader);
-
-        int status = glGetShaderi(shader, GL_COMPILE_STATUS);
-        checkState(GL_TRUE == status, "Shader compilation failure: %s", filename);
-        return new Shader(shader);
-    }
-
-    protected static final void checkGlError() {
+    protected static void checkGlError() {
         int err = glGetError();
         checkState(0 == err, "glGetError == " + err);
     }

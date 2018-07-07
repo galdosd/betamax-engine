@@ -1,6 +1,7 @@
 package com.github.galdosd.betamax;
 
 
+import com.github.galdosd.betamax.graphics.*;
 import com.github.galdosd.betamax.scripting.EventType;
 import com.github.galdosd.betamax.scripting.ScriptWorld;
 import com.github.galdosd.betamax.sprite.SpriteEvent;
@@ -50,9 +51,9 @@ public class BetamaxGlProgram extends GlProgramBase {
         // prepare shaders
         ShaderProgram shaderProgram = new ShaderProgram();
         shaderProgram.attach(
-                loadAndCompileShader("default.vert", GL_VERTEX_SHADER));
+                Shader.loadAndCompileShader("default.vert", GL_VERTEX_SHADER));
         shaderProgram.attach(
-                loadAndCompileShader("default.frag", GL_FRAGMENT_SHADER));
+                Shader.loadAndCompileShader("default.frag", GL_FRAGMENT_SHADER));
         //shaderProgram.bindFragDataLocation(0, "outColor"); //unnecessary, we only have one output color
         shaderProgram.linkAndUse();
 
@@ -60,8 +61,8 @@ public class BetamaxGlProgram extends GlProgramBase {
         VAO vao = new VAO();
         vao.bind();
         vbo.bind(GL_ARRAY_BUFFER);
-        vertexAttribPointer(0, 2, GL_FLOAT, false, 4 * Float.BYTES, 0);
-        vertexAttribPointer(1, 2, GL_FLOAT, false, 4 * Float.BYTES, 2 * Float.BYTES);
+        VAO.vertexAttribPointer(0, 2, GL_FLOAT, false, 4 * Float.BYTES, 0);
+        VAO.vertexAttribPointer(1, 2, GL_FLOAT, false, 4 * Float.BYTES, 2 * Float.BYTES);
 
         // enable transparency
         glEnable(GL_BLEND);

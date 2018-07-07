@@ -1,7 +1,6 @@
-package com.github.galdosd.betamax;
+package com.github.galdosd.betamax.graphics;
 
-import com.codahale.metrics.Timer;
-import com.google.common.base.Preconditions;
+import com.github.galdosd.betamax.OurTool;
 import lombok.Value;
 import org.lwjgl.opengl.*;
 import org.lwjgl.system.MemoryUtil;
@@ -13,9 +12,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
 import java.io.IOException;
 import java.nio.FloatBuffer;
-import java.util.Arrays;
 
-import static com.github.galdosd.betamax.GlProgramBase.checkGlError;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 import static org.lwjgl.opengl.GL11.*;
@@ -77,7 +74,6 @@ public final class Texture {
     public void loadAlphaTiff(String filename) {
         checkArgument(null==pixelData, "already loaded something else");
         BufferedImage image;
-        // ImageIO.scanForPlugins(); // TODO do this once not all the time
         try {
             image = ImageIO.read(OurTool.streamResource(filename));
         } catch (IOException e) {
