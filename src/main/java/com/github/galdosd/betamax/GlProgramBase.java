@@ -26,9 +26,8 @@ import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
-/**
- * FIXME: Document this class
- * FIXME: break up this class
+/** FIXME: document this class
+ * TODO instead of being subclassable, have an interface and accept that
  * TODO: for safety in debug mode use glGet to make sure the right target is bound for buffers,
  *  textures, etc. basically try as hard as possible to fight the dumbass statefullness of GL calls
  *  that require params to be "bound"
@@ -36,8 +35,6 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 public abstract class GlProgramBase {
     //TODO all GL wrapped arguments passed from subclass/users of GlprogramBase should be typesafe, not
     //some fucking ints. fuck you C people.
-    //TODO make a GL low level wrapper class that calls each glXYZ method but don't care which GL version and
-    // includes the getGlError check. or use some stupid AOP. probably not though, that's too obtuse
     private static final org.slf4j.Logger LOG =
             LoggerFactory.getLogger(new Object(){}.getClass().getEnclosingClass());
 
@@ -55,8 +52,6 @@ public abstract class GlProgramBase {
             .convertDurationsTo(TimeUnit.MILLISECONDS)
             .build();
 
-
-    // framecount management
     private int frameCount = 0;
 
     /** Typesafe enum for GLFW_KEY_DOWN/GLFW_KEY_UP constants */
@@ -81,11 +76,9 @@ public abstract class GlProgramBase {
         try {
             initializeGlBase();
 
-            // loop forever until the user closes the window
             while (!glfwWindowShouldClose(windowHandle)) {
                 loopOnce();
             }
-
         } finally {
             if(0!=windowHandle) {
                 glfwDestroyWindow(windowHandle);
@@ -93,7 +86,6 @@ public abstract class GlProgramBase {
             }
             glfwTerminate();
             if(null!=glfwErrorCallback) glfwErrorCallback.free(); // IDRC if we need to do this
-
         }
     }
 
