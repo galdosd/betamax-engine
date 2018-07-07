@@ -12,6 +12,7 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
+import static org.lwjgl.opengl.GL11.glGetError;
 
 /** miscellaneous utilities */
 public final class OurTool {
@@ -31,6 +32,14 @@ public final class OurTool {
         InputStream resourceAsStream = OurTool.class.getResourceAsStream("/" + filename);
         checkArgument(null!=resourceAsStream, "no such resource found: /" + filename);
         return resourceAsStream;
+    }
+
+    public static void checkGlError() {
+        // in theory we should not need this because of our GlDebugMessages callbacks, but we still call this once per
+        // frame (and at a few points during initialization) just in case
+        // also GlDebugMessages is disabled in debug mode, this is not
+        int err = glGetError();
+        checkState(0 == err, "glGetError == " + err);
     }
 }
 

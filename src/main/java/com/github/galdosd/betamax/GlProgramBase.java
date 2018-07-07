@@ -2,16 +2,11 @@ package com.github.galdosd.betamax;
 
 import com.codahale.metrics.ConsoleReporter;
 import com.codahale.metrics.Timer;
-import com.github.galdosd.betamax.graphics.GlDebugMessages;
+import com.github.galdosd.betamax.graphics.GlWindow;
 import com.github.galdosd.betamax.graphics.TextureCoordinate;
 import lombok.AllArgsConstructor;
 import org.lwjgl.BufferUtils;
-import org.lwjgl.glfw.GLFWErrorCallback;
-import org.lwjgl.glfw.GLFWKeyCallback;
-import org.lwjgl.glfw.GLFWMouseButtonCallback;
-import org.lwjgl.glfw.GLFWVidMode;
-import org.lwjgl.opengl.*;
-import org.lwjgl.system.Configuration;
+import org.lwjgl.glfw.GLFW;
 import org.slf4j.LoggerFactory;
 
 import java.nio.DoubleBuffer;
@@ -20,11 +15,9 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import static com.github.galdosd.betamax.OurTool.checkGlError;
 import static com.google.common.base.Preconditions.checkState;
-import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
-import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.system.MemoryUtil.NULL;
+import static org.lwjgl.glfw.GLFW.glfwGetCursorPos;
 
 /** FIXME: document this class
  * TODO instead of being subclassable, have an interface and accept that
@@ -38,10 +31,14 @@ public abstract class GlProgramBase {
     private static final org.slf4j.Logger LOG =
             LoggerFactory.getLogger(new Object(){}.getClass().getEnclosingClass());
 
-    // glfw window stuff
-    private GLFWErrorCallback glfwErrorCallback;
-    private long windowHandle;
+    private GlWindow mainWindow;
+    private boolean paused = false;
+    private int frameCount = 0;
+
+    // input management
     private final Set<Integer> downKeys = new HashSet<>();
+    private final DoubleBuffer xMousePosBuffer = BufferUtils.createDoubleBuffer(1);
+    private final DoubleBuffer yMousePosBuffer = BufferUtils.createDoubleBuffer(1);
 
     // FPS metrics
     private final Timer userInitTimer = Global.metrics.timer("userInitTimer");
@@ -52,12 +49,10 @@ public abstract class GlProgramBase {
             .convertDurationsTo(TimeUnit.MILLISECONDS)
             .build();
 
-    private int frameCount = 0;
-
     /** Typesafe enum for GLFW_KEY_DOWN/GLFW_KEY_UP constants */
     @AllArgsConstructor
     public static enum KeyAction {
-        DOWN(GLFW_PRESS), UP(GLFW_RELEASE);
+        DOWN(GLFW.GLFW_PRESS), UP(GLFW.GLFW_RELEASE);
 
         public final int glfwConstant;
 
@@ -72,76 +67,29 @@ public abstract class GlProgramBase {
         return () -> frameCount;
     }
 
-    public void run() {
+    public final void run() {
         try {
-            initializeGlBase();
+            GlWindow.initGlfw(getDebugMode());
+            try(GlWindow _mainWindow = new GlWindow(getWindowWidth(), getWindowHeight(), getWindowTitle(),
+                    this::keyCallback, this::mouseButtonCallback)){
+                mainWindow = _mainWindow;
+                try (Timer.Context _unused_context = userInitTimer.time()) {
+                    initialize();
+                    checkGlError();
+                    LOG.debug("User initialization done");
+                }
 
-            while (!glfwWindowShouldClose(windowHandle)) {
-                loopOnce();
+                while (!mainWindow.getShouldClose()) {
+                    loopOnce();
+                }
             }
         } finally {
-            if(0!=windowHandle) {
-                glfwDestroyWindow(windowHandle);
-                glfwFreeCallbacks(windowHandle);
-            }
-            glfwTerminate();
-            if(null!=glfwErrorCallback) glfwErrorCallback.free(); // IDRC if we need to do this
+            GlWindow.shutdownGlfw();
         }
     }
-
-    private void initializeGlBase() {
-        if(getDebugMode()) {
-            // enable glfw debugging
-            Configuration.DEBUG.set(true);
-            Configuration.DEBUG_LOADER.set(true);
-            Configuration.DEBUG_FUNCTIONS.set(true);
-            // we only currently use try-with-resources for stack memory
-            // Configuration.DEBUG_STACK.set(true);
-            // we don't yet use MemoryUtils
-            // Configuration.DEBUG_MEMORY_ALLOCATOR.set(true);
-        }
-
-        (glfwErrorCallback = GLFWErrorCallback.createThrow()).set();
-        checkState(glfwInit(), "Could not initialize GLFW");
-
-        createWindow();
-        centerWindow();
-
-        // set input callbacks
-        glfwSetKeyCallback(windowHandle, GLFWKeyCallback.create(this::keyCallback));
-        glfwSetMouseButtonCallback(windowHandle, GLFWMouseButtonCallback.create(this::mouseButtonCallback));
-
-        glfwMakeContextCurrent(windowHandle);
-        glfwSwapInterval(1); // wait for v sync (or whatever they do these days) when swapping buffers
-
-        glfwShowWindow(windowHandle);
-        // FIXME we are not multithreaded but if we were i think we have to do this more often
-        GL.createCapabilities();
-
-        if(getDebugMode()) {
-            // enable opengl debugging
-            GlDebugMessages.setupJavaStyleDebugMessageCallback(LOG);
-            //glDisable(GL_CULL_FACE);
-        }
-
-        checkGlError();
-        LOG.debug("Initialized GLFW and OpenGL");
-
-        // reporter.start(60, TimeUnit.SECONDS);
-
-        try(Timer.Context _unused_context = userInitTimer.time()) {
-            initialize();
-        }
-        checkGlError();
-        LOG.debug("User initialization done");
-
-    }
-
-    private final DoubleBuffer xMousePosBuffer = BufferUtils.createDoubleBuffer(1);
-    private final DoubleBuffer yMousePosBuffer = BufferUtils.createDoubleBuffer(1);
 
     private void mouseButtonCallback(long window, int button, int action, int mods){
-        if(action == GLFW_PRESS && button == GLFW_MOUSE_BUTTON_LEFT) {
+        if(action == GLFW.GLFW_PRESS && button == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
             glfwGetCursorPos(window, xMousePosBuffer, yMousePosBuffer);
             double x = xMousePosBuffer.get(0);
             double y = yMousePosBuffer.get(0);
@@ -149,37 +97,19 @@ public abstract class GlProgramBase {
         }
     }
 
-    private void createWindow() {
-        glfwDefaultWindowHints(); // probably unnecessary, but whatever, fuck the police
-        glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-        // we don't want to show the window till we're done making it...
-        glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
-
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-        if(getDebugMode()) glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
-
-        windowHandle = glfwCreateWindow(
-                getWindowWidth(), getWindowHeight(), getWindowTitle(), NULL, NULL);
-        checkState(NULL != windowHandle);
-    }
-
-    private boolean paused = false;
     private void keyCallback(long window, int key, int scancode, int action, int mods) {
         // exit upon ESC key
-        if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE) {
+        if (key == GLFW.GLFW_KEY_ESCAPE && action == GLFW.GLFW_RELEASE) {
             closeWindow();
         }
         // show FPS metrics upon pause/break key
-        else if (key == GLFW_KEY_PAUSE && action == GLFW_RELEASE) {
+        else if (key == GLFW.GLFW_KEY_PAUSE && action == GLFW.GLFW_RELEASE) {
             paused = !paused;
             // FIXME this will fuck up the metrics,we need a cooked Clock for Metrics to ignore
             // the passage of time during pause
             if(paused) reporter.report();
         }
-        else if(action!=GLFW_REPEAT) {
+        else if(action!=GLFW.GLFW_REPEAT) {
             KeyAction keyAction = KeyAction.fromInt(action);
             if(keyAction == KeyAction.DOWN) downKeys.add(key);
             if(keyAction == KeyAction.UP) downKeys.remove(key);
@@ -187,17 +117,8 @@ public abstract class GlProgramBase {
         }
     }
 
-    private void centerWindow() {
-        GLFWVidMode vidMode = glfwGetVideoMode(glfwGetPrimaryMonitor()); // get the resolution
-        glfwSetWindowPos(
-                windowHandle,
-                (vidMode.width() - getWindowWidth()) / 2,
-                (vidMode.height() - getWindowHeight()) / 2
-        );
-    }
-
     protected final void closeWindow() {
-        glfwSetWindowShouldClose(windowHandle, true);
+        mainWindow.setShouldClose(true);
     }
 
     private void loopOnce() {
@@ -207,19 +128,11 @@ public abstract class GlProgramBase {
             updateLogic();
         }
         try(Timer.Context _unused_context = renderTimer.time()) {
-            updateView();
+            try (GlWindow.RenderPhase __unused_context = mainWindow.renderPhase()) {
+                updateView();
+            }
         }
         if (!paused) frameCount++;
-        checkGlError();
-        glfwSwapBuffers(windowHandle);
-        glfwPollEvents();
-        checkGlError();
-    }
-
-
-    protected static void checkGlError() {
-        int err = glGetError();
-        checkState(0 == err, "glGetError == " + err);
     }
 
     // TODO composition instead of inheritance, turn the below into an interface
