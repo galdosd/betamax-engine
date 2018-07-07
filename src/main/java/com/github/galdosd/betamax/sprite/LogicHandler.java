@@ -1,4 +1,4 @@
-package com.github.galdosd.betamax.scripting;
+package com.github.galdosd.betamax.sprite;
 
 import com.github.galdosd.betamax.sprite.SpriteEvent;
 

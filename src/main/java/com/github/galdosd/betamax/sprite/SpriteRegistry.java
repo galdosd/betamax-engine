@@ -4,7 +4,6 @@ import com.github.galdosd.betamax.FrameClock;
 import com.github.galdosd.betamax.Global;
 import com.github.galdosd.betamax.graphics.TextureCoordinate;
 import com.github.galdosd.betamax.scripting.EventType;
-import com.github.galdosd.betamax.scripting.LogicHandler;
 import lombok.Getter;
 import org.slf4j.LoggerFactory;
 
