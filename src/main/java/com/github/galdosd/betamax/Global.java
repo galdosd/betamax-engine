@@ -11,4 +11,5 @@ public final class Global {
     public final static String spriteBase = "com.github.galdosd.betamax.sprites.";
     public final static String mainScript = "simplerexample.py";
     public final static String scriptBase = "com/github/galdosd/betamax/scripts/";
+    public final static int defaultTargetFps = 8;
 }

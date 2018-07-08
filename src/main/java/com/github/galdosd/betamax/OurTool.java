@@ -41,5 +41,17 @@ public final class OurTool {
         int err = glGetError();
         checkState(0 == err, "glGetError == " + err);
     }
+
+    public static void sleepUntilPrecisely(long targetTime) {
+        // if we are more than 5 ms out, Thread.sleep is good enough
+        // only sleep for a third of the time we have left to conservatively account for inaccuracy
+        while(targetTime - System.currentTimeMillis() > 5) {
+            try {
+                Thread.sleep((targetTime - System.currentTimeMillis()) / 3);
+            } catch (InterruptedException e) {/* doesn't matter, we'll keep trying */}
+        }
+        // now that we're pretty close to it, busy loop
+        while(System.currentTimeMillis() < targetTime);
+    }
 }
 

@@ -17,6 +17,7 @@ import java.util.concurrent.TimeUnit;
 
 import static com.github.galdosd.betamax.OurTool.checkGlError;
 import static com.google.common.base.Preconditions.checkState;
+import static org.lwjgl.glfw.GLFW.GLFW_RELEASE;
 import static org.lwjgl.glfw.GLFW.glfwGetCursorPos;
 
 /** FIXME: document this class
@@ -34,6 +35,8 @@ public abstract class GlProgramBase {
     private GlWindow mainWindow;
     private boolean paused = false;
     private int frameCount = 0;
+    private int targetFps = Global.defaultTargetFps;
+    private long nextLogicFrameTime;
 
     // input management
     private final Set<Integer> downKeys = new HashSet<>();
@@ -44,6 +47,7 @@ public abstract class GlProgramBase {
     private final Timer userInitTimer = Global.metrics.timer("userInitTimer");
     private final Timer renderTimer = Global.metrics.timer("renderTimer");
     private final Timer logicTimer = Global.metrics.timer("logicTimer");
+    private final Timer idleTimer = Global.metrics.timer("idleTimer");
     private final ConsoleReporter reporter = ConsoleReporter.forRegistry(Global.metrics)
             .convertRatesTo(TimeUnit.SECONDS)
             .convertDurationsTo(TimeUnit.MILLISECONDS)
@@ -79,6 +83,7 @@ public abstract class GlProgramBase {
                     LOG.debug("User initialization done");
                 }
 
+                nextLogicFrameTime = System.currentTimeMillis();
                 while (!mainWindow.getShouldClose()) {
                     loopOnce();
                 }
@@ -98,18 +103,29 @@ public abstract class GlProgramBase {
     }
 
     private void keyCallback(long window, int key, int scancode, int action, int mods) {
-        // exit upon ESC key
-        if (key == GLFW.GLFW_KEY_ESCAPE && action == GLFW.GLFW_RELEASE) {
-            closeWindow();
+        if(action == GLFW.GLFW_RELEASE) {
+            // exit upon ESC key
+            if (key == GLFW.GLFW_KEY_ESCAPE) {
+                closeWindow();
+            }
+            // show FPS metrics upon pause/break key
+            else if (key == GLFW.GLFW_KEY_PAUSE) {
+                paused = !paused;
+                // FIXME this will fuck up the metrics,we need a cooked Clock for Metrics to ignore
+                // the passage of time during pause
+                if (paused) reporter.report();
+            // page up/down to change target FPS
+            } else if (key == GLFW.GLFW_KEY_PAGE_UP) {
+                targetFps++;
+                LOG.info("New target FPS: {}", targetFps);
+            } else if (key == GLFW.GLFW_KEY_PAGE_DOWN) {
+                if (targetFps > 1) {
+                    targetFps--;
+                    LOG.info("New target FPS: {}", targetFps);
+                }
+            }
         }
-        // show FPS metrics upon pause/break key
-        else if (key == GLFW.GLFW_KEY_PAUSE && action == GLFW.GLFW_RELEASE) {
-            paused = !paused;
-            // FIXME this will fuck up the metrics,we need a cooked Clock for Metrics to ignore
-            // the passage of time during pause
-            if(paused) reporter.report();
-        }
-        else if(action!=GLFW.GLFW_REPEAT) {
+        if(action!=GLFW.GLFW_REPEAT) {
             KeyAction keyAction = KeyAction.fromInt(action);
             if(keyAction == KeyAction.DOWN) downKeys.add(key);
             if(keyAction == KeyAction.UP) downKeys.remove(key);
@@ -122,17 +138,23 @@ public abstract class GlProgramBase {
     }
 
     private void loopOnce() {
-        try(Timer.Context _unused_context = logicTimer.time()) {
-            // XXX: the pause function is very rudimentary for debugging, so it does not
-            // actually stop logic updates! they will just happen over and over!!!!!
-            updateLogic();
+        try (Timer.Context _unused_context = idleTimer.time()) {
+            OurTool.sleepUntilPrecisely(nextLogicFrameTime - 1);
         }
-        try(Timer.Context _unused_context = renderTimer.time()) {
+        while(System.currentTimeMillis() > nextLogicFrameTime) {
+            try (Timer.Context _unused_context = logicTimer.time()) {
+                // XXX: the pause function is very rudimentary for debugging, so it does not
+                // actually stop logic updates! they will just happen over and over!!!!!
+                if (!paused) frameCount++;
+                updateLogic();
+                nextLogicFrameTime += 1000 / targetFps;
+            }
+        }
+        try (Timer.Context _unused_context = renderTimer.time()) {
             try (GlWindow.RenderPhase __unused_context = mainWindow.renderPhase()) {
                 updateView();
             }
         }
-        if (!paused) frameCount++;
     }
 
     // TODO composition instead of inheritance, turn the below into an interface
