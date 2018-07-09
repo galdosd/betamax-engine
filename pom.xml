@@ -53,7 +53,7 @@
     <properties>
         <lwjgl.version>3.1.6</lwjgl.version>
         <metrics.version>4.0.0</metrics.version>
-        <lwjgl.natives>natives-linux</lwjgl.natives>
+        <lwjgl.natives>natives-windows</lwjgl.natives>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>

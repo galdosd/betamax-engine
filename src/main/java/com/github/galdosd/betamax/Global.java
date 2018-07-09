@@ -9,7 +9,7 @@ import com.codahale.metrics.MetricRegistry;
 public final class Global {
     public final static MetricRegistry metrics = new MetricRegistry();
     public final static String spriteBase = "com.github.galdosd.betamax.sprites.";
-    public final static String mainScript = "simplerexample.py";
+    public final static String mainScript = "game.py";
     public final static String scriptBase = "com/github/galdosd/betamax/scripts/";
     public final static int defaultTargetFps = 8;
 }
