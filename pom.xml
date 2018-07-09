@@ -4,11 +4,13 @@
         Bugs
         
         Working set features
+            Fast texture loading
             Display list of sprites and their current moments
             Single button to tag a moment on the disk file?
             Managed state, just integers
             Rewind
         Backlog features
+            Hot swapping code
             Sound
             Saving/Loading state
             Fancy mouse cursor
@@ -37,6 +39,9 @@
             Pre-process textures so program load time is short (LZ4)
             Possibly store texture compressed in memory to save main RAM (LZ4)
             Separate sprites into dayparts so we can load them in chunks rather than all at load time
+        Bugs
+            I think the last frame of a sprite actually gets displayed first for some reason, as if the frame clock is
+                off by one? But could not reproduce
 
         Scripter requested features
             Pause logical time whenever loading templates / use loading screen

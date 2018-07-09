@@ -139,6 +139,7 @@ public abstract class GlProgramBase {
                 closeWindow();
             }
             // show FPS metrics upon pause/break key
+            // FIXME show them upon ctrl+pausebrk so you don't have to pause to see metrics
             else if (key == GLFW.GLFW_KEY_PAUSE) {
                 frameClock.setPaused(!paused);
                 // FIXME this will fuck up the metrics,we need a cooked Clock for Metrics to ignore
@@ -154,6 +155,7 @@ public abstract class GlProgramBase {
                     LOG.info("New target FPS: {}", targetFps);
                 }
             }
+
         }
         if(action!=GLFW.GLFW_REPEAT) {
             KeyAction keyAction = KeyAction.fromInt(action);
