@@ -5,4 +5,6 @@ package com.github.galdosd.betamax;
  */
 public interface FrameClock {
     int getCurrentFrame();
+    boolean getPaused();
+    void setPaused(boolean newPaused);
 }

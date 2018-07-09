@@ -30,6 +30,10 @@ public class SpriteRegistry {
     private final Deque<Sprite> orderedSprites = new LinkedList<>();
     private final Queue<SpriteEvent> enqueuedSpriteEvents = new LinkedList<>();
 
+    // we track the last dispatched moment so that if logic is paused, the same frame can be processed many times
+    // but moment events get dispatched just once
+    private int lastDispatchedMoment;
+
     public SpriteRegistry(FrameClock frameClock) {
         this.frameClock = frameClock;
     }
@@ -106,11 +110,16 @@ public class SpriteRegistry {
     private void dispatchBeginEvent(LogicHandler logicHandler) {
         if(!alreadyBegun) {
             alreadyBegun = true;
+            frameClock.setPaused(true);
             logicHandler.onBegin();
+            frameClock.setPaused(false);
         }
     }
 
     private void dispatchSpriteMomentEvents(LogicHandler logicHandler) {
+        if(lastDispatchedMoment == frameClock.getCurrentFrame()) {
+            return;
+        }
         // TODO negative moments should be implemented, count backwards from end python style
         for(Sprite sprite: orderedSprites) {
             SpriteEvent momentEvent = new SpriteEvent(
@@ -120,7 +129,9 @@ public class SpriteRegistry {
             );
             logicHandler.onSpriteEvent(momentEvent);
         }
+        lastDispatchedMoment = frameClock.getCurrentFrame();
     }
+
     private void dispatchEnqueuedSpriteEvents(LogicHandler logicHandler) {
         SpriteEvent event;
         while(null != (event = enqueuedSpriteEvents.poll())) {

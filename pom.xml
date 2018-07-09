@@ -22,15 +22,26 @@
         Maintenance
             Refactoring
             Triage TODOs
-            Testing
             Enforce glossary terms / reify as objects for type safety ;)
             static analysis
             Windows testing
+
+        Testing
+            Generic end to end test?
+            Timing/choreography/FPS invariants. We already had at least one bug on that
 
         Performance
             Pre-process textures so program load time is short (LZ4)
             Possibly store texture compressed in memory to save main RAM (LZ4)
             Separate sprites into dayparts so we can load them in chunks rather than all at load time
+
+        Scripter features
+            Pause logical time whenever loading templates / use loading screen
+            Optionally log all handled events
+            "this" sprite reference / replace_sprite()
+            Optional sprite name for when sprite name = sprite template name
+            sprites magic dict so that renaming works better maybe?
+            sprite prefix scopes so everything in one file can ignore a prefix like m2?
 
      GLOSSARY
         Global clock frame (clock frame)

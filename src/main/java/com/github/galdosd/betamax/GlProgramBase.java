@@ -34,6 +34,8 @@ public abstract class GlProgramBase {
 
     private GlWindow mainWindow;
     private boolean paused = false;
+
+    // passage of time management
     private int frameCount = 0;
     private int targetFps = Global.defaultTargetFps;
     private long nextLogicFrameTime;
@@ -43,7 +45,7 @@ public abstract class GlProgramBase {
     private final DoubleBuffer xMousePosBuffer = BufferUtils.createDoubleBuffer(1);
     private final DoubleBuffer yMousePosBuffer = BufferUtils.createDoubleBuffer(1);
 
-    // FPS metrics
+    // FPS performance metrics
     private final Timer userInitTimer = Global.metrics.timer("userInitTimer");
     private final Timer renderTimer = Global.metrics.timer("renderTimer");
     private final Timer logicTimer = Global.metrics.timer("logicTimer");
@@ -67,8 +69,35 @@ public abstract class GlProgramBase {
         }
     }
 
-    protected FrameClock getFrameClock() {
-        return () -> frameCount;
+    // TODO break out Frameclock/time management
+    private final FrameClock frameClock =  new FrameClock() {
+        @Override public int getCurrentFrame() {
+            return frameCount;
+        }
+
+        @Override public boolean getPaused() {
+            return paused;
+        }
+
+        @Override public void setPaused(boolean newPaused) {
+            if (newPaused == paused) {
+                return;
+            } else if (newPaused) {
+                // pause
+                LOG.info("Paused");
+            } else {
+                // unpause
+                // we need to ignore the time spent in pause, otherwise we'll get a flood of catch up logic frames
+                // and rendering will appear to skip
+                nextLogicFrameTime = System.currentTimeMillis();
+                LOG.info("Unpaused");
+            }
+            paused = newPaused;
+        }
+    };
+
+    protected final FrameClock getFrameClock() {
+        return frameClock;
     }
 
     public final void run() {
@@ -102,6 +131,7 @@ public abstract class GlProgramBase {
         }
     }
 
+    // TODO break out input handling
     private void keyCallback(long window, int key, int scancode, int action, int mods) {
         if(action == GLFW.GLFW_RELEASE) {
             // exit upon ESC key
@@ -110,7 +140,7 @@ public abstract class GlProgramBase {
             }
             // show FPS metrics upon pause/break key
             else if (key == GLFW.GLFW_KEY_PAUSE) {
-                paused = !paused;
+                frameClock.setPaused(!paused);
                 // FIXME this will fuck up the metrics,we need a cooked Clock for Metrics to ignore
                 // the passage of time during pause
                 if (paused) reporter.report();
@@ -141,15 +171,19 @@ public abstract class GlProgramBase {
         try (Timer.Context _unused_context = idleTimer.time()) {
             OurTool.sleepUntilPrecisely(nextLogicFrameTime - 1);
         }
-        while(System.currentTimeMillis() > nextLogicFrameTime) {
+        do {
             try (Timer.Context _unused_context = logicTimer.time()) {
-                // XXX: the pause function is very rudimentary for debugging, so it does not
-                // actually stop logic updates! they will just happen over and over!!!!!
-                if (!paused) frameCount++;
-                updateLogic();
+                // the pause function continues logic updates because logic updates should be idempotent in the absence
+                // of user input, which can be useful. The frame clock should be checked and if duplicate frames are
+                // received, no new time-triggered events should happen. This is the responsibility of the updateLogic
+                // implementation.
+                if (!paused) {
+                    frameCount++;
+                }
                 nextLogicFrameTime += 1000 / targetFps;
+                updateLogic();
             }
-        }
+        } while(!paused && System.currentTimeMillis() > nextLogicFrameTime);
         try (Timer.Context _unused_context = renderTimer.time()) {
             try (GlWindow.RenderPhase __unused_context = mainWindow.renderPhase()) {
                 updateView();
