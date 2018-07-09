@@ -3,6 +3,7 @@ package com.github.galdosd.betamax;
 import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
 import com.google.common.io.Files;
+import lombok.NonNull;
 
 import java.io.*;
 import java.net.URL;
@@ -17,13 +18,14 @@ import static org.lwjgl.opengl.GL11.glGetError;
 
 /** miscellaneous utilities */
 public final class OurTool {
+    private OurTool(){}
+
     /** Return full contents of file at _filename_ from built in resources/
      *  We should be certain at compile time this file exists, so IllegalStateException will be thrown
      *  if there is any issue
      */
     public static String loadResource(String filename) {
-        try {
-            InputStream in = streamResource(filename);
+        try (InputStream in = streamResource(filename)) {
             return CharStreams.toString(new InputStreamReader(in, Charsets.UTF_8));
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -63,5 +65,15 @@ public final class OurTool {
           return defaultValue;
         }
     }
+
+    public static Optional<InputStream> streamCached(String... key) {
+        return Optional.empty();
+    }
+
+    public static OutputStream writeCachedStream(String... key) {
+
+    }
+
+    private static String cachedFilename() {}
 }
 

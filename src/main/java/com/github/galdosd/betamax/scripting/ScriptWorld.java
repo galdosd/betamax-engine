@@ -8,6 +8,7 @@ import com.github.galdosd.betamax.sprite.SpriteRegistry;
 import org.python.util.PythonInterpreter;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -59,7 +60,6 @@ public class ScriptWorld implements LogicHandler {
     }
 
     public void loadScript(String scriptName) {
-        InputStream scriptStream = OurTool.streamResource(Global.scriptBase + scriptName);
         LOG.info("Evaluating jython script from {}", scriptName);
         pythonInterpreter.set("_BETAMAX_INTERNAL_script_servicer", servicer);
         // I know it looks wacky. this is the best way i could figure to smuggle our ScriptServicer
@@ -72,6 +72,10 @@ public class ScriptWorld implements LogicHandler {
                 "import betamax as _BETAMAX_INTERNAL_servicer_registration; "+
                 "_BETAMAX_INTERNAL_servicer_registration.register_script_servicer(_BETAMAX_INTERNAL_script_servicer);"
         );
-        pythonInterpreter.execfile(scriptStream, scriptName);
+        try (InputStream scriptStream = OurTool.streamResource(Global.scriptBase + scriptName)) {
+            pythonInterpreter.execfile(scriptStream, scriptName);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

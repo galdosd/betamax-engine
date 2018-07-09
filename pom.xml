@@ -9,7 +9,9 @@
             Single button to tag a moment on the disk file?
             Managed state, just integers
             Rewind
+
         Backlog features
+            Arbitrary savestates
             Hot swapping code
             Sound
             Saving/Loading state
@@ -23,6 +25,11 @@
             "this" sprite reference / replace_sprite()
             Optional sprite name for when sprite name = sprite template name
             sprite prefix scopes so everything in one file can ignore a prefix like m2?
+
+        Scripter requested
+            Show length of sprite
+            Named sprite frames
+            Negative frame offsets
 
         Maintenance
             Refactoring
@@ -39,9 +46,9 @@
             Pre-process textures so program load time is short (LZ4)
             Possibly store texture compressed in memory to save main RAM (LZ4)
             Separate sprites into dayparts so we can load them in chunks rather than all at load time
+                Support unloading of textures
         Bugs
-            I think the last frame of a sprite actually gets displayed first for some reason, as if the frame clock is
-                off by one? But could not reproduce
+           FPS Control should reset after onBegin, right now all frames are unrendered during onBegin
 
         Scripter requested features
             Pause logical time whenever loading templates / use loading screen

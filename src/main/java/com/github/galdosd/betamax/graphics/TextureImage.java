@@ -38,35 +38,81 @@ public final class TextureImage {
         this.pixelData = pixelData;
         this.filename = filename;
     }
-/*
-    public static TextureImage loadCached(String filename) {
-        Optional<InputStream> inputStream = OurTool.streamCached(CACHE_KEY, filename);
-        inputStream.get().read()
-        if(inputStream.isPresent()) {
-            DataInputStream dataInputStream = new DataInputStream(inputStream.get());
-            int width = dataInputStream.readInt();
-            int height = dataInputStream.readInt();
-            final int imageBytes = width * height * BANDS * Float.BYTES;
-            FloatBuffer pixelData = MemoryUtil.memAllocFloat();
-            ByteArrayInputStream
-            pixelData.
 
+    private static Optional<TextureImage> loadCached(String filename) throws IOException {
+        Optional<InputStream> inputStreamOptional = OurTool.streamCached(CACHE_KEY, filename);
+        if(inputStreamOptional.isPresent()) {
+            try(DataInputStream dataInputStream = new DataInputStream(inputStreamOptional.get())) {
+                int width = dataInputStream.readInt();
+                int height = dataInputStream.readInt();
+                final int colorSamples = width * height * BANDS;
+                // these limits are arbitrary, maybe someday a 250 megapixel image will be reasonable
+                checkArgument(width > 0 && height > 0 && width < 16384 && height < 16384,
+                        "bad image size %sx%s", width, height);
+                FloatBuffer pixelData = MemoryUtil.memAllocFloat(colorSamples);
+                for (int jj = 0; jj < colorSamples; jj++) {
+                    pixelData.put(dataInputStream.readFloat());
+                }
+                pixelData.flip();
+                return Optional.of(new TextureImage(width, height, pixelData, filename));
+            }
+        } else {
+            return Optional.empty();
         }
     }
 
-    private void saveToCache() {
-        //OutputStream outputStream = OurTool.writeCachedStream(CACHE_KEY, loadedFilename);
-    }*/
+    private void saveToCache() throws IOException {
+        try(DataOutputStream outputStream = new DataOutputStream(OurTool.writeCachedStream(CACHE_KEY, filename))) {
+            outputStream.writeInt(width);
+            outputStream.writeInt(height);
+            for (float datum : pixelData.array()) {
+                outputStream.writeFloat(datum);
+            }
+        }
+    }
 
-    public static TextureImage fromAlphaTiffFile(String filename) {
+    /** Load image from a file, possibly using a temporary directory as a cache.
+     * The cache will contain a likely larger but faster to read version of the image, compressed losslessly with LZ4
+     * This allows image loading during runtime to be much faster hopefully
+     *
+     * @param filename Must be a file readable by ImageIO with whatever plugins you have loaded.
+     *                 I've only tested with some alpha tiffs we had. Must be in RGBA layout, you
+     *                 will probably get bizarre results or worse otherwise. We do not explicitly verify
+     *                 this, would require wasting a bunch of time figuring out SampleModel. Just watch out.
+     * @param readCache If true, check the cache first
+     * @param writeCache If true, write to the cache if it was empty
+     */
+    public static TextureImage fromRgbaFile(String filename, boolean readCache, boolean writeCache) {
+        if (readCache) {
+            try {
+                Optional<TextureImage> cached = loadCached(filename);
+                if(cached.isPresent()) {
+                    return cached.get();
+                }
+            } catch (IOException e) {
+                throw new RuntimeException("Fast-load cached texture exists but loading failed or file was corrupt", e);
+            }
+        }
+        TextureImage textureImage = fromRgbaFile(filename);
+        if(writeCache) {
+            try {
+                textureImage.saveToCache();
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to write fast-load cached texture", e);
+            }
+        }
+        return textureImage;
+    }
+
+    private static TextureImage fromRgbaFile(String filename) {
         BufferedImage image;
-        try {
-            image = ImageIO.read(OurTool.streamResource(filename));
+        try (InputStream inputStream = OurTool.streamResource(filename)){
+            image = ImageIO.read(inputStream);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
-        // TODO could optimize by not allocationg a new float[] everytime
+        // TODO could optimize by not allocating a new float[] everytime
         Raster raster = image.getData();
         int width = raster.getWidth();
         int height = raster.getHeight();
@@ -114,7 +160,11 @@ public final class TextureImage {
         unloaded = true;
     }
 
-    private ColorSample getPixel(int x, int y) {
+    public ColorSample getPixel(TextureCoordinate coordinate) {
+        checkArgument(unloaded==false);
+        // XXX: should this be rounding or truncating? i have no idea
+        int x = (int) (coordinate.getX() * width);
+        int y = (int) (coordinate.getY() * height);
         int offset = BANDS * (width * y + x);
         return new ColorSample(
                 pixelData.get(offset),
@@ -122,14 +172,6 @@ public final class TextureImage {
                 pixelData.get(offset+2),
                 pixelData.get(offset+3)
         );
-    }
-
-    public ColorSample getPixel(TextureCoordinate coordinate) {
-        checkArgument(unloaded==false);
-        // XXX: should this be rounding or truncating? i have no idea
-        int x = (int) (coordinate.getX() * width);
-        int y = (int) (coordinate.getY() * height);
-        return getPixel(x,y);
     }
 
 }
