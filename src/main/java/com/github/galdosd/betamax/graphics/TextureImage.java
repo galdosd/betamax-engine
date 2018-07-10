@@ -54,6 +54,7 @@ public final class TextureImage {
                     pixelData.put(dataInputStream.readFloat());
                 }
                 pixelData.flip();
+                LOG.info("Loaded from cache: {}", filename);
                 return Optional.of(new TextureImage(width, height, pixelData, filename));
             }
         } else {
@@ -62,12 +63,18 @@ public final class TextureImage {
     }
 
     private void saveToCache() throws IOException {
+        // FIXME we should only save 1 byte per sample not the damn float -- at least test this with LZ4, disadvantage
+        // is still have to convert to floats and that may be expensive? LZ4 is not dumb, it may be just fine
         try(DataOutputStream outputStream = new DataOutputStream(OurTool.writeCachedStream(CACHE_KEY, filename))) {
+            // FIXME write original filename as a safety check
             outputStream.writeInt(width);
             outputStream.writeInt(height);
-            for (float datum : pixelData.array()) {
-                outputStream.writeFloat(datum);
+            final int colorSamples = width * height * BANDS;
+            pixelData.
+            for(int jj =  0; jj < colorSamples; jj++) {
+                outputStream.writeFloat(pixelData.get(jj));
             }
+            LOG.info("Saved to cache: {}", filename);
         }
     }
 

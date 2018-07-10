@@ -39,7 +39,7 @@ public final class SpriteTemplate {
         checkArgument(0!=spriteFilenames.size(), "no sprite frame files found for " + pkgName);
         LOG.debug("Loading {}-frame sprite {}", spriteFilenames.size(), pkgName);
         textures = spriteFilenames.stream().map(name -> {
-            Texture texture = new Texture(TextureImage.fromRgbaFile(name, true, false));
+            Texture texture = new Texture(TextureImage.fromRgbaFile(name, true, true));
             texture.bind(GL_TEXTURE_2D);
             texture.btSetParameters();
             texture.btUploadTextureUnit();

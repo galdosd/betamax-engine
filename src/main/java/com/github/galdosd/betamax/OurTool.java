@@ -7,10 +7,7 @@ import lombok.NonNull;
 
 import java.io.*;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.IllegalFormatCodePointException;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
@@ -67,13 +64,33 @@ public final class OurTool {
     }
 
     public static Optional<InputStream> streamCached(String... key) {
-        return Optional.empty();
+        File file = new File(cachedFilename(key));
+        if (!file.exists()) {
+            return Optional.empty();
+        }
+        try {
+            return Optional.of(new FileInputStream(file));
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static OutputStream writeCachedStream(String... key) {
-        throw new UnsupportedOperationException();
+        try {
+            return new FileOutputStream(cachedFilename(key));
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-   // private static String cachedFilename() {}
+   private static String cachedFilename(String[] key) {
+       StringBuilder strings = new StringBuilder();
+       for(String str: key) {
+           strings.append(str);
+           strings.append("\n");
+       }
+       UUID uuid = UUID.nameUUIDFromBytes(strings.toString().getBytes(Charsets.UTF_8));
+       return Global.textureCacheDir + uuid.toString() + ".dat";
+   }
 }
 
