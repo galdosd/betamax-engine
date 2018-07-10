@@ -84,7 +84,7 @@ public final class Texture {
         Raster raster = image.getData();
         width = raster.getWidth();
         height = raster.getHeight();
-        LOG.debug("Loaded image from {} (size {}x{}) {}-band, DataBuffer dataType {}",
+        LOG.trace("Loaded image from {} (size {}x{}) {}-band, DataBuffer dataType {}",
                 filename, width, height, raster.getNumBands(),
                 raster.getSampleModel().getDataType());
 

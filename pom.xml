@@ -2,8 +2,7 @@
 <!--
     TODO
         Working set features
-            Do FPS correctly
-            Frame control / pause / fast forward
+            Windows/Linux proper maven profile
             Display list of sprites and their current moments
             Single button to tag a moment on the disk file?
             Managed state, just integers
@@ -37,7 +36,7 @@
 
         Scripter features
             Pause logical time whenever loading templates / use loading screen
-            Optionally log all handled events
+            Optionally log all handled events and servicer actions
             "this" sprite reference / replace_sprite()
             Optional sprite name for when sprite name = sprite template name
             sprites magic dict so that renaming works better maybe?
