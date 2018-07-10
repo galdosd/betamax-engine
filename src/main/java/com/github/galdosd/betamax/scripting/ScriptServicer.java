@@ -48,8 +48,8 @@ public final class ScriptServicer {
         return spriteRegistry.getSpriteByName(spriteName);
     }
 
-    public void createSprite(String templateName, SpriteName spriteName) {
-        spriteRegistry.createSprite(templateName, spriteName);
+    public Sprite createSprite(String templateName, SpriteName spriteName) {
+        return spriteRegistry.createSprite(templateName, spriteName);
     }
 
     public void destroySprite(SpriteName spriteName) {

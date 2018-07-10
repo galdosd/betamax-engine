@@ -4,6 +4,7 @@ import com.github.galdosd.betamax.FrameClock;
 import com.github.galdosd.betamax.graphics.Texture;
 import com.github.galdosd.betamax.graphics.TextureCoordinate;
 import com.google.common.base.Joiner;
+import org.lwjgl.system.CallbackI;
 import org.reflections.Reflections;
 import org.reflections.scanners.ResourcesScanner;
 import org.slf4j.LoggerFactory;
@@ -71,6 +72,7 @@ public final class SpriteTemplate {
     private class SpriteImpl implements Sprite {
         private int initialFrame = 0;
         private final SpriteName name;
+        private boolean clickableEverywhere = false;
 
         private SpriteImpl(SpriteName name){
             initialFrame = frameClock.getCurrentFrame();
@@ -101,9 +103,16 @@ public final class SpriteTemplate {
             return "Sprite(" + getName() + ")";
         }
         @Override public boolean isClickableAtCoordinate(TextureCoordinate coord) {
+            if(clickableEverywhere) {
+                return true;
+            }
             boolean transparentAtCoordinate = textures.get(getRenderedFrame()).isTransparentAtCoordinate(coord);
             LOG.trace("{}.isClickableAtCoordinate({}) == {}", this, coord, !transparentAtCoordinate);
             return !transparentAtCoordinate;
+        }
+
+        @Override public void setClickableEverywhere(boolean clickableEverywhere) {
+           this.clickableEverywhere = clickableEverywhere;
         }
 
     }

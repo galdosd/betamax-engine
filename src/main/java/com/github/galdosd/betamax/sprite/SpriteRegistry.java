@@ -56,12 +56,14 @@ public class SpriteRegistry {
     // first loop of a sprite created by the outer program
     // this should also not be called before the BEGIN event is processed or moment events would happen early
     // again, leave that to scripts
-    public void createSprite(String templateName, SpriteName spriteName) {
-        addSprite(getTemplate(templateName).create(spriteName));
+    public Sprite createSprite(String templateName, SpriteName spriteName) {
+        Sprite sprite = getTemplate(templateName).create(spriteName);
+        addSprite(sprite);
         enqueueSpriteEvent(new SpriteEvent(EventType.SPRITE_CREATE, spriteName, 0));
         // dispatchSpriteMomentEvents will only catch sprites that already existed before this frame and the frame
         // will then increment, so without this we'd miss the first sprite moment#0 event
         enqueueSpriteEvent(new SpriteEvent(EventType.SPRITE_MOMENT, spriteName, 0));
+        return sprite;
     }
 
     private void addSprite(Sprite sprite) {
