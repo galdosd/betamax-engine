@@ -59,14 +59,44 @@
 
     <groupId>com.github.galdosd.betamax</groupId>
     <artifactId>betamax-engine</artifactId>
-    <version>1.0-SNAPSHOT-${lwjgl.natives}</version>
+    <version>1.0-SNAPSHOT</version>
+
     <properties>
         <lwjgl.version>3.1.6</lwjgl.version>
         <metrics.version>4.0.0</metrics.version>
-        <lwjgl.natives>natives-windows</lwjgl.natives>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
+
+    <profiles>
+        <profile>
+            <id>lwjgl-natives-linux</id>
+            <activation>
+                <os><family>unix</family></os>
+            </activation>
+            <properties>
+                <lwjgl.natives>natives-linux</lwjgl.natives>
+            </properties>
+        </profile>
+        <!-- need to find a mac to test on --><!-- <profile>
+            <id>lwjgl-natives-macos</id>
+            <activation>
+                <os><family>mac</family></os>
+            </activation>
+            <properties>
+                <lwjgl.natives>natives-macos</lwjgl.natives>
+            </properties>
+        </profile> -->
+        <profile>
+            <id>lwjgl-natives-windows</id>
+            <activation>
+                <os><family>windows</family></os>
+            </activation>
+            <properties>
+                <lwjgl.natives>natives-windows</lwjgl.natives>
+            </properties>
+        </profile>
+    </profiles>
 
     <build>
         <plugins>
