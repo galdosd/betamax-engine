@@ -122,7 +122,6 @@ public class SpriteRegistry {
         if(lastDispatchedMoment == frameClock.getCurrentFrame()) {
             return;
         }
-        // TODO negative moments should be implemented, count backwards from end python style
         for(Sprite sprite: orderedSprites) {
             SpriteEvent momentEvent = new SpriteEvent(
                     EventType.SPRITE_MOMENT,

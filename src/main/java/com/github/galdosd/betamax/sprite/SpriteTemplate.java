@@ -36,8 +36,7 @@ public final class SpriteTemplate {
                 .stream().sorted()
                 .collect(toList());
         checkArgument(0!=spriteFilenames.size(), "no sprite frame files found for " + pkgName);
-        if(LOG.isTraceEnabled()) LOG.trace("Loading these sprite files for {}: {}",
-                pkgName, Joiner.on("\n\t").join(spriteFilenames));
+        LOG.debug("Loading {}-frame sprite {}", spriteFilenames.size(), pkgName);
         textures = spriteFilenames.stream().map(name -> {
             Texture texture = new Texture();
             texture.bind(GL_TEXTURE_2D);
@@ -113,6 +112,10 @@ public final class SpriteTemplate {
 
         @Override public void setClickableEverywhere(boolean clickableEverywhere) {
            this.clickableEverywhere = clickableEverywhere;
+        }
+
+        @Override public int getTotalFrames() {
+            return textureCount;
         }
 
     }

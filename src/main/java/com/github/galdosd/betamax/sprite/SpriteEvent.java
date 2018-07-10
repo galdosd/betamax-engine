@@ -5,6 +5,7 @@ import com.github.galdosd.betamax.sprite.SpriteName;
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 import lombok.ToString;
+import lombok.experimental.Wither;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -21,7 +22,8 @@ public final class SpriteEvent {
     /**
      * ignored and must be 0 except for eventType==SPRITE_MOMENT
      */
-    public final int moment;
+    @Wither public final int moment;
+
 
     public SpriteEvent(@NonNull EventType eventType, @NonNull SpriteName spriteName, int moment) {
         checkArgument(eventType == EventType.SPRITE_MOMENT || moment == 0, "moment may only be set for EventType.SPRITE_MOMENT");

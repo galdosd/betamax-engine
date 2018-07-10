@@ -14,4 +14,6 @@ public interface Sprite {
 
     boolean isClickableAtCoordinate(TextureCoordinate coordinate);
     void setClickableEverywhere(boolean clickableEverywhere);
+
+    int getTotalFrames();
 }

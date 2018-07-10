@@ -37,6 +37,12 @@ public class ScriptWorld implements LogicHandler {
 
     @Override public void onSpriteEvent(SpriteEvent event) {
         ScriptCallback callback = servicer.getCallback(event);
+        // allow python style negative indices, eg -1 is the last frame
+        if(null==callback && event.eventType==EventType.SPRITE_MOMENT) {
+            int totalSpriteFrames = spriteRegistry.getSpriteByName(event.spriteName).getTotalFrames();
+            SpriteEvent negativeEvent = event.withMoment(event.moment - totalSpriteFrames);
+            callback = servicer.getCallback(negativeEvent);
+        }
         if(null!=callback) {
             callback.invoke();
         }
