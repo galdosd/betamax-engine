@@ -47,6 +47,7 @@
             Possibly store texture compressed in memory to save main RAM (LZ4)
             Separate sprites into dayparts so we can load them in chunks rather than all at load time
                 Support unloading of textures
+                Allow loading to happen in a seperate thread so we can begin preloading early but not too early
         Bugs
            FPS Control should reset after onBegin, right now all frames are unrendered during onBegin
 

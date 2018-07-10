@@ -116,7 +116,7 @@ public final class TextureImage {
         Raster raster = image.getData();
         int width = raster.getWidth();
         int height = raster.getHeight();
-        LOG.debug("Loaded image from {} (size {}x{}) {}-band, DataBuffer dataType {}",
+        LOG.trace("Loaded image from {} (size {}x{}) {}-band, DataBuffer dataType {}",
                 filename, width, height, raster.getNumBands(),
                 raster.getSampleModel().getDataType());
 

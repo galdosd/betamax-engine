@@ -71,9 +71,9 @@ public final class OurTool {
     }
 
     public static OutputStream writeCachedStream(String... key) {
-
+        throw new UnsupportedOperationException();
     }
 
-    private static String cachedFilename() {}
+   // private static String cachedFilename() {}
 }
 
