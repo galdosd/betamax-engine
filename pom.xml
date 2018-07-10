@@ -2,7 +2,6 @@
 <!--
     TODO
         Working set features
-            Windows/Linux proper maven profile
             Display list of sprites and their current moments
             Single button to tag a moment on the disk file?
             Managed state, just integers
@@ -17,6 +16,9 @@
             basic steam support
             osx support
             steam achievements
+            "this" sprite reference / replace_sprite()
+            Optional sprite name for when sprite name = sprite template name
+            sprite prefix scopes so everything in one file can ignore a prefix like m2?
 
         Maintenance
             Refactoring
@@ -34,13 +36,10 @@
             Possibly store texture compressed in memory to save main RAM (LZ4)
             Separate sprites into dayparts so we can load them in chunks rather than all at load time
 
-        Scripter features
+        Scripter requested features
             Pause logical time whenever loading templates / use loading screen
             Optionally log all handled events and servicer actions
-            "this" sprite reference / replace_sprite()
-            Optional sprite name for when sprite name = sprite template name
-            sprites magic dict so that renaming works better maybe?
-            sprite prefix scopes so everything in one file can ignore a prefix like m2?
+            Add Sprite Locations
 
      GLOSSARY
         Global clock frame (clock frame)

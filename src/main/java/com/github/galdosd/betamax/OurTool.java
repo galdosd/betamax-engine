@@ -53,5 +53,14 @@ public final class OurTool {
         // now that we're pretty close to it, busy loop
         while(System.currentTimeMillis() < targetTime);
     }
+
+    public static String fromProperty(String propertyName, String defaultValue) {
+        String property = System.getProperty(propertyName);
+        if(null!=property) {
+            return property;
+        } else {
+          return defaultValue;
+        }
+    }
 }
 
