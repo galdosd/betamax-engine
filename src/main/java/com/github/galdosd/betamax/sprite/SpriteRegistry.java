@@ -122,13 +122,21 @@ public class SpriteRegistry {
         if(lastDispatchedMoment == frameClock.getCurrentFrame()) {
             return;
         }
+        // we first generate the events then process them, because otherwise
+        // if a script creates or destroys a sprite, orderedSprites will be modified
+        // while we are iterating over orderedSprites, resulting in a ConcurrentModificationException
+        // ...ask me how i know
+        List<SpriteEvent> generatedEvents = new ArrayList<>();
         for(Sprite sprite: orderedSprites) {
             SpriteEvent momentEvent = new SpriteEvent(
                     EventType.SPRITE_MOMENT,
                     sprite.getName(),
                     sprite.getRenderedFrame()
             );
-            logicHandler.onSpriteEvent(momentEvent);
+            generatedEvents.add(momentEvent);
+        }
+        for(SpriteEvent event: generatedEvents) {
+            logicHandler.onSpriteEvent(event);
         }
         lastDispatchedMoment = frameClock.getCurrentFrame();
     }
