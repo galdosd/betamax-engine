@@ -2,7 +2,6 @@ package com.github.galdosd.betamax.graphics;
 
 import com.github.galdosd.betamax.OurTool;
 import lombok.Getter;
-import lombok.Value;
 import org.lwjgl.system.MemoryUtil;
 import org.slf4j.LoggerFactory;
 
@@ -10,7 +9,10 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
 import java.io.*;
+import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
+import java.nio.channels.FileChannel;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -19,6 +21,7 @@ import static com.google.common.base.Preconditions.checkState;
 /**
  * FIXME: Document this class
  */
+// TODO: split out most statics dealing with loading/unloading from file into ImageFiles statics container maybe
 public final class TextureImage {
     private static final org.slf4j.Logger LOG =
             LoggerFactory.getLogger(new Object(){}.getClass().getEnclosingClass());
@@ -27,35 +30,47 @@ public final class TextureImage {
     private static final String CACHE_KEY = "TextureImage#loadAlphaTiff";
 
     @Getter private final FloatBuffer pixelData;
+    private final ByteBuffer bytePixelData;
     @Getter private final int width, height;
     private final String filename;
 
     private boolean unloaded = false;
 
-    private TextureImage(int width, int height, FloatBuffer pixelData, String filename) {
+    private TextureImage(int width, int height, ByteBuffer bytePixelData, String filename) {
         this.width = width;
         this.height = height;
-        this.pixelData = pixelData;
+        this.bytePixelData = bytePixelData;
         this.filename = filename;
+
+        pixelData = bytePixelData.asFloatBuffer();
     }
 
     private static Optional<TextureImage> loadCached(String filename) throws IOException {
-        Optional<InputStream> inputStreamOptional = OurTool.streamCached(CACHE_KEY, filename);
+        Optional<FileChannel> inputStreamOptional = OurTool.readCached(CACHE_KEY, filename);
         if(inputStreamOptional.isPresent()) {
-            try(DataInputStream dataInputStream = new DataInputStream(inputStreamOptional.get())) {
-                int width = dataInputStream.readInt();
-                int height = dataInputStream.readInt();
+            try(FileChannel readChannel = inputStreamOptional.get()) {
+                LOG.debug("Loading from cache: {}", filename);
+
+                final int headerSizeInBytes = 2 * Integer.BYTES;
+                ByteBuffer byteHeader = ByteBuffer.allocate(headerSizeInBytes);
+                IntBuffer intHeader = byteHeader.asIntBuffer();
+                int readHeaderBytes = readChannel.read(byteHeader);
+                checkState(headerSizeInBytes * Integer.BYTES == readHeaderBytes, "read failure: cache file header");
+                int width = intHeader.get();
+                int height = intHeader.get();
+
                 final int colorSamples = width * height * BANDS;
                 // these limits are arbitrary, maybe someday a 250 megapixel image will be reasonable
                 checkArgument(width > 0 && height > 0 && width < 16384 && height < 16384,
                         "bad image size %sx%s", width, height);
-                FloatBuffer pixelData = MemoryUtil.memAllocFloat(colorSamples);
-                for (int jj = 0; jj < colorSamples; jj++) {
-                    pixelData.put(dataInputStream.readFloat());
-                }
-                pixelData.flip();
+
+                ByteBuffer bytePixelData = MemoryUtil.memAlloc(colorSamples * Float.BYTES);
+                FloatBuffer pixelData = bytePixelData.asFloatBuffer();
+                int readPixelBytes = readChannel.read(bytePixelData);
+                checkState(colorSamples * Float.BYTES == readPixelBytes, "read failure: cache file pixel data");
+
                 LOG.info("Loaded from cache: {}", filename);
-                return Optional.of(new TextureImage(width, height, pixelData, filename));
+                return Optional.of(new TextureImage(width, height, bytePixelData, filename));
             }
         } else {
             return Optional.empty();
@@ -65,15 +80,15 @@ public final class TextureImage {
     private void saveToCache() throws IOException {
         // FIXME we should only save 1 byte per sample not the damn float -- at least test this with LZ4, disadvantage
         // is still have to convert to floats and that may be expensive? LZ4 is not dumb, it may be just fine
-        try(DataOutputStream outputStream = new DataOutputStream(OurTool.writeCachedStream(CACHE_KEY, filename))) {
+        try(FileChannel fileChannel = OurTool.writeCached(CACHE_KEY, filename)) {
+            LOG.debug("Saving to cache: {}", filename);
             // FIXME write original filename as a safety check
-            outputStream.writeInt(width);
-            outputStream.writeInt(height);
-            final int colorSamples = width * height * BANDS;
-            pixelData.
-            for(int jj =  0; jj < colorSamples; jj++) {
-                outputStream.writeFloat(pixelData.get(jj));
-            }
+            ByteBuffer byteHeader = ByteBuffer.allocate(Integer.BYTES * 2);
+            IntBuffer intHeader = byteHeader.asIntBuffer();
+            intHeader.put(width);
+            intHeader.put(height);
+            fileChannel.write(byteHeader);
+            fileChannel.write(bytePixelData);
             LOG.info("Saved to cache: {}", filename);
         }
     }
@@ -129,7 +144,7 @@ public final class TextureImage {
 
         float[] pixels = raster.getPixels(0, 0, width, height, (float[]) null);
         checkState(pixels.length == (BANDS * width * height));
-        FloatBuffer pixelData = convertForGl(width, height, pixels);
+        ByteBuffer pixelData = convertForGl(width, height, pixels);
 
         return new TextureImage(width, height, pixelData, filename);
     }
@@ -142,7 +157,7 @@ public final class TextureImage {
      * 3. we need an off-heap LWJGL native FloatBuffer, not a java on-heap FloatBuffer, so we can send
      *    the data to opengl later
      */
-    private static FloatBuffer convertForGl(int width, int height, float[] pixels) {
+    private static ByteBuffer convertForGl(int width, int height, float[] pixels) {
         float[] upsideDownPixels = new float[pixels.length];
         for (int row = height - 1; row >= 0; row--) {
             for (int col = (width - 1) * BANDS; col >= 0; col--) {
@@ -151,10 +166,10 @@ public final class TextureImage {
             }
         }
         // TODO maybe don't allocate a second array, make upsideDownPixels off-heap to begin with
-        FloatBuffer pixelData = MemoryUtil.memAllocFloat(upsideDownPixels.length);
+        ByteBuffer bytePixelData = MemoryUtil.memAlloc(upsideDownPixels.length * Float.BYTES);
+        FloatBuffer pixelData = bytePixelData.asFloatBuffer();
         pixelData.put(upsideDownPixels, 0, upsideDownPixels.length);
-        pixelData.flip();
-        return pixelData;
+        return bytePixelData;
     }
 
     /** for textures that don't live the whole life of the program, you must call this

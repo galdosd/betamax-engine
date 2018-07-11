@@ -11,8 +11,9 @@ import static com.github.galdosd.betamax.OurTool.fromProperty;
 public final class Global {
     public final static MetricRegistry metrics = new MetricRegistry();
     public final static String spriteBase = "com.github.galdosd.betamax.sprites.";
-    public final static String mainScript = fromProperty("betamax.mainScript", "game.py");
     public final static String scriptBase = "com/github/galdosd/betamax/scripts/";
-    public final static String textureCacheDir = "/tmp/betamax_texture_cache/";
     public final static int defaultTargetFps = 8;
+
+    public final static String mainScript = fromProperty("betamax.mainScript", "game.py");
+    public final static String textureCacheDir = fromProperty("betamax.textureCacheDir");
 }

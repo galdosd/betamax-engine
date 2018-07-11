@@ -7,10 +7,17 @@ import lombok.NonNull;
 
 import java.io.*;
 import java.net.URL;
+import java.nio.channels.FileChannel;
+import java.nio.file.OpenOption;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.*;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
+import static java.nio.file.StandardOpenOption.CREATE_NEW;
+import static java.nio.file.StandardOpenOption.READ;
+import static java.nio.file.StandardOpenOption.WRITE;
 import static org.lwjgl.opengl.GL11.glGetError;
 
 /** miscellaneous utilities */
@@ -63,34 +70,46 @@ public final class OurTool {
         }
     }
 
-    public static Optional<InputStream> streamCached(String... key) {
-        File file = new File(cachedFilename(key));
+    public static String fromProperty(String propertyName) {
+        String propertyValue = fromProperty(propertyName, null);
+        if(null==propertyValue) {
+            throw new IllegalArgumentException(
+                    "You forgot to define a property. Add -D"+propertyName+"=... to your java command line.");
+        } else {
+            return propertyValue;
+        }
+    }
+
+    public static Optional<FileChannel> readCached(String cacheKey, String... key) {
+        File file = cachedFilename(key);
         if (!file.exists()) {
             return Optional.empty();
         }
         try {
-            return Optional.of(new FileInputStream(file));
-        } catch (FileNotFoundException e) {
+            return Optional.of(FileChannel.open(file.toPath(), READ));
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public static OutputStream writeCachedStream(String... key) {
+
+    public static FileChannel writeCached(String... key) {
         try {
-            return new FileOutputStream(cachedFilename(key));
-        } catch (FileNotFoundException e) {
+            return FileChannel.open(cachedFilename(key).toPath(), CREATE_NEW, WRITE);
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-   private static String cachedFilename(String[] key) {
+    private static File cachedFilename(String[] key) {
        StringBuilder strings = new StringBuilder();
        for(String str: key) {
            strings.append(str);
            strings.append("\n");
        }
        UUID uuid = UUID.nameUUIDFromBytes(strings.toString().getBytes(Charsets.UTF_8));
-       return Global.textureCacheDir + uuid.toString() + ".dat";
+       return new File(Global.textureCacheDir + uuid.toString() + ".dat");
    }
+
 }
 
