@@ -4,9 +4,6 @@
         Bugs
         
         Working set features
-            Break out input from GlProgramBase
-            Break out frameclock from GlProgramBase
-            Add script hotloading
             Scripter timers
             Load screen / reset frame clock any time a synchronous load happens
 
@@ -24,7 +21,8 @@
 
             Display list of sprites and their current moments
             Single button to tag a moment on the disk file?
-            Managed state, just integers
+            Managed state, just integers and booleans
+                Proper hotloading including preserving state
             Rewind
             Effecient preloading for rewind
 
