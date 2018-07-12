@@ -164,4 +164,8 @@ public class SpriteRegistry {
     public void enqueueSpriteEvent(SpriteEvent spriteEvent) {
         enqueuedSpriteEvents.add(spriteEvent);
     }
+
+    public boolean spriteExists(SpriteName spriteName) {
+        return registeredSprites.containsKey(spriteName);
+    }
 }

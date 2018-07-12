@@ -48,6 +48,9 @@ public final class ScriptServicer {
         return spriteRegistry.getSpriteByName(spriteName);
     }
 
+    public boolean spriteExists(SpriteName spriteName) {
+        return spriteRegistry.spriteExists(spriteName);
+    }
     public Sprite createSprite(String templateName, SpriteName spriteName) {
         return spriteRegistry.createSprite(templateName, spriteName);
     }
