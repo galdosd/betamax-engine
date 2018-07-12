@@ -33,6 +33,7 @@ public final class SpriteTemplate {
     public SpriteTemplate(String pkgName, FrameClock frameClock) {
         this.frameClock = frameClock;
         Reflections reflections = new Reflections(pkgName, new ResourcesScanner());
+        // TODO eliminate Reflections log line
         List<String> spriteFilenames = reflections.getResources(Pattern.compile(".*\\.tif"))
                 .stream().sorted()
                 .collect(toList());
