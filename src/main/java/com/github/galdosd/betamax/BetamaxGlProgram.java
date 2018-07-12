@@ -31,17 +31,31 @@ public class BetamaxGlProgram extends GlProgramBase {
     private final SpriteTemplateRegistry spriteTemplateRegistry = new SpriteTemplateRegistry();
 
     private ScriptWorld scriptWorld;
-    private SpriteRegistry spriteRegistry = new SpriteRegistry(spriteTemplateRegistry, getFrameClock());
+    private SpriteRegistry spriteRegistry;
 
     public static void main(String[] args) {
         new BetamaxGlProgram().run();
     }
 
     @Override protected void initialize() {
+        prepareShaders();
+        prepareForDrawing();
 
+        // enable transparency
+        glEnable(GL_BLEND);
+        glEnable(GL_DEPTH_TEST);
+        glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        spriteRegistry = new SpriteRegistry(spriteTemplateRegistry, getFrameClock());
+        scriptWorld = new ScriptWorld(spriteRegistry);
+        scriptWorld.loadScript(Global.mainScript);
+    }
+
+    // FIXME this should be paired with SpriteTemplate#renderTemplate, there is indirect dependency between them
+    // via opengl VBO/VAO handles
+    private void prepareForDrawing() {
         // load our triangle vertices
         VBO vbo = new VBO();
-        float textureScale = 2;
         vbo.bindAndLoad(GL_ARRAY_BUFFER, GL_STATIC_DRAW, new float[]{
             // two right triangles that cover the full screen
             // all our sprites are fullscreen! wow!
@@ -55,7 +69,15 @@ public class BetamaxGlProgram extends GlProgramBase {
                 -1.0f, -1.0f,     0.0f, 0.0f,
         });
 
-        // prepare shaders
+        // prepare vao
+        VAO vao = new VAO();
+        vao.bind();
+        vbo.bind(GL_ARRAY_BUFFER);
+        VAO.vertexAttribPointer(0, 2, GL_FLOAT, false, 4 * Float.BYTES, 0);
+        VAO.vertexAttribPointer(1, 2, GL_FLOAT, false, 4 * Float.BYTES, 2 * Float.BYTES);
+    }
+
+    private void prepareShaders() {
         ShaderProgram shaderProgram = new ShaderProgram();
         shaderProgram.attach(
                 Shader.loadAndCompileShader("default.vert", GL_VERTEX_SHADER));
@@ -63,25 +85,10 @@ public class BetamaxGlProgram extends GlProgramBase {
                 Shader.loadAndCompileShader("default.frag", GL_FRAGMENT_SHADER));
         //shaderProgram.bindFragDataLocation(0, "outColor"); //unnecessary, we only have one output color
         shaderProgram.linkAndUse();
-
-        // prepare vao
-        VAO vao = new VAO();
-        vao.bind();
-        vbo.bind(GL_ARRAY_BUFFER);
-        VAO.vertexAttribPointer(0, 2, GL_FLOAT, false, 4 * Float.BYTES, 0);
-        VAO.vertexAttribPointer(1, 2, GL_FLOAT, false, 4 * Float.BYTES, 2 * Float.BYTES);
-
-        // enable transparency
-        glEnable(GL_BLEND);
-        glEnable(GL_DEPTH_TEST);
-        glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-        scriptWorld = new ScriptWorld(spriteRegistry);
-        scriptWorld.loadScript(Global.mainScript);
     }
 
-
-    @Override protected void keyboardEvent(int key) { }
+    @Override protected void keyPressEvent(int key) {
+    }
 
     @Override protected void leftMouseClickEvent(TextureCoordinate coordinate) {
         LOG.trace("Clicked at {} x {}", coordinate.getX(), coordinate.getY());
@@ -91,7 +98,6 @@ public class BetamaxGlProgram extends GlProgramBase {
             spriteRegistry.enqueueSpriteEvent(new SpriteEvent(EventType.SPRITE_CLICK, clickedSprite.get(), 0));
         }
     }
-
 
     /** cycle background color; can be helpful in debugging */
     private int colorcycler = 0;

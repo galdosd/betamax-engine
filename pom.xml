@@ -7,6 +7,8 @@
             Break out input from GlProgramBase
             Break out frameclock from GlProgramBase
             Add script hotloading
+            Scripter timers
+            Load screen / reset frame clock any time a synchronous load happens
 
             Fast texture loading
                 Show VRAM and RAM texture usage, metrics gauges
