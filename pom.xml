@@ -5,10 +5,22 @@
         
         Working set features
             Fast texture loading
+                Show VRAM and RAM texture usage, metrics gauges
+                More Metrics timers
+                Cooked Metrics Clock so pause time does not count
+                Swapping textures out of VRAM
+                LZ4 single frame
+                Pixel click bitmap
+                Keep textureimage in RAM as LZ4
+                LZ4 full sprite
+                load_template async
+                evict_template
+
             Display list of sprites and their current moments
             Single button to tag a moment on the disk file?
             Managed state, just integers
             Rewind
+            Effecient preloading for rewind
 
         Backlog features
             Arbitrary savestates
