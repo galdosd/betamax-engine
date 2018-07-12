@@ -23,8 +23,6 @@
             osx support
             steam achievements
             "this" sprite reference / replace_sprite()
-            Optional sprite name for when sprite name = sprite template name
-            sprite prefix scopes so everything in one file can ignore a prefix like m2?
 
         Scripter requested
             Show length of sprite
