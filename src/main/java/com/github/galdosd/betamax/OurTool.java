@@ -80,7 +80,7 @@ public final class OurTool {
         }
     }
 
-    public static Optional<FileChannel> readCached(String cacheKey, String... key) {
+    public static Optional<FileChannel> readCached(String... key) {
         File file = cachedFilename(key);
         if (!file.exists()) {
             return Optional.empty();

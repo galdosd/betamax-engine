@@ -29,33 +29,35 @@ public final class TextureImage {
     private static final int BANDS = 4; // RGBA so 4 samples per pixel
     private static final String CACHE_KEY = "TextureImage#loadAlphaTiff";
 
-    @Getter private final FloatBuffer pixelData;
     private final ByteBuffer bytePixelData;
     @Getter private final int width, height;
     private final String filename;
 
     private boolean unloaded = false;
 
+    final ByteBuffer getBytePixelData() {
+        checkState(0==bytePixelData.position(), "bytePixelData.position()!=0");
+        return bytePixelData;
+    }
     private TextureImage(int width, int height, ByteBuffer bytePixelData, String filename) {
         this.width = width;
         this.height = height;
         this.bytePixelData = bytePixelData;
+        bytePixelData.position(0);
         this.filename = filename;
-
-        pixelData = bytePixelData.asFloatBuffer();
     }
 
     private static Optional<TextureImage> loadCached(String filename) throws IOException {
-        Optional<FileChannel> inputStreamOptional = OurTool.readCached(CACHE_KEY, filename);
-        if(inputStreamOptional.isPresent()) {
-            try(FileChannel readChannel = inputStreamOptional.get()) {
+        Optional<FileChannel> optionalFileChannel = OurTool.readCached(CACHE_KEY, filename);
+        if(optionalFileChannel.isPresent()) {
+            try(FileChannel readChannel = optionalFileChannel.get()) {
                 LOG.debug("Loading from cache: {}", filename);
 
                 final int headerSizeInBytes = 2 * Integer.BYTES;
                 ByteBuffer byteHeader = ByteBuffer.allocate(headerSizeInBytes);
                 IntBuffer intHeader = byteHeader.asIntBuffer();
                 int readHeaderBytes = readChannel.read(byteHeader);
-                checkState(headerSizeInBytes * Integer.BYTES == readHeaderBytes, "read failure: cache file header");
+                checkState(headerSizeInBytes == readHeaderBytes, "read failure: cache file header");
                 int width = intHeader.get();
                 int height = intHeader.get();
 
@@ -65,10 +67,11 @@ public final class TextureImage {
                         "bad image size %sx%s", width, height);
 
                 ByteBuffer bytePixelData = MemoryUtil.memAlloc(colorSamples * Float.BYTES);
-                FloatBuffer pixelData = bytePixelData.asFloatBuffer();
                 int readPixelBytes = readChannel.read(bytePixelData);
+                bytePixelData.flip();
                 checkState(colorSamples * Float.BYTES == readPixelBytes, "read failure: cache file pixel data");
 
+                checkState(bytePixelData.position()==0);
                 LOG.info("Loaded from cache: {}", filename);
                 return Optional.of(new TextureImage(width, height, bytePixelData, filename));
             }
@@ -88,7 +91,11 @@ public final class TextureImage {
             intHeader.put(width);
             intHeader.put(height);
             fileChannel.write(byteHeader);
-            fileChannel.write(bytePixelData);
+            ByteBuffer localBytePixelData = getBytePixelData();
+            fileChannel.write(localBytePixelData);
+            // FileChannel#write fucks the position up despite failing to specify that in its contract
+            // what a fucking junk heap
+            localBytePixelData.position(0);
             LOG.info("Saved to cache: {}", filename);
         }
     }
@@ -169,6 +176,7 @@ public final class TextureImage {
         ByteBuffer bytePixelData = MemoryUtil.memAlloc(upsideDownPixels.length * Float.BYTES);
         FloatBuffer pixelData = bytePixelData.asFloatBuffer();
         pixelData.put(upsideDownPixels, 0, upsideDownPixels.length);
+        checkState(bytePixelData.position()==0);
         return bytePixelData;
     }
 
@@ -178,7 +186,7 @@ public final class TextureImage {
      */
     public void unload() {
         checkArgument(unloaded==false);
-        MemoryUtil.memFree(pixelData);
+        MemoryUtil.memFree(bytePixelData);
         unloaded = true;
     }
 
@@ -188,6 +196,8 @@ public final class TextureImage {
         int x = (int) (coordinate.getX() * width);
         int y = (int) (coordinate.getY() * height);
         int offset = BANDS * (width * y + x);
+        FloatBuffer pixelData = getBytePixelData().asFloatBuffer();
+        pixelData.position(0);
         return new ColorSample(
                 pixelData.get(offset),
                 pixelData.get(offset+1),
