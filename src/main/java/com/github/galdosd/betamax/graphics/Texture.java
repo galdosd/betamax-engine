@@ -56,7 +56,7 @@ public final class Texture {
         rebind();
         ByteBuffer bytePixelData = textureImage.getBytePixelData();
         bytePixelData.position(0);
-        glTexImage2D(
+        glTexImage2D( // TODO add a metrics timer here
                 // TODO GL_INT or something would be more precise maybe but i couldn't get it to work
                 boundTarget, 0, GL_RGBA, textureImage.getWidth(), textureImage.getHeight(), 0,
                 GL_RGBA, GL_FLOAT, bytePixelData

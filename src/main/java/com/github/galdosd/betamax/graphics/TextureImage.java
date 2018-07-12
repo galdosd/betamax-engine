@@ -51,7 +51,7 @@ public final class TextureImage {
         Optional<FileChannel> optionalFileChannel = OurTool.readCached(CACHE_KEY, filename);
         if(optionalFileChannel.isPresent()) {
             try(FileChannel readChannel = optionalFileChannel.get()) {
-                LOG.debug("Loading from cache: {}", filename);
+                LOG.trace("Loading from cache: {}", filename);
 
                 final int headerSizeInBytes = 2 * Integer.BYTES;
                 ByteBuffer byteHeader = ByteBuffer.allocate(headerSizeInBytes);
@@ -67,7 +67,7 @@ public final class TextureImage {
                         "bad image size %sx%s", width, height);
 
                 ByteBuffer bytePixelData = MemoryUtil.memAlloc(colorSamples * Float.BYTES);
-                int readPixelBytes = readChannel.read(bytePixelData);
+                int readPixelBytes = readChannel.read(bytePixelData); // TODO add metrics timer
                 bytePixelData.flip();
                 checkState(colorSamples * Float.BYTES == readPixelBytes, "read failure: cache file pixel data");
 
@@ -84,7 +84,7 @@ public final class TextureImage {
         // FIXME we should only save 1 byte per sample not the damn float -- at least test this with LZ4, disadvantage
         // is still have to convert to floats and that may be expensive? LZ4 is not dumb, it may be just fine
         try(FileChannel fileChannel = OurTool.writeCached(CACHE_KEY, filename)) {
-            LOG.debug("Saving to cache: {}", filename);
+            LOG.trace("Saving to cache: {}", filename);
             // FIXME write original filename as a safety check
             ByteBuffer byteHeader = ByteBuffer.allocate(Integer.BYTES * 2);
             IntBuffer intHeader = byteHeader.asIntBuffer();
