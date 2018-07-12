@@ -33,7 +33,9 @@ public class GlProgramBaseTest {
 
             private boolean startedThread;
             @Override protected void initialize() { }
-            @Override protected void keyboardEvent(int key, KeyAction action) { }
+
+            @Override protected void keyPressEvent(int key) { }
+
             @Override protected void leftMouseClickEvent(TextureCoordinate coord) { }
 
             @Override protected void updateView() {

@@ -7,6 +7,7 @@ import com.github.galdosd.betamax.scripting.ScriptWorld;
 import com.github.galdosd.betamax.sprite.SpriteEvent;
 import com.github.galdosd.betamax.sprite.SpriteName;
 import com.github.galdosd.betamax.sprite.SpriteRegistry;
+import com.github.galdosd.betamax.sprite.SpriteTemplateRegistry;
 import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
@@ -23,8 +24,10 @@ public class BetamaxGlProgram extends GlProgramBase {
     private static final org.slf4j.Logger LOG =
             LoggerFactory.getLogger(new Object(){}.getClass().getEnclosingClass());
 
-    ScriptWorld scriptWorld;
-    SpriteRegistry spriteRegistry = new SpriteRegistry(getFrameClock());
+    private final SpriteTemplateRegistry spriteTemplateRegistry = new SpriteTemplateRegistry();
+
+    private ScriptWorld scriptWorld;
+    private SpriteRegistry spriteRegistry = new SpriteRegistry(spriteTemplateRegistry, getFrameClock());
 
     public static void main(String[] args) {
         new BetamaxGlProgram().run();
@@ -74,7 +77,7 @@ public class BetamaxGlProgram extends GlProgramBase {
     }
 
 
-    @Override protected void keyboardEvent(int key, KeyAction action) { }
+    @Override protected void keyboardEvent(int key) { }
 
     @Override protected void leftMouseClickEvent(TextureCoordinate coordinate) {
         LOG.trace("Clicked at {} x {}", coordinate.getX(), coordinate.getY());

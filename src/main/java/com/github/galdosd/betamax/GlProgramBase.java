@@ -4,20 +4,15 @@ import com.codahale.metrics.ConsoleReporter;
 import com.codahale.metrics.Timer;
 import com.github.galdosd.betamax.graphics.GlWindow;
 import com.github.galdosd.betamax.graphics.TextureCoordinate;
-import lombok.AllArgsConstructor;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.LoggerFactory;
 
 import java.nio.DoubleBuffer;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import static com.github.galdosd.betamax.OurTool.checkGlError;
 import static com.google.common.base.Preconditions.checkState;
-import static org.lwjgl.glfw.GLFW.GLFW_RELEASE;
 import static org.lwjgl.glfw.GLFW.glfwGetCursorPos;
 
 /** FIXME: document this class
@@ -33,15 +28,9 @@ public abstract class GlProgramBase {
             LoggerFactory.getLogger(new Object(){}.getClass().getEnclosingClass());
 
     private GlWindow mainWindow;
-    private boolean paused = false;
-
-    // passage of time management
-    private int frameCount = 0;
-    private int targetFps = Global.defaultTargetFps;
-    private long nextLogicFrameTime;
+    private final GameLoopFrameClock frameClock = new GameLoopFrameClock();
 
     // input management
-    private final Set<Integer> downKeys = new HashSet<>();
     private final DoubleBuffer xMousePosBuffer = BufferUtils.createDoubleBuffer(1);
     private final DoubleBuffer yMousePosBuffer = BufferUtils.createDoubleBuffer(1);
 
@@ -55,46 +44,6 @@ public abstract class GlProgramBase {
             .convertDurationsTo(TimeUnit.MILLISECONDS)
             .build();
 
-    /** Typesafe enum for GLFW_KEY_DOWN/GLFW_KEY_UP constants */
-    @AllArgsConstructor
-    public static enum KeyAction {
-        DOWN(GLFW.GLFW_PRESS), UP(GLFW.GLFW_RELEASE);
-
-        public final int glfwConstant;
-
-        public static KeyAction fromInt(int code) {
-            return Arrays.stream(KeyAction.values())
-                    .filter(action -> action.glfwConstant == code)
-                    .findFirst().get();
-        }
-    }
-
-    // TODO break out Frameclock/time management
-    private final FrameClock frameClock =  new FrameClock() {
-        @Override public int getCurrentFrame() {
-            return frameCount;
-        }
-
-        @Override public boolean getPaused() {
-            return paused;
-        }
-
-        @Override public void setPaused(boolean newPaused) {
-            if (newPaused == paused) {
-                return;
-            } else if (newPaused) {
-                // pause
-                LOG.info("Paused");
-            } else {
-                // unpause
-                // we need to ignore the time spent in pause, otherwise we'll get a flood of catch up logic frames
-                // and rendering will appear to skip
-                nextLogicFrameTime = System.currentTimeMillis();
-                LOG.info("Unpaused");
-            }
-            paused = newPaused;
-        }
-    };
 
     protected final FrameClock getFrameClock() {
         return frameClock;
@@ -112,7 +61,7 @@ public abstract class GlProgramBase {
                     LOG.debug("User initialization done");
                 }
 
-                nextLogicFrameTime = System.currentTimeMillis();
+                frameClock.resetLogicFrames();
                 while (!mainWindow.getShouldClose()) {
                     loopOnce();
                 }
@@ -133,7 +82,7 @@ public abstract class GlProgramBase {
 
     // TODO break out input handling
     private void keyCallback(long window, int key, int scancode, int action, int mods) {
-        if(action == GLFW.GLFW_RELEASE) {
+        if(action == GLFW.GLFW_PRESS) {
             // exit upon ESC key
             if (key == GLFW.GLFW_KEY_ESCAPE) {
                 closeWindow();
@@ -143,26 +92,19 @@ public abstract class GlProgramBase {
                reporter.report();
             }
             else if (key == GLFW.GLFW_KEY_PAUSE) {
-                frameClock.setPaused(!paused);
+                frameClock.setPaused(!frameClock.getPaused());
                 // FIXME this will fuck up the metrics,we need a cooked Clock for Metrics to ignore
                 // the passage of time during pause
             // page up/down to change target FPS
             } else if (key == GLFW.GLFW_KEY_PAGE_UP) {
-                targetFps++;
-                LOG.info("New target FPS: {}", targetFps);
+                frameClock.setTargetFps(frameClock.getTargetFps()+1);
             } else if (key == GLFW.GLFW_KEY_PAGE_DOWN) {
-                if (targetFps > 1) {
-                    targetFps--;
-                    LOG.info("New target FPS: {}", targetFps);
+                if (frameClock.getTargetFps() > 1) {
+                    frameClock.setTargetFps(frameClock.getTargetFps()-1);
                 }
+            } else {
+                keyPressEvent(key);
             }
-
-        }
-        if(action!=GLFW.GLFW_REPEAT) {
-            KeyAction keyAction = KeyAction.fromInt(action);
-            if(keyAction == KeyAction.DOWN) downKeys.add(key);
-            if(keyAction == KeyAction.UP) downKeys.remove(key);
-            keyboardEvent(key, keyAction);
         }
     }
 
@@ -172,7 +114,7 @@ public abstract class GlProgramBase {
 
     private void loopOnce() {
         try (Timer.Context _unused_context = idleTimer.time()) {
-            OurTool.sleepUntilPrecisely(nextLogicFrameTime - 1);
+            frameClock.sleepTillNextLogicFrame();
         }
         do {
             try (Timer.Context _unused_context = logicTimer.time()) {
@@ -180,13 +122,10 @@ public abstract class GlProgramBase {
                 // of user input, which can be useful. The frame clock should be checked and if duplicate frames are
                 // received, no new time-triggered events should happen. This is the responsibility of the updateLogic
                 // implementation.
-                if (!paused) {
-                    frameCount++;
-                }
-                nextLogicFrameTime += 1000 / targetFps;
+                frameClock.beginLogicFrame();
                 updateLogic();
             }
-        } while(!paused && System.currentTimeMillis() > nextLogicFrameTime);
+        } while(frameClock.moreLogicFramesNeeded());
         try (Timer.Context _unused_context = renderTimer.time()) {
             try (GlWindow.RenderPhase __unused_context = mainWindow.renderPhase()) {
                 updateView();
@@ -194,9 +133,10 @@ public abstract class GlProgramBase {
         }
     }
 
+
     // TODO composition instead of inheritance, turn the below into an interface
     protected abstract void initialize();
-    protected abstract void keyboardEvent(int key, KeyAction action);
+    protected abstract void keyPressEvent(int key);
     protected abstract void leftMouseClickEvent(TextureCoordinate coord);
     /** updateView could be called every frame, more than once per frame, less often, etc. it must be idempotent */
     protected abstract void updateView();
@@ -206,4 +146,5 @@ public abstract class GlProgramBase {
     protected abstract int getWindowHeight();
     protected abstract int getWindowWidth();
     protected abstract boolean getDebugMode(); //TODO get from cmd line property
+
 }

@@ -4,6 +4,10 @@
         Bugs
         
         Working set features
+            Break out input from GlProgramBase
+            Break out frameclock from GlProgramBase
+            Add script hotloading
+
             Fast texture loading
                 Show VRAM and RAM texture usage, metrics gauges
                 More Metrics timers
@@ -37,9 +41,9 @@
             "this" sprite reference / replace_sprite()
 
         Scripter requested
+            Wait timers
             Show length of sprite
             Named sprite frames
-            Negative frame offsets
             Layers
 
         Maintenance
@@ -51,6 +55,7 @@
 
         Testing
             Generic end to end test?
+            Record/replay style testing cause i am too lazy to write test cases
             Timing/choreography/FPS invariants. We already had at least one bug on that
 
         Performance
