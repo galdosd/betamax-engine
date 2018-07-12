@@ -1,7 +1,6 @@
 package com.github.galdosd.betamax.sprite;
 
 import com.github.galdosd.betamax.FrameClock;
-import com.github.galdosd.betamax.Global;
 import com.github.galdosd.betamax.graphics.TextureCoordinate;
 import com.github.galdosd.betamax.scripting.EventType;
 import lombok.Getter;
@@ -21,7 +20,6 @@ public class SpriteRegistry {
             LoggerFactory.getLogger(new Object(){}.getClass().getEnclosingClass());
 
     private final FrameClock frameClock;
-    private final Map<String,SpriteTemplate> registeredTemplates = new HashMap<>();
 
     // TODO sprite destruction will be O(number of sprites on screen)
     // this will probably never significantly impact performance tho
@@ -29,27 +27,15 @@ public class SpriteRegistry {
     private final Map<SpriteName,Sprite> registeredSprites = new HashMap<>();
     private final Deque<Sprite> orderedSprites = new LinkedList<>();
     private final Queue<SpriteEvent> enqueuedSpriteEvents = new LinkedList<>();
+    public final SpriteTemplateRegistry spriteTemplateRegistry;
 
     // we track the last dispatched moment so that if logic is paused, the same frame can be processed many times
     // but moment events get dispatched just once
     private int lastDispatchedMoment;
 
-    public SpriteRegistry(FrameClock frameClock) {
+    public SpriteRegistry(SpriteTemplateRegistry spriteTemplateRegistry, FrameClock frameClock) {
+        this.spriteTemplateRegistry = spriteTemplateRegistry;
         this.frameClock = frameClock;
-    }
-
-    // TODO it might be nice to have some mechanism by which templates not used for a while are unloaded
-    // that said it probably makes sense to have that partially manually controlled (to group templates into
-    // dayparts for example) rather than entirely automagical, especially since the performance implications are
-    // quite serious if the magic gets it wrong
-    // conversely, automatic background loading of things that will be needed in the future might be worthwhile
-    public SpriteTemplate getTemplate(String name) {
-        SpriteTemplate template = registeredTemplates.get(name);
-        if(null==template) {
-            template = new SpriteTemplate(Global.spriteBase+name, frameClock);
-            registeredTemplates.put(name,template);
-        }
-        return template;
     }
 
     // this should only be called from script handlers, or else a duplicate moment#0 event may be dispatched on the
@@ -57,7 +43,7 @@ public class SpriteRegistry {
     // this should also not be called before the BEGIN event is processed or moment events would happen early
     // again, leave that to scripts
     public Sprite createSprite(String templateName, SpriteName spriteName) {
-        Sprite sprite = getTemplate(templateName).create(spriteName);
+        Sprite sprite = spriteTemplateRegistry.getTemplate(templateName).create(spriteName, frameClock);
         addSprite(sprite);
         enqueueSpriteEvent(new SpriteEvent(EventType.SPRITE_CREATE, spriteName, 0));
         // dispatchSpriteMomentEvents will only catch sprites that already existed before this frame and the frame
@@ -167,5 +153,9 @@ public class SpriteRegistry {
 
     public boolean spriteExists(SpriteName spriteName) {
         return registeredSprites.containsKey(spriteName);
+    }
+
+    public void loadTemplate(String templateName) {
+        spriteTemplateRegistry.getTemplate(templateName);
     }
 }

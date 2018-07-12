@@ -28,10 +28,8 @@ public final class SpriteTemplate {
             LoggerFactory.getLogger(new Object(){}.getClass().getEnclosingClass());
     private final List<Texture> textures;
     private final int textureCount;
-    private final FrameClock frameClock;
 
-    public SpriteTemplate(String pkgName, FrameClock frameClock) {
-        this.frameClock = frameClock;
+    public SpriteTemplate(String pkgName) {
         Reflections reflections = new Reflections(pkgName, new ResourcesScanner());
         // TODO eliminate Reflections log line
         List<String> spriteFilenames = reflections.getResources(Pattern.compile(".*\\.tif"))
@@ -49,8 +47,8 @@ public final class SpriteTemplate {
         textureCount = textures.size();
     }
 
-    public Sprite create(SpriteName name) {
-        return new SpriteImpl(name);
+    public Sprite create(SpriteName name, FrameClock frameClock) {
+        return new SpriteImpl(name, frameClock);
     }
 
 
@@ -70,13 +68,15 @@ public final class SpriteTemplate {
      * different places, for example.
      */
     private class SpriteImpl implements Sprite {
-        private int initialFrame = 0;
         private final SpriteName name;
+        private final FrameClock frameClock;
+        private int initialFrame;
         private boolean clickableEverywhere = false;
 
-        private SpriteImpl(SpriteName name){
-            initialFrame = frameClock.getCurrentFrame();
+        private SpriteImpl(SpriteName name, FrameClock frameClock){
+            this.frameClock = frameClock;
             this.name = name;
+            initialFrame = frameClock.getCurrentFrame();
         }
 
         @Override public void render() {
