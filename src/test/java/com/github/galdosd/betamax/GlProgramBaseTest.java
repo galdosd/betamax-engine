@@ -1,6 +1,6 @@
 package com.github.galdosd.betamax;
 
-import com.github.galdosd.betamax.graphics.Shader;
+import com.github.galdosd.betamax.opengl.Shader;
 import com.github.galdosd.betamax.graphics.TextureCoordinate;
 import org.junit.Ignore;
 import org.junit.Test;

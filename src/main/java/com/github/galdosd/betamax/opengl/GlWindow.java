@@ -1,6 +1,5 @@
-package com.github.galdosd.betamax.graphics;
+package com.github.galdosd.betamax.opengl;
 
-import com.github.galdosd.betamax.OurTool;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.system.Configuration;

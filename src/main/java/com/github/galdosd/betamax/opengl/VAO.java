@@ -1,4 +1,4 @@
-package com.github.galdosd.betamax.graphics;
+package com.github.galdosd.betamax.opengl;
 
 import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
 import static org.lwjgl.opengl.GL20.glVertexAttribPointer;

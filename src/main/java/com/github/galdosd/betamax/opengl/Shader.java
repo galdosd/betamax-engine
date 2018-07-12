@@ -1,4 +1,4 @@
-package com.github.galdosd.betamax.graphics;
+package com.github.galdosd.betamax.opengl;
 
 import com.github.galdosd.betamax.OurTool;
 import lombok.Value;

@@ -2,7 +2,7 @@ package com.github.galdosd.betamax;
 
 import com.codahale.metrics.ConsoleReporter;
 import com.codahale.metrics.Timer;
-import com.github.galdosd.betamax.graphics.GlWindow;
+import com.github.galdosd.betamax.opengl.GlWindow;
 import com.github.galdosd.betamax.graphics.TextureCoordinate;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFW;

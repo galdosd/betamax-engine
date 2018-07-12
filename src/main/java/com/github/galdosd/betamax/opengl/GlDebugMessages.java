@@ -1,4 +1,4 @@
-package com.github.galdosd.betamax.graphics;
+package com.github.galdosd.betamax.opengl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.Value;

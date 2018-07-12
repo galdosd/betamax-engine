@@ -1,4 +1,4 @@
-package com.github.galdosd.betamax.graphics;
+package com.github.galdosd.betamax.opengl;
 
 import static com.google.common.base.Preconditions.checkState;
 import static org.lwjgl.opengl.GL11.GL_TRUE;

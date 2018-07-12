@@ -2,6 +2,10 @@ package com.github.galdosd.betamax;
 
 
 import com.github.galdosd.betamax.graphics.*;
+import com.github.galdosd.betamax.opengl.Shader;
+import com.github.galdosd.betamax.opengl.ShaderProgram;
+import com.github.galdosd.betamax.opengl.VAO;
+import com.github.galdosd.betamax.opengl.VBO;
 import com.github.galdosd.betamax.scripting.EventType;
 import com.github.galdosd.betamax.scripting.ScriptWorld;
 import com.github.galdosd.betamax.sprite.SpriteEvent;
