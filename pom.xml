@@ -30,6 +30,7 @@
             Show length of sprite
             Named sprite frames
             Negative frame offsets
+            Layers
 
         Maintenance
             Refactoring
@@ -48,6 +49,10 @@
             Separate sprites into dayparts so we can load them in chunks rather than all at load time
                 Support unloading of textures
                 Allow loading to happen in a seperate thread so we can begin preloading early but not too early
+            Trim texture to remove transparent border area
+            Performace instrumentation, showing VRAM and RAM used etc
+            Compress a whole sprite together, should compress much better than frame at a time
+
         Bugs
            FPS Control should reset after onBegin, right now all frames are unrendered during onBegin
 
