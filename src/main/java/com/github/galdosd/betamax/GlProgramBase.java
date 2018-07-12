@@ -45,7 +45,7 @@ public abstract class GlProgramBase {
             .build();
 
 
-    protected final FrameClock getFrameClock() {
+    protected final GameLoopFrameClock getFrameClock() {
         return frameClock;
     }
 
@@ -103,7 +103,7 @@ public abstract class GlProgramBase {
                     frameClock.setTargetFps(frameClock.getTargetFps()-1);
                 }
             } else {
-                keyPressEvent(key);
+                keyPressEvent(key, mods);
             }
         }
     }
@@ -136,7 +136,7 @@ public abstract class GlProgramBase {
 
     // TODO composition instead of inheritance, turn the below into an interface
     protected abstract void initialize();
-    protected abstract void keyPressEvent(int key);
+    protected abstract void keyPressEvent(int key, int mods);
     protected abstract void leftMouseClickEvent(TextureCoordinate coord);
     /** updateView could be called every frame, more than once per frame, less often, etc. it must be idempotent */
     protected abstract void updateView();

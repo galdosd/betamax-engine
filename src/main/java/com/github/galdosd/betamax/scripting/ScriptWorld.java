@@ -73,9 +73,12 @@ public class ScriptWorld implements LogicHandler {
                 "_BETAMAX_INTERNAL_servicer_registration.register_script_servicer(_BETAMAX_INTERNAL_script_servicer);"
         );
         try (InputStream scriptStream = OurTool.streamResource(Global.scriptBase + scriptName)) {
+            spriteRegistry.setAcceptingCallbacks(true);
             pythonInterpreter.execfile(scriptStream, scriptName);
         } catch (IOException e) {
             throw new RuntimeException(e);
+        } finally {
+            spriteRegistry.setAcceptingCallbacks(false);
         }
     }
 }

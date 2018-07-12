@@ -4,6 +4,7 @@ import com.github.galdosd.betamax.FrameClock;
 import com.github.galdosd.betamax.graphics.TextureCoordinate;
 import com.github.galdosd.betamax.scripting.EventType;
 import lombok.Getter;
+import lombok.Setter;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
@@ -32,6 +33,8 @@ public class SpriteRegistry {
     // we track the last dispatched moment so that if logic is paused, the same frame can be processed many times
     // but moment events get dispatched just once
     private int lastDispatchedMoment;
+    private boolean alreadyBegun = false;
+    @Getter @Setter private boolean acceptingCallbacks = false;
 
     public SpriteRegistry(SpriteTemplateRegistry spriteTemplateRegistry, FrameClock frameClock) {
         this.spriteTemplateRegistry = spriteTemplateRegistry;
@@ -94,7 +97,6 @@ public class SpriteRegistry {
         }
     }
 
-    @Getter boolean alreadyBegun = false;
     private void dispatchBeginEvent(LogicHandler logicHandler) {
         if(!alreadyBegun) {
             alreadyBegun = true;

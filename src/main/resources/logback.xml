@@ -8,6 +8,7 @@
     </appender>
 
     <logger name="com.github.galdosd" level="DEBUG"/>
+    <logger name="org.reflections.Reflections" level="WARN"/>
 
     <root level="debug">
         <appender-ref ref="STDOUT" />

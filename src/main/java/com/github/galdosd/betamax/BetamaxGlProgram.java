@@ -12,6 +12,7 @@ import com.github.galdosd.betamax.sprite.SpriteEvent;
 import com.github.galdosd.betamax.sprite.SpriteName;
 import com.github.galdosd.betamax.sprite.SpriteRegistry;
 import com.github.galdosd.betamax.sprite.SpriteTemplateRegistry;
+import org.lwjgl.glfw.GLFW;
 import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
@@ -46,9 +47,18 @@ public class BetamaxGlProgram extends GlProgramBase {
         glEnable(GL_DEPTH_TEST);
         glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-        spriteRegistry = new SpriteRegistry(spriteTemplateRegistry, getFrameClock());
+        newWorld(true);
+    }
+
+    private void newWorld(boolean resetSprites) {
+        LOG.info("Starting new world");
+        if(resetSprites) {
+            LOG.info("Resetting sprites");
+            spriteRegistry = new SpriteRegistry(spriteTemplateRegistry, getFrameClock());
+        }
         scriptWorld = new ScriptWorld(spriteRegistry);
         scriptWorld.loadScript(Global.mainScript);
+        getFrameClock().resetLogicFrames();
     }
 
     // FIXME this should be paired with SpriteTemplate#renderTemplate, there is indirect dependency between them
@@ -87,7 +97,14 @@ public class BetamaxGlProgram extends GlProgramBase {
         shaderProgram.linkAndUse();
     }
 
-    @Override protected void keyPressEvent(int key) {
+    @Override protected void keyPressEvent(int key, int mods) {
+        // restart the world if Ctrl+F5 is pressed
+        // just reload scripts without affecting sprite state if just F5 is pressed
+        // FIXME: right now state is managed in-python so the state will still be dropped
+        // once we manage state in-engine we'll be fine
+        if(key == GLFW.GLFW_KEY_F5) {
+            newWorld((mods&GLFW.GLFW_MOD_CONTROL)!=0);
+        }
     }
 
     @Override protected void leftMouseClickEvent(TextureCoordinate coordinate) {

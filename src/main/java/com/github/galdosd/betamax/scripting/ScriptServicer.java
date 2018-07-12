@@ -64,7 +64,7 @@ public final class ScriptServicer {
         // during the game, this would make saving/loading/rewinding/fast forwarding state intractable
         // callbacks should be set up during script initialization, initial sprites should be drawn during onBegin
         // (so if state is saved onBegin can just be skipped and the sprite stack can be restored)
-        checkArgument(!spriteRegistry.isAlreadyBegun(), "cannot alter callbacks after already begun");
+        checkArgument(spriteRegistry.isAcceptingCallbacks(), "cannot alter callbacks after already begun");
         checkArgument(!callbacks.containsKey(spriteEvent), "Callback already registered for %s", spriteEvent);
         callbacks.put(spriteEvent, scriptCallback);
     }
