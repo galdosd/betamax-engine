@@ -173,7 +173,7 @@ public final class TextureImage {
             for (int col = (width - 1) * BANDS; col >= 0; col--) {
                 int sample = samples[BANDS * width * (height - row - 1) + col];
                 checkState(sample >= 0 && sample <= 255);
-                fixedSamples[BANDS * width * row + col] = (byte)(sample - 128);
+                fixedSamples[BANDS * width * row + col] = (byte)(sample);
             }
         }
         // TODO maybe don't allocate a second array, make fixedSamples off-heap to begin with
@@ -200,19 +200,21 @@ public final class TextureImage {
         int x = (int) (coordinate.getX() * width);
         int y = (int) (coordinate.getY() * height);
         int offset = BANDS * (width * y + x);
-        return new ColorSample(
+        ColorSample colorSample = new ColorSample(
                 getBytePixelData().get(offset),
-                getBytePixelData().get(offset+1),
-                getBytePixelData().get(offset+2),
-                getBytePixelData().get(offset+3)
+                getBytePixelData().get(offset + 1),
+                getBytePixelData().get(offset + 2),
+                getBytePixelData().get(offset + 3)
         );
+        LOG.trace("Pixel at {}x{} is {} (from {})", x, y, colorSample, filename);
+        return colorSample;
     }
 
     public void uploadGl(int boundTarget) {
         checkArgument(!unloaded);
         GL11.glTexImage2D( // TODO add a metrics timer here
-                boundTarget, 0, GL11.GL_RGBA, getWidth(), getHeight(), 0,
-                GL11.GL_RGBA, GL11.GL_BYTE, bytePixelData
+                boundTarget, 0, GL11.GL_RGBA8, getWidth(), getHeight(), 0,
+                GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, bytePixelData
         );
     }
 }
