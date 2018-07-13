@@ -24,13 +24,11 @@
             Managed state, just integers and booleans
                 Proper hotloading including preserving state
             Rewind
-            Effecient preloading for rewind
+            Efficient preloading for rewind
 
         Backlog features
-            Arbitrary savestates
-            Hot swapping code
-            Sound
             Saving/Loading state
+            Sound
             Fancy mouse cursor
             Sprite positions
             Advance sprite frame / pause sprite execution
@@ -44,6 +42,9 @@
             Wait timers
             Show length of sprite
             Named sprite frames
+            Pause logical time whenever loading templates / use loading screen
+            Optionally log all handled events and servicer actions
+            Add Sprite Locations
             Layers
 
         Maintenance
@@ -65,16 +66,8 @@
                 Support unloading of textures
                 Allow loading to happen in a seperate thread so we can begin preloading early but not too early
             Trim texture to remove transparent border area
-            Performace instrumentation, showing VRAM and RAM used etc
+            Performance instrumentation, showing VRAM and RAM used etc
             Compress a whole sprite together, should compress much better than frame at a time
-
-        Bugs
-           FPS Control should reset after onBegin, right now all frames are unrendered during onBegin
-
-        Scripter requested features
-            Pause logical time whenever loading templates / use loading screen
-            Optionally log all handled events and servicer actions
-            Add Sprite Locations
 
      GLOSSARY
         Global clock frame (clock frame)
