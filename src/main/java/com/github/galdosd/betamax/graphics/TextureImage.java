@@ -171,8 +171,9 @@ public final class TextureImage {
         byte[] fixedSamples = new byte[sampleCount];
         for (int row = height - 1; row >= 0; row--) {
             for (int col = (width - 1) * BANDS; col >= 0; col--) {
-                fixedSamples[BANDS * width * row + col] =
-                        (byte)(samples[BANDS * width * (height - row - 1) + col] - 128);
+                int sample = samples[BANDS * width * (height - row - 1) + col];
+                checkState(sample >= 0 && sample <= 255);
+                fixedSamples[BANDS * width * row + col] = (byte)(sample - 128);
             }
         }
         // TODO maybe don't allocate a second array, make fixedSamples off-heap to begin with
