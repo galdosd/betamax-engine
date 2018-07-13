@@ -108,7 +108,7 @@ public class BetamaxGlProgram extends GlProgramBase {
     }
 
     @Override protected void leftMouseClickEvent(TextureCoordinate coordinate) {
-        LOG.trace("Clicked at {} x {}", coordinate.getX(), coordinate.getY());
+        LOG.debug("Clicked at {} x {}", coordinate.getX(), coordinate.getY());
         Optional<SpriteName> clickedSprite = spriteRegistry.getSpriteAtCoordinate(coordinate);
         if(clickedSprite.isPresent()) {
             LOG.debug("Clicked on sprite {}", clickedSprite.get());

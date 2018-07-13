@@ -10,6 +10,7 @@ import java.awt.image.Raster;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Optional;
@@ -45,10 +46,10 @@ public class TextureImages {
                 checkArgument(width > 0 && height > 0 && width < 16384 && height < 16384,
                         "bad image size %sx%s", width, height);
 
-                ByteBuffer bytePixelData = MemoryUtil.memAlloc(colorSamples * Float.BYTES);
+                ByteBuffer bytePixelData = MemoryUtil.memAlloc(colorSamples);
                 int readPixelBytes = readChannel.read(bytePixelData); // TODO add metrics timer
                 bytePixelData.flip();
-                checkState(colorSamples * Float.BYTES == readPixelBytes, "read failure: cache file pixel data");
+                checkState(colorSamples == readPixelBytes, "read failure: cache file pixel data");
 
                 checkState(bytePixelData.position()==0);
                 LOG.info("Loaded from cache: {}", filename);

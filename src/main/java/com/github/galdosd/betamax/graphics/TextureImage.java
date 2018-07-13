@@ -79,12 +79,13 @@ public final class TextureImage {
         int y = (int) (coordinate.getY() * height);
         int offset = TextureImages.BANDS * (width * y + x);
         ColorSample colorSample = new ColorSample(
-                getBytePixelData().get(offset),
-                getBytePixelData().get(offset + 1),
-                getBytePixelData().get(offset + 2),
-                getBytePixelData().get(offset + 3)
+                // these bytes have unsigned data stored on them
+                getBytePixelData().get(offset) & 0xFF,
+                getBytePixelData().get(offset + 1) & 0xFF,
+                getBytePixelData().get(offset + 2) & 0xFF,
+                getBytePixelData().get(offset + 3) & 0xFF
         );
-        LOG.trace("Pixel at {}x{} is {} (from {})", x, y, colorSample, filename);
+        LOG.debug("Pixel at {}x{} is {} (from {})", x, y, colorSample, filename);
         return colorSample;
     }
 
