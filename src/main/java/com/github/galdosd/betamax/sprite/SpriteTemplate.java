@@ -3,9 +3,7 @@ package com.github.galdosd.betamax.sprite;
 import com.github.galdosd.betamax.FrameClock;
 import com.github.galdosd.betamax.graphics.Texture;
 import com.github.galdosd.betamax.graphics.TextureCoordinate;
-import com.github.galdosd.betamax.graphics.TextureImage;
-import com.google.common.base.Joiner;
-import org.lwjgl.system.CallbackI;
+import com.github.galdosd.betamax.graphics.TextureImages;
 import org.reflections.Reflections;
 import org.reflections.scanners.ResourcesScanner;
 import org.slf4j.LoggerFactory;
@@ -38,7 +36,7 @@ public final class SpriteTemplate {
         checkArgument(0!=spriteFilenames.size(), "no sprite frame files found for " + pkgName);
         LOG.debug("Loading {}-frame sprite {}", spriteFilenames.size(), pkgName);
         textures = spriteFilenames.stream().map(name -> {
-            Texture texture = new Texture(TextureImage.fromRgbaFile(name, false, false));
+            Texture texture = new Texture(TextureImages.fromRgbaFile(name, false, false));
             texture.bind(GL_TEXTURE_2D);
             texture.btSetParameters();
             texture.btUploadTextureUnit();
