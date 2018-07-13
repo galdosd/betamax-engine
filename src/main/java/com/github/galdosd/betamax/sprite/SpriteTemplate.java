@@ -30,7 +30,7 @@ public final class SpriteTemplate {
     private final int textureCount;
 
     public SpriteTemplate(String pkgName) {
-        Reflections reflections = new Reflections(pkgName, new ResourcesScanner());
+        Reflections reflections = new Reflections(pkgName+".", new ResourcesScanner());
         // TODO eliminate Reflections log line
         List<String> spriteFilenames = reflections.getResources(Pattern.compile(".*\\.tif"))
                 .stream().sorted()
