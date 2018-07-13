@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
+    NOTES
+       sync; echo 3 | sudo tee /proc/sys/vm/drop_caches
     TODO
         Bugs
         
