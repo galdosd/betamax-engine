@@ -46,6 +46,7 @@ public class SpriteRegistry {
     // this should also not be called before the BEGIN event is processed or moment events would happen early
     // again, leave that to scripts
     public Sprite createSprite(String templateName, SpriteName spriteName) {
+        LOG.debug("Creating {} (from template {})", spriteName, templateName);
         Sprite sprite = spriteTemplateRegistry.getTemplate(templateName).create(spriteName, frameClock);
         addSprite(sprite);
         enqueueSpriteEvent(new SpriteEvent(EventType.SPRITE_CREATE, spriteName, 0));
@@ -69,6 +70,7 @@ public class SpriteRegistry {
     }
 
     public void destroySprite(SpriteName spriteName) {
+        LOG.debug("Destroying {}", spriteName);
         Sprite sprite = getSpriteByName(spriteName);
         registeredSprites.remove(spriteName);
         boolean wasRemovedFromList = orderedSprites.remove(sprite);

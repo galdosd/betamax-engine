@@ -111,7 +111,7 @@ public class BetamaxGlProgram extends GlProgramBase {
         LOG.trace("Clicked at {} x {}", coordinate.getX(), coordinate.getY());
         Optional<SpriteName> clickedSprite = spriteRegistry.getSpriteAtCoordinate(coordinate);
         if(clickedSprite.isPresent()) {
-            LOG.info("Clicked on sprite {}", clickedSprite.get());
+            LOG.debug("Clicked on sprite {}", clickedSprite.get());
             spriteRegistry.enqueueSpriteEvent(new SpriteEvent(EventType.SPRITE_CLICK, clickedSprite.get(), 0));
         }
     }
