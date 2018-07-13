@@ -4,9 +4,6 @@ import lombok.NonNull;
 import org.lwjgl.opengl.GL11;
 import org.slf4j.LoggerFactory;
 
-import java.nio.ByteBuffer;
-import java.nio.FloatBuffer;
-
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.lwjgl.opengl.GL11.*;
 
@@ -55,13 +52,7 @@ public final class Texture {
 
     public void btUploadTextureUnit() {
         rebind();
-        ByteBuffer bytePixelData = textureImage.getBytePixelData();
-        bytePixelData.position(0);
-        glTexImage2D( // TODO add a metrics timer here
-                // TODO GL_INT or something would be more precise maybe but i couldn't get it to work
-                boundTarget, 0, GL_RGBA, textureImage.getWidth(), textureImage.getHeight(), 0,
-                GL_RGBA, GL_FLOAT, bytePixelData
-        );
+        textureImage.uploadGl(boundTarget);
     }
 
     public boolean isTransparentAtCoordinate(TextureCoordinate coordinate) {

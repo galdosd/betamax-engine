@@ -2,6 +2,7 @@ package com.github.galdosd.betamax.graphics;
 
 import com.github.galdosd.betamax.OurTool;
 import lombok.Getter;
+import org.lwjgl.opengl.GL11;
 import org.lwjgl.system.MemoryUtil;
 import org.slf4j.LoggerFactory;
 
@@ -81,6 +82,7 @@ public final class TextureImage {
     }
 
     private void saveToCache() throws IOException {
+        checkArgument(!unloaded);
         // FIXME we should only save 1 byte per sample not the damn float -- at least test this with LZ4, disadvantage
         // is still have to convert to floats and that may be expensive? LZ4 is not dumb, it may be just fine
         try(FileChannel fileChannel = OurTool.writeCached(CACHE_KEY, filename)) {
@@ -149,8 +151,7 @@ public final class TextureImage {
                 filename, width, height, raster.getNumBands(),
                 raster.getSampleModel().getDataType());
 
-        float[] pixels = raster.getPixels(0, 0, width, height, (float[]) null);
-        checkState(pixels.length == (BANDS * width * height));
+        int[] pixels = raster.getPixels(0, 0, width, height, (int[]) null);
         ByteBuffer pixelData = convertForGl(width, height, pixels);
 
         return new TextureImage(width, height, pixelData, filename);
@@ -160,22 +161,24 @@ public final class TextureImage {
      *
      * 1. we have to turn it upside down because opengl texture coordinates have the origin
      *    at the southwest corner but most image formats start from the northwest corner
-     * 2. Raster#getPixels gives us samples in 0.0f to 255.0f range, but opengl wants 0.0f to 1.0f
-     * 3. we need an off-heap LWJGL native FloatBuffer, not a java on-heap FloatBuffer, so we can send
+     * 2. Raster#getPixels gives us unsigned ints but opengl wants signed bytes
+     * 3. we need an off-heap LWJGL native ByteBuffer FloatBuffer, not a java on-heap FloatBuffer, so we can send
      *    the data to opengl later
      */
-    private static ByteBuffer convertForGl(int width, int height, float[] pixels) {
-        float[] upsideDownPixels = new float[pixels.length];
+    private static ByteBuffer convertForGl(int width, int height, int[] samples) {
+        final int sampleCount = BANDS * width * height;
+        checkState(samples.length == sampleCount);
+        byte[] fixedSamples = new byte[sampleCount];
         for (int row = height - 1; row >= 0; row--) {
             for (int col = (width - 1) * BANDS; col >= 0; col--) {
-                upsideDownPixels[BANDS * width * row + col] =
-                        pixels[BANDS * width * (height - row - 1) + col] / 255.0f;
+                fixedSamples[BANDS * width * row + col] =
+                        (byte)(samples[BANDS * width * (height - row - 1) + col] - 128);
             }
         }
-        // TODO maybe don't allocate a second array, make upsideDownPixels off-heap to begin with
-        ByteBuffer bytePixelData = MemoryUtil.memAlloc(upsideDownPixels.length * Float.BYTES);
-        FloatBuffer pixelData = bytePixelData.asFloatBuffer();
-        pixelData.put(upsideDownPixels, 0, upsideDownPixels.length);
+        // TODO maybe don't allocate a second array, make fixedSamples off-heap to begin with
+        ByteBuffer bytePixelData = MemoryUtil.memAlloc(sampleCount);
+        bytePixelData.put(fixedSamples, 0, sampleCount);
+        bytePixelData.flip();
         checkState(bytePixelData.position()==0);
         return bytePixelData;
     }
@@ -185,25 +188,30 @@ public final class TextureImage {
      * for opengl. no, finalizers are not a reasonable solution, they're crazy.
      */
     public void unload() {
-        checkArgument(unloaded==false);
+        checkArgument(!unloaded);
         MemoryUtil.memFree(bytePixelData);
         unloaded = true;
     }
 
     public ColorSample getPixel(TextureCoordinate coordinate) {
-        checkArgument(unloaded==false);
+        checkArgument(!unloaded);
         // XXX: should this be rounding or truncating? i have no idea
         int x = (int) (coordinate.getX() * width);
         int y = (int) (coordinate.getY() * height);
         int offset = BANDS * (width * y + x);
-        FloatBuffer pixelData = getBytePixelData().asFloatBuffer();
-        pixelData.position(0);
         return new ColorSample(
-                pixelData.get(offset),
-                pixelData.get(offset+1),
-                pixelData.get(offset+2),
-                pixelData.get(offset+3)
+                getBytePixelData().get(offset),
+                getBytePixelData().get(offset+1),
+                getBytePixelData().get(offset+2),
+                getBytePixelData().get(offset+3)
         );
     }
 
+    public void uploadGl(int boundTarget) {
+        checkArgument(!unloaded);
+        GL11.glTexImage2D( // TODO add a metrics timer here
+                boundTarget, 0, GL11.GL_RGBA, getWidth(), getHeight(), 0,
+                GL11.GL_RGBA, GL11.GL_BYTE, bytePixelData
+        );
+    }
 }
