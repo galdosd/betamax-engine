@@ -21,6 +21,7 @@ public final class Texture {
     private final int handle;
     public final TextureImage textureImage;
     private int boundTarget = 0;
+    // FIXME unload from VRAM when done
 
     public Texture(@NonNull TextureImage textureImage) {
         handle = GL11.glGenTextures();

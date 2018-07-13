@@ -10,6 +10,7 @@
             Load screen / reset frame clock any time a synchronous load happens
 
             Fast texture loading
+                GL bytes instead of floats
                 Show VRAM and RAM texture usage, metrics gauges
                 More Metrics timers
                 Cooked Metrics Clock so pause time does not count
@@ -20,6 +21,7 @@
                 LZ4 full sprite
                 load_template async
                 evict_template
+                Unload Texture from VRAM also
 
             Display list of sprites and their current moments
             Single button to tag a moment on the disk file?
