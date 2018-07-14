@@ -9,19 +9,6 @@
             Scripter timers
             Load screen / reset frame clock any time a synchronous load happens
 
-            Fast texture loading
-                GL bytes instead of floats
-                Show VRAM and RAM texture usage, metrics gauges
-                More Metrics timers
-                Cooked Metrics Clock so pause time does not count
-                Swapping textures out of VRAM
-                LZ4 single frame
-                Pixel click bitmap
-                Keep textureimage in RAM as LZ4
-                LZ4 full sprite
-                load_template async
-                evict_template
-                Unload Texture from VRAM also
 
             Display list of sprites and their current moments
             Single button to tag a moment on the disk file?
@@ -71,7 +58,19 @@
                 Allow loading to happen in a seperate thread so we can begin preloading early but not too early
             Trim texture to remove transparent border area
             Performance instrumentation, showing VRAM and RAM used etc
-            Compress a whole sprite together, should compress much better than frame at a time
+            Put data together to help with HDD seek time (for Steam release; on Gallery we use SSD so don't matter)
+            Fast texture loading
+                Show VRAM and RAM texture usage, metrics gauges
+                More Metrics timers
+                Cooked Metrics Clock so pause time does not count
+                Swapping textures out of VRAM
+                LZ4 single frame
+                Pixel click bitmap
+                Keep textureimage in RAM as LZ4
+                LZ4 full sprite
+                load_template async
+                evict_template
+                Unload Texture from VRAM also
 
      GLOSSARY
         Global clock frame (clock frame)

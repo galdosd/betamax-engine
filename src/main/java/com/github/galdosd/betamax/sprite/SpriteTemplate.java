@@ -110,6 +110,7 @@ public final class SpriteTemplate {
         }
 
         @Override public void setClickableEverywhere(boolean clickableEverywhere) {
+            LOG.debug("{}.setClickableEverywhere({})", getName(), clickableEverywhere);
            this.clickableEverywhere = clickableEverywhere;
         }
 
