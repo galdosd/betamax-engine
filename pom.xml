@@ -20,12 +20,11 @@
             Rewind
             Invalidate cache based on file size, last mod
             Efficient preloading for rewind
+            Sound
 
         Backlog features
-            Saving/Loading state
-            Sound
             Fancy mouse cursor
-            Sprite positions
+            Sprite positions/sizes
             Advance sprite frame / pause sprite execution
             Fancy framebuffer CRT style post effects
             basic steam support
@@ -34,6 +33,7 @@
             "this" sprite reference / replace_sprite()
             Named sprite frames
             safe sprite references
+            @regarding
 
         Maintenance
             Refactoring
