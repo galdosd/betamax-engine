@@ -60,8 +60,7 @@ public class ScriptWorld implements LogicHandler {
         }
     }
 
-    public void loadScript(String scriptName) {
-        LOG.info("Evaluating jython script from {}", scriptName);
+    public void loadScripts(String... scriptNames) {
         pythonInterpreter.set("_BETAMAX_INTERNAL_script_servicer", servicer);
         // I know it looks wacky. this is the best way i could figure to smuggle our ScriptServicer
         // instance in to the betamax module without making it too blatantly available to the main script
@@ -73,13 +72,16 @@ public class ScriptWorld implements LogicHandler {
                 "import betamax as _BETAMAX_INTERNAL_servicer_registration; "+
                 "_BETAMAX_INTERNAL_servicer_registration.register_script_servicer(_BETAMAX_INTERNAL_script_servicer);"
         );
-        try (InputStream scriptStream = OurTool.streamResource(Global.scriptBase + scriptName)) {
-            spriteRegistry.setAcceptingCallbacks(true);
-            pythonInterpreter.execfile(scriptStream, scriptName);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } finally {
-            spriteRegistry.setAcceptingCallbacks(false);
+        for(String scriptName: scriptNames) {
+            try (InputStream scriptStream = OurTool.streamResource(Global.scriptBase + scriptName)) {
+                spriteRegistry.setAcceptingCallbacks(true);
+                LOG.info("Evaluating jython script from {}", scriptName);
+                pythonInterpreter.execfile(scriptStream, scriptName);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            } finally {
+                spriteRegistry.setAcceptingCallbacks(false);
+            }
         }
     }
 }

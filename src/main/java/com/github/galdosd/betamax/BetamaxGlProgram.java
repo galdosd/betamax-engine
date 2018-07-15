@@ -57,7 +57,8 @@ public class BetamaxGlProgram extends GlProgramBase {
             spriteRegistry = new SpriteRegistry(spriteTemplateRegistry, getFrameClock());
         }
         scriptWorld = new ScriptWorld(spriteRegistry);
-        scriptWorld.loadScript(Global.mainScript);
+        String[] scriptNames = Global.mainScript.split(",");
+        scriptWorld.loadScripts(scriptNames);
         getFrameClock().resetLogicFrames();
     }
 

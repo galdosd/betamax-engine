@@ -12,8 +12,12 @@ public final class Global {
     public final static MetricRegistry metrics = new MetricRegistry();
     public final static String spriteBase = "com.github.galdosd.betamax.sprites.";
     public final static String scriptBase = "com/github/galdosd/betamax/scripts/";
-    public final static int defaultTargetFps = 8;
 
+    public final static int defaultTargetFps = 8;
+    /** Optionally, you can have multiple scripts loaded in order, comma seperated.
+     *  This is necessary because since we load from resources so jars will work,
+     *  we end up breaking normal python import keyword
+     */
     public final static String mainScript = fromProperty("betamax.mainScript", "game.py");
     public final static String textureCacheDir = fromProperty("betamax.textureCacheDir");
 }
