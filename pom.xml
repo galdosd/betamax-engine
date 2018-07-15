@@ -6,14 +6,13 @@
         Bugs
         
         Working set features
-            Scripter timers
+            Scripter wait timers
             Load screen / reset frame clock any time a synchronous load happens
-
-
             Display list of sprites and their current moments
             Single button to tag a moment on the disk file?
             Managed state, just integers and booleans
                 Proper hotloading including preserving state
+            Layers
             Rewind
             Efficient preloading for rewind
 
@@ -28,15 +27,8 @@
             osx support
             steam achievements
             "this" sprite reference / replace_sprite()
-
-        Scripter requested
-            Wait timers
-            Show length of sprite
             Named sprite frames
-            Pause logical time whenever loading templates / use loading screen
-            Optionally log all handled events and servicer actions
-            Add Sprite Locations
-            Layers
+            safe sprite references
 
         Maintenance
             Refactoring
