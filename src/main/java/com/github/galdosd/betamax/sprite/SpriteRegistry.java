@@ -1,6 +1,7 @@
 package com.github.galdosd.betamax.sprite;
 
 import com.github.galdosd.betamax.FrameClock;
+import com.github.galdosd.betamax.graphics.SpriteTemplateRegistry;
 import com.github.galdosd.betamax.graphics.TextureCoordinate;
 import com.github.galdosd.betamax.scripting.EventType;
 import com.google.common.collect.Ordering;

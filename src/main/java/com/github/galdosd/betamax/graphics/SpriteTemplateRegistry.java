@@ -1,4 +1,4 @@
-package com.github.galdosd.betamax.sprite;
+package com.github.galdosd.betamax.graphics;
 
 import com.github.galdosd.betamax.Global;
 

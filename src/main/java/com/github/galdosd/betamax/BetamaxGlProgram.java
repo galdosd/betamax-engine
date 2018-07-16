@@ -11,7 +11,7 @@ import com.github.galdosd.betamax.scripting.ScriptWorld;
 import com.github.galdosd.betamax.sprite.SpriteEvent;
 import com.github.galdosd.betamax.sprite.SpriteName;
 import com.github.galdosd.betamax.sprite.SpriteRegistry;
-import com.github.galdosd.betamax.sprite.SpriteTemplateRegistry;
+import com.github.galdosd.betamax.graphics.SpriteTemplateRegistry;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.LoggerFactory;
 
