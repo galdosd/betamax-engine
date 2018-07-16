@@ -3,6 +3,7 @@ package com.github.galdosd.betamax.sprite;
 import com.github.galdosd.betamax.FrameClock;
 import com.github.galdosd.betamax.graphics.TextureCoordinate;
 import com.github.galdosd.betamax.scripting.EventType;
+import com.google.common.collect.Ordering;
 import lombok.Getter;
 import lombok.Setter;
 import org.slf4j.LoggerFactory;
@@ -22,12 +23,18 @@ public class SpriteRegistry {
 
     private final FrameClock frameClock;
 
-    // TODO sprite destruction will be O(number of sprites on screen)
-    // this will probably never significantly impact performance tho
-    // could just store the index anyway
     private final Map<SpriteName,Sprite> registeredSprites = new HashMap<>();
-    private final Deque<Sprite> orderedSprites = new LinkedList<>();
     private final Queue<SpriteEvent> enqueuedSpriteEvents = new LinkedList<>();
+
+    Ordering<Sprite> creationSerialOrdering = Ordering.natural().onResultOf(Sprite::getCreationSerial);
+    Ordering<Sprite> layerOrdering = Ordering.natural().onResultOf(Sprite::getLayer);
+    Ordering<Sprite> RENDER_ORDERING = layerOrdering.compound(creationSerialOrdering);
+    private final NavigableSet<SpriteName> spritesByRenderOrder = new TreeSet<>(
+            (l, r) -> {
+                return RENDER_ORDERING.compare(getSpriteByName(l), getSpriteByName(r));
+            }
+    );
+
     public final SpriteTemplateRegistry spriteTemplateRegistry;
 
     // we track the last dispatched moment so that if logic is paused, the same frame can be processed many times
@@ -60,7 +67,8 @@ public class SpriteRegistry {
         SpriteName name = sprite.getName();
         checkArgument(!registeredSprites.containsKey(name), "duplicate sprite name: " + name);
         registeredSprites.put(name, sprite);
-        orderedSprites.add(sprite);
+        spritesByRenderOrder.add(name);
+        LOG.trace("New render order: {}", spritesByRenderOrder);
     }
 
     public Sprite getSpriteByName(SpriteName spriteName) {
@@ -73,14 +81,15 @@ public class SpriteRegistry {
         LOG.debug("Destroying {}", spriteName);
         Sprite sprite = getSpriteByName(spriteName);
         registeredSprites.remove(spriteName);
-        boolean wasRemovedFromList = orderedSprites.remove(sprite);
+        boolean wasRemovedFromList = spritesByRenderOrder.remove(spriteName);
         checkState(wasRemovedFromList);
         enqueueSpriteEvent(new SpriteEvent(EventType.SPRITE_DESTROY, spriteName, 0));
+        LOG.trace("New render order: {}", spritesByRenderOrder);
     }
 
     public void renderAll() {
-        for(Sprite sprite: orderedSprites) {
-            sprite.render();
+        for(SpriteName spriteName: spritesByRenderOrder) {
+            getSpriteByName(spriteName).render();
         }
     }
 
@@ -117,11 +126,11 @@ public class SpriteRegistry {
         // while we are iterating over orderedSprites, resulting in a ConcurrentModificationException
         // ...ask me how i know
         List<SpriteEvent> generatedEvents = new ArrayList<>();
-        for(Sprite sprite: orderedSprites) {
+        for(SpriteName spriteName: spritesByRenderOrder) {
             SpriteEvent momentEvent = new SpriteEvent(
                     EventType.SPRITE_MOMENT,
-                    sprite.getName(),
-                    sprite.getRenderedFrame()
+                    spriteName,
+                    getSpriteByName(spriteName).getRenderedFrame()
             );
             generatedEvents.add(momentEvent);
         }
@@ -140,9 +149,8 @@ public class SpriteRegistry {
 
     public Optional<SpriteName> getSpriteAtCoordinate(TextureCoordinate coordinate) {
         // look through sprites in reverse draw order, ie from front to back
-        Iterator<Sprite> spriteIterator = orderedSprites.descendingIterator();
-        while(spriteIterator.hasNext()) {
-            Sprite sprite = spriteIterator.next();
+        for(SpriteName spriteName: spritesByRenderOrder.descendingSet()) {
+            Sprite sprite = getSpriteByName(spriteName);
             if (sprite.isClickableAtCoordinate(coordinate)) {
                 return Optional.of(sprite.getName());
             }

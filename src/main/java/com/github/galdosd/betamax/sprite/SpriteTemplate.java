@@ -4,6 +4,8 @@ import com.github.galdosd.betamax.FrameClock;
 import com.github.galdosd.betamax.graphics.Texture;
 import com.github.galdosd.betamax.graphics.TextureCoordinate;
 import com.github.galdosd.betamax.graphics.TextureImages;
+import lombok.Getter;
+import lombok.Setter;
 import org.reflections.Reflections;
 import org.reflections.scanners.ResourcesScanner;
 import org.slf4j.LoggerFactory;
@@ -26,6 +28,7 @@ public final class SpriteTemplate {
             LoggerFactory.getLogger(new Object(){}.getClass().getEnclosingClass());
     private final List<Texture> textures;
     private final int textureCount;
+    private static int nextCreationSerial = 0;
 
     public SpriteTemplate(String pkgName) {
         Reflections reflections = new Reflections(pkgName+".", new ResourcesScanner());
@@ -49,7 +52,6 @@ public final class SpriteTemplate {
         return new SpriteImpl(name, frameClock);
     }
 
-
     private void renderTemplate(int whichFrame) {
         // FIXME very leaky abstraction, bring more of the VBO and VAO stuff into SpriteTemplate
         // while removing the VBO/VAO stuff from GlProgramBase
@@ -68,13 +70,16 @@ public final class SpriteTemplate {
     private class SpriteImpl implements Sprite {
         private final SpriteName name;
         private final FrameClock frameClock;
+        private final int creationSerial;
         private int initialFrame;
         private boolean clickableEverywhere = false;
+        @Getter private int layer = 0;
 
         private SpriteImpl(SpriteName name, FrameClock frameClock){
             this.frameClock = frameClock;
             this.name = name;
             initialFrame = frameClock.getCurrentFrame();
+            creationSerial = nextCreationSerial++;
         }
 
         @Override public void render() {
@@ -110,8 +115,17 @@ public final class SpriteTemplate {
         }
 
         @Override public void setClickableEverywhere(boolean clickableEverywhere) {
-            LOG.debug("{}.setClickableEverywhere({})", getName(), clickableEverywhere);
-           this.clickableEverywhere = clickableEverywhere;
+            LOG.debug("{}.setClickableEverywhere({})", this, clickableEverywhere);
+            this.clickableEverywhere = clickableEverywhere;
+        }
+
+        @Override public void setLayer(int layer) {
+            LOG.debug("{}.setLayer({})", this, layer);
+            this.layer = layer;
+        }
+
+        @Override public int getCreationSerial() {
+            return creationSerial;
         }
 
         @Override public int getTotalFrames() {
