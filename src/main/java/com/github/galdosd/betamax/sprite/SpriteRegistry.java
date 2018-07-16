@@ -26,13 +26,11 @@ public class SpriteRegistry {
     private final Map<SpriteName,Sprite> registeredSprites = new HashMap<>();
     private final Queue<SpriteEvent> enqueuedSpriteEvents = new LinkedList<>();
 
-    Ordering<Sprite> creationSerialOrdering = Ordering.natural().onResultOf(Sprite::getCreationSerial);
-    Ordering<Sprite> layerOrdering = Ordering.natural().onResultOf(Sprite::getLayer);
-    Ordering<Sprite> RENDER_ORDERING = layerOrdering.compound(creationSerialOrdering);
+    private static final Ordering<Sprite> creationSerialOrdering = Ordering.natural().onResultOf(Sprite::getCreationSerial);
+    private static final Ordering<Sprite> layerOrdering = Ordering.natural().onResultOf(Sprite::getLayer);
+    private static final Ordering<Sprite> RENDER_ORDERING = layerOrdering.compound(creationSerialOrdering);
     private final NavigableSet<SpriteName> spritesByRenderOrder = new TreeSet<>(
-            (l, r) -> {
-                return RENDER_ORDERING.compare(getSpriteByName(l), getSpriteByName(r));
-            }
+            (l, r) -> RENDER_ORDERING.compare(getSpriteByName(l), getSpriteByName(r))
     );
 
     public final SpriteTemplateRegistry spriteTemplateRegistry;
