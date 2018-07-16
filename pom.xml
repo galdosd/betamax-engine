@@ -12,15 +12,16 @@
                 Display callbacks
                 Display state
                 Display history
-            Right click to select sprite
+                Right click to select sprite
+                Right click menus?
             Scripter timers
             Managed state, just integers and booleans
                 Proper hotloading including preserving state
                 Save/load state
+            Sound
             Rewind
             Invalidate cache based on file size, last mod
             Efficient preloading for rewind
-            Sound
 
         Backlog features
             Fancy mouse cursor
