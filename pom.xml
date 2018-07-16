@@ -6,6 +6,8 @@
         Bugs
         
         Working set features
+            Exceptions should show python filename
+            Save info on callback to debug duplicate callbacks and show source in callbacks inspector
             Load screen / reset frame clock any time a synchronous load happens
             Display list of sprites and their current moments
                 Display global info
@@ -14,6 +16,7 @@
                 Display history
                 Right click to select sprite
                 Right click menus?
+                Hide/show sprite/highlight visually
             Scripter timers
             Managed state, just integers and booleans
                 Proper hotloading including preserving state
