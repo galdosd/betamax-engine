@@ -14,6 +14,7 @@
                 Proper hotloading including preserving state
             Layers
             Rewind
+            Invalidate cache based on file size, last mod
             Efficient preloading for rewind
 
         Backlog features

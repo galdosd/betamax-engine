@@ -65,7 +65,8 @@ public final class ScriptServicer {
         // callbacks should be set up during script initialization, initial sprites should be drawn during onBegin
         // (so if state is saved onBegin can just be skipped and the sprite stack can be restored)
         checkArgument(spriteRegistry.isAcceptingCallbacks(), "cannot alter callbacks after already begun");
-        checkArgument(!callbacks.containsKey(spriteEvent), "Callback already registered for %s", spriteEvent);
+        checkArgument(!callbacks.containsKey(spriteEvent), "Callback already registered for %s:\n     %s",
+                spriteEvent, callbacks.get(spriteEvent));
         callbacks.put(spriteEvent, scriptCallback);
     }
 

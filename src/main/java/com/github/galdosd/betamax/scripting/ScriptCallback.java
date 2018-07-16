@@ -5,4 +5,5 @@ package com.github.galdosd.betamax.scripting;
  */
 public interface ScriptCallback {
     void invoke();
+    String toString();
 }
