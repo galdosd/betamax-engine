@@ -78,8 +78,8 @@ public class SpriteRegistry {
     public void destroySprite(SpriteName spriteName) {
         LOG.debug("Destroying {}", spriteName);
         Sprite sprite = getSpriteByName(spriteName);
-        registeredSprites.remove(spriteName);
         boolean wasRemovedFromList = spritesByRenderOrder.remove(spriteName);
+        registeredSprites.remove(spriteName);
         checkState(wasRemovedFromList);
         enqueueSpriteEvent(new SpriteEvent(EventType.SPRITE_DESTROY, spriteName, 0));
         LOG.trace("New render order: {}", spritesByRenderOrder);
