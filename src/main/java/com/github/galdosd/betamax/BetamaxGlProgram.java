@@ -13,6 +13,7 @@ import com.github.galdosd.betamax.sprite.SpriteEvent;
 import com.github.galdosd.betamax.sprite.SpriteName;
 import com.github.galdosd.betamax.sprite.SpriteRegistry;
 import com.github.galdosd.betamax.graphics.SpriteTemplateRegistry;
+import javafx.application.Platform;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +35,6 @@ public class BetamaxGlProgram extends GlProgramBase {
     private final DevConsole devConsole = new DevConsole();
     private ScriptWorld scriptWorld;
     private SpriteRegistry spriteRegistry;
-
 
     public static void main(String[] args) {
         new BetamaxGlProgram().run();
@@ -101,11 +101,35 @@ public class BetamaxGlProgram extends GlProgramBase {
     }
 
     @Override protected void keyPressEvent(int key, int mods) {
-        // restart the world if Ctrl+F5 is pressed
-        // just reload scripts without affecting sprite state if just F5 is pressed
-        // FIXME: right now state is managed in-python so the state will still be dropped
-        // once we manage state in-engine we'll be fine
-        if(key == GLFW.GLFW_KEY_F5) {
+        // exit upon ESC key
+        if (key == GLFW.GLFW_KEY_ESCAPE) {
+            closeWindow();
+            LOG.info("Exiting");
+        }
+        // show FPS metrics upon pause/break key
+        else if(key == GLFW.GLFW_KEY_PRINT_SCREEN) {
+            reportMetrics();
+        }
+        else if(key == GLFW.GLFW_KEY_TAB && getFrameClock().getPaused()) {
+            getFrameClock().stepFrame();
+            updateLogic();
+        }
+        else if (key == GLFW.GLFW_KEY_PAUSE) {
+            getFrameClock().setPaused(!getFrameClock().getPaused());
+            // FIXME this will fuck up the metrics,we need a cooked Clock for Metrics to ignore
+            // the passage of time during pause
+            // page up/down to change target FPS
+        } else if (key == GLFW.GLFW_KEY_PAGE_UP) {
+            getFrameClock().setTargetFps(getFrameClock().getTargetFps()+1);
+        } else if (key == GLFW.GLFW_KEY_PAGE_DOWN) {
+            if (getFrameClock().getTargetFps() > 1) {
+                getFrameClock().setTargetFps(getFrameClock().getTargetFps()-1);
+            }
+        } else if(key == GLFW.GLFW_KEY_F5) {
+            // restart the world if Ctrl+F5 is pressed
+            // just reload scripts without affecting sprite state if just F5 is pressed
+            // FIXME: right now state is managed in-python so the state will still be dropped
+            // once we manage state in-engine we'll be fine
             newWorld((mods&GLFW.GLFW_MOD_CONTROL)!=0);
         }
     }
@@ -121,18 +145,20 @@ public class BetamaxGlProgram extends GlProgramBase {
 
     /** cycle background color; can be helpful in debugging */
     private int colorcycler = 0;
+    private long nextConsoleUpdate = System.currentTimeMillis();
     @Override protected void updateView() {
         glClearColor(((float)Math.sin(colorcycler*0.05f) + 1)*0.5f, 0.8f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         spriteRegistry.renderAll();
+        if(System.currentTimeMillis() > nextConsoleUpdate) {
+            devConsole.updateSprites(spriteRegistry.getAllSprites());
+            nextConsoleUpdate = System.currentTimeMillis() + Global.devConsoleUpdateIntervalMillis;
+        }
     }
 
     @Override protected void updateLogic() {
         colorcycler++;
         spriteRegistry.dispatchEvents(scriptWorld);
-        if(getFrameClock().everyFewSeconds(1)) {
-           devConsole.updateSprites(spriteRegistry.getAllSprites());
-        }
     }
 
     @Override protected String getWindowTitle() { return "BETAMAX DEMO"; }
@@ -140,3 +166,4 @@ public class BetamaxGlProgram extends GlProgramBase {
     @Override protected int getWindowWidth() { return 960; }
     @Override protected boolean getDebugMode() { return true; }
 }
+

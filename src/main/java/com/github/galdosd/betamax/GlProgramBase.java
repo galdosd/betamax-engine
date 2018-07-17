@@ -4,6 +4,7 @@ import com.codahale.metrics.ConsoleReporter;
 import com.codahale.metrics.Timer;
 import com.github.galdosd.betamax.opengl.GlWindow;
 import com.github.galdosd.betamax.graphics.TextureCoordinate;
+import javafx.application.Platform;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.LoggerFactory;
@@ -65,6 +66,7 @@ public abstract class GlProgramBase {
                 while (!mainWindow.getShouldClose()) {
                     loopOnce();
                 }
+                closeWindow();
             }
         } finally {
             GlWindow.shutdownGlfw();
@@ -83,33 +85,17 @@ public abstract class GlProgramBase {
     // TODO break out input handling
     private void keyCallback(long window, int key, int scancode, int action, int mods) {
         if(action == GLFW.GLFW_PRESS) {
-            // exit upon ESC key
-            if (key == GLFW.GLFW_KEY_ESCAPE) {
-                closeWindow();
-            }
-            // show FPS metrics upon pause/break key
-            else if(key == GLFW.GLFW_KEY_PRINT_SCREEN) {
-               reporter.report();
-            }
-            else if (key == GLFW.GLFW_KEY_PAUSE) {
-                frameClock.setPaused(!frameClock.getPaused());
-                // FIXME this will fuck up the metrics,we need a cooked Clock for Metrics to ignore
-                // the passage of time during pause
-            // page up/down to change target FPS
-            } else if (key == GLFW.GLFW_KEY_PAGE_UP) {
-                frameClock.setTargetFps(frameClock.getTargetFps()+1);
-            } else if (key == GLFW.GLFW_KEY_PAGE_DOWN) {
-                if (frameClock.getTargetFps() > 1) {
-                    frameClock.setTargetFps(frameClock.getTargetFps()-1);
-                }
-            } else {
-                keyPressEvent(key, mods);
-            }
+            keyPressEvent(key, mods);
         }
+    }
+
+    protected final void reportMetrics() {
+        reporter.report();
     }
 
     protected final void closeWindow() {
         mainWindow.setShouldClose(true);
+        Platform.exit();
     }
 
     private void loopOnce() {

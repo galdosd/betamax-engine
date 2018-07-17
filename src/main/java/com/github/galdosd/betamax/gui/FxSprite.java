@@ -1,8 +1,10 @@
 package com.github.galdosd.betamax.gui;
 
+import com.github.galdosd.betamax.sprite.SpriteName;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 
 /**
@@ -10,11 +12,23 @@ import lombok.experimental.FieldDefaults;
  */
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public final class FxSprite extends FxObject {
+    @Getter @FxObject.IgnoreColumn final int tableIndex;
+
     SimpleStringProperty spriteName = new SimpleStringProperty();
     SimpleStringProperty template = new SimpleStringProperty();
     SimpleIntegerProperty moment = new SimpleIntegerProperty();
     SimpleIntegerProperty length = new SimpleIntegerProperty();
     SimpleIntegerProperty age = new SimpleIntegerProperty();
+    SimpleIntegerProperty layer = new SimpleIntegerProperty();
+    SimpleIntegerProperty serial = new SimpleIntegerProperty();
+
+    public FxSprite(int tableIndex) {
+        this.tableIndex = tableIndex;
+    }
+
+    public SpriteName getID() {
+        return new SpriteName(getSpriteName());
+    }
 
     public String getSpriteName() {
         return spriteName.get();
@@ -51,4 +65,17 @@ public final class FxSprite extends FxObject {
         this.age.set(age);
     }
 
+    public int getLayer() {
+        return layer.get();
+    }
+    public void setLayer(int layer) {
+        this.layer.set(layer);
+    }
+
+    public int getSerial() {
+        return serial.get();
+    }
+    public void setSerial(int serial) {
+        this.serial.set(serial);
+    }
 }

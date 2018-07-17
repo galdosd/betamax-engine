@@ -58,6 +58,12 @@ class GameLoopFrameClock implements FrameClock {
         nextLogicFrameTime += 1000 / targetFps;
     }
 
+    public void stepFrame() {
+        if(paused) {
+            frameCount++;
+        }
+    }
+
     public void sleepTillNextLogicFrame() {
         OurTool.sleepUntilPrecisely(nextLogicFrameTime - 1);
     }
@@ -72,7 +78,7 @@ class GameLoopFrameClock implements FrameClock {
     }
 
     /** return true at the first frame of each period of time of length secs in seconds */
-    public boolean everyFewSeconds(int secs) {
-        return 0 == getCurrentFrame() % (getTargetFps() * secs);
-    }
+//    public boolean everyFewSeconds(int secs) {
+//        return 0 == getCurrentFrame() % (getTargetFps() * secs);
+//    }
 }

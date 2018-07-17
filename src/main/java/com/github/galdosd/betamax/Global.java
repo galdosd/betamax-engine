@@ -20,4 +20,5 @@ public final class Global {
      */
     public final static String mainScript = fromProperty("betamax.mainScript", "objects.py");
     public final static String textureCacheDir = fromProperty("betamax.textureCacheDir");
+    public final static  int devConsoleUpdateIntervalMillis = 500;
 }

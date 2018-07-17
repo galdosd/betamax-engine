@@ -1,6 +1,5 @@
 package com.github.galdosd.betamax.gui;
 
-import com.github.galdosd.betamax.FrameClock;
 import com.github.galdosd.betamax.sprite.Sprite;
 import com.google.common.collect.Ordering;
 import javafx.application.Platform;
@@ -8,8 +7,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -23,27 +20,28 @@ public final class DevConsole {
     private final FxWindow window; // FIXME this gets replaced for some reason????
 
     public DevConsole() {
-        window = new FxWindow();
-        window.doLaunch();
+        window = FxWindow.singleton();
         LOG.info("FxWindow launched");
     }
+
     public void updateSprites(Collection<Sprite> sprites) {
+        final int[] tableIndex = {0};
         List<FxSprite> updatedFxSprites = sprites.stream()
+                .sorted(Ordering.natural().onResultOf(Sprite::getAge).reverse())
                 .map(sprite -> {
-                    FxSprite fxSprite = new FxSprite();
+                    FxSprite fxSprite = new FxSprite(tableIndex[0]++);
                     fxSprite.setSpriteName( sprite.getName().getName() );
                     fxSprite.setTemplate( sprite.getTemplateName() );
                     fxSprite.setMoment( sprite.getRenderedFrame() );
                     fxSprite.setLength( sprite.getTotalFrames() );
                     fxSprite.setAge( sprite.getAge() );
+                    fxSprite.setSerial( sprite.getCreationSerial() );
+                    fxSprite.setLayer( sprite.getLayer() );
                     return fxSprite;
                 })
-                .sorted(Ordering.natural().onResultOf(FxSprite::getAge).reverse())
                 .collect(toList());
 
         Platform.runLater( () -> {
-            LOG.debug("Updating sprite report: {}", updatedFxSprites);
-
             window.updateSpriteData(updatedFxSprites);
         });
     }
