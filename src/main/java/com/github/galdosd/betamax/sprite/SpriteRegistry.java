@@ -10,7 +10,6 @@ import lombok.Setter;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -29,12 +28,10 @@ public class SpriteRegistry {
     private final Map<SpriteName,Sprite> registeredSprites = new HashMap<>();
     private final Queue<SpriteEvent> enqueuedSpriteEvents = new LinkedList<>();
 
-    private static final Ordering<Sprite> creationSerialOrdering = Ordering.natural().onResultOf(Sprite::getCreationSerial);
-    private static final Ordering<Sprite> layerOrdering = Ordering.natural().onResultOf(Sprite::getLayer);
-    private static final Ordering<Sprite> RENDER_ORDERING = layerOrdering.compound(creationSerialOrdering);
-    private final NavigableSet<SpriteName> spritesByRenderOrder = new TreeSet<>(
-            (l, r) -> RENDER_ORDERING.compare(getSpriteByName(l), getSpriteByName(r))
-    );
+    private static final Ordering<Sprite> CREATION_ORDERING = Ordering.natural().onResultOf(Sprite::getCreationSerial);
+    private static final Ordering<Sprite> LAYER_ORDERING = Ordering.natural().onResultOf(Sprite::getLayer);
+    private static final Ordering<Sprite> RENDER_ORDERING = LAYER_ORDERING.compound(CREATION_ORDERING);
+    private final NavigableSet<SpriteName> spritesByRenderOrder = new TreeSet<>(RENDER_ORDERING.onResultOf(this::getSpriteByName));
 
     public final SpriteTemplateRegistry spriteTemplateRegistry;
 
@@ -148,7 +145,9 @@ public class SpriteRegistry {
 
     public Optional<SpriteName> getSpriteAtCoordinate(TextureCoordinate coordinate) {
         // look through sprites in reverse draw order, ie from front to back
-        for(SpriteName spriteName: spritesByRenderOrder.descendingSet()) {
+        List<SpriteName> spriteNames = spritesByRenderOrder.descendingSet().stream().collect(toList());
+        LOG.debug("Checking sprites for clickability: {}", spriteNames);
+        for(SpriteName spriteName: spriteNames) {
             Sprite sprite = getSpriteByName(spriteName);
             if (sprite.isClickableAtCoordinate(coordinate)) {
                 return Optional.of(sprite.getName());
