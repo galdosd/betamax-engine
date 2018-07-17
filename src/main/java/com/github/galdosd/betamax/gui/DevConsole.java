@@ -1,12 +1,14 @@
 package com.github.galdosd.betamax.gui;
 
 import com.github.galdosd.betamax.sprite.Sprite;
+import com.github.galdosd.betamax.sprite.SpriteName;
 import com.google.common.collect.Ordering;
 import javafx.application.Platform;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import static java.util.stream.Collectors.toList;
 
@@ -24,8 +26,9 @@ public final class DevConsole {
         LOG.info("FxWindow launched");
     }
 
-    public void updateSprites(Collection<Sprite> sprites) {
+    public void updateSprites(Collection<Sprite> sprites, Optional<SpriteName> highlightedSprite) {
         final int[] tableIndex = {0};
+        final int[] highlightedIndex = {-1};
         List<FxSprite> updatedFxSprites = sprites.stream()
                 .sorted(Ordering.natural().onResultOf(Sprite::getAge).reverse())
                 .map(sprite -> {
@@ -37,12 +40,18 @@ public final class DevConsole {
                     fxSprite.setAge( sprite.getAge() );
                     fxSprite.setSerial( sprite.getCreationSerial() );
                     fxSprite.setLayer( sprite.getLayer() );
+                    if(highlightedSprite.isPresent() && sprite.getName().equals(highlightedSprite.get())) {
+                        highlightedIndex[0] = fxSprite.getTableIndex();
+                    }
                     return fxSprite;
                 })
                 .collect(toList());
 
         Platform.runLater( () -> {
             window.updateSpriteData(updatedFxSprites);
+            if(-1 != highlightedIndex[0]) {
+                window.selectSpriteIndex(highlightedIndex[0]);
+            }
         });
     }
 

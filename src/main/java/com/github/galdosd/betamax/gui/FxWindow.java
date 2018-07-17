@@ -122,5 +122,10 @@ public final class FxWindow extends Application {
         }
 
     }
+
+    public void selectSpriteIndex(int index) {
+        spriteTable.getSelectionModel().select(index);
+
+    }
 }
 

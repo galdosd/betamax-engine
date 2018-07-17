@@ -36,7 +36,7 @@ public class GlProgramBaseTest {
 
             @Override protected void keyPressEvent(int key, int mods) { }
 
-            @Override protected void leftMouseClickEvent(TextureCoordinate coord) { }
+            @Override protected void mouseClickEvent(TextureCoordinate coord, int button) { }
 
             @Override protected void updateView() {
                 glClearColor(1.0f, 1.0f, 0.0f, 0.0f);

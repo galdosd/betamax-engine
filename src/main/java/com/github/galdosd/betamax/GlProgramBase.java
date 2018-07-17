@@ -74,11 +74,12 @@ public abstract class GlProgramBase {
     }
 
     private void mouseButtonCallback(long window, int button, int action, int mods){
-        if(action == GLFW.GLFW_PRESS && button == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
+        if(action == GLFW.GLFW_PRESS) {
             glfwGetCursorPos(window, xMousePosBuffer, yMousePosBuffer);
             double x = xMousePosBuffer.get(0);
             double y = yMousePosBuffer.get(0);
-            leftMouseClickEvent(new TextureCoordinate(x/(double)getWindowWidth(), 1.0 - y/(double)getWindowHeight()));
+            TextureCoordinate coord = new TextureCoordinate(x / (double) getWindowWidth(), 1.0 - y / (double) getWindowHeight());
+            mouseClickEvent(coord, button);
         }
     }
 
@@ -123,7 +124,7 @@ public abstract class GlProgramBase {
     // TODO composition instead of inheritance, turn the below into an interface
     protected abstract void initialize();
     protected abstract void keyPressEvent(int key, int mods);
-    protected abstract void leftMouseClickEvent(TextureCoordinate coord);
+    protected abstract void mouseClickEvent(TextureCoordinate coord, int button);
     /** updateView could be called every frame, more than once per frame, less often, etc. it must be idempotent */
     protected abstract void updateView();
     /** updateLogic will be called exactly once per logical frame, ie, once for frame 0, then once for frame 1, etc */

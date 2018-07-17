@@ -35,6 +35,7 @@ public class BetamaxGlProgram extends GlProgramBase {
     private final DevConsole devConsole = new DevConsole();
     private ScriptWorld scriptWorld;
     private SpriteRegistry spriteRegistry;
+    private Optional<SpriteName> highlightedSprite = Optional.empty();
 
     public static void main(String[] args) {
         new BetamaxGlProgram().run();
@@ -134,12 +135,20 @@ public class BetamaxGlProgram extends GlProgramBase {
         }
     }
 
-    @Override protected void leftMouseClickEvent(TextureCoordinate coordinate) {
+    @Override protected void mouseClickEvent(TextureCoordinate coordinate, int button) {
         LOG.debug("Clicked at {} x {}", coordinate.getX(), coordinate.getY());
         Optional<SpriteName> clickedSprite = spriteRegistry.getSpriteAtCoordinate(coordinate);
         if(clickedSprite.isPresent()) {
-            LOG.debug("Clicked on sprite {}", clickedSprite.get());
-            spriteRegistry.enqueueSpriteEvent(new SpriteEvent(EventType.SPRITE_CLICK, clickedSprite.get(), 0));
+            LOG.debug("Clicked on sprite {} (button {})", clickedSprite.get(), button);
+            handleSpriteClick(clickedSprite.get(), button);
+        }
+    }
+
+    private void handleSpriteClick(SpriteName spriteName, int button) {
+        if(button == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
+            spriteRegistry.enqueueSpriteEvent(new SpriteEvent(EventType.SPRITE_CLICK, spriteName, 0));
+        } else if (button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) {
+            highlightedSprite = Optional.of(spriteName);
         }
     }
 
@@ -151,7 +160,8 @@ public class BetamaxGlProgram extends GlProgramBase {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         spriteRegistry.renderAll();
         if(System.currentTimeMillis() > nextConsoleUpdate) {
-            devConsole.updateSprites(spriteRegistry.getAllSprites());
+            devConsole.updateSprites(spriteRegistry.getAllSprites(), highlightedSprite);
+            highlightedSprite = Optional.empty();
             nextConsoleUpdate = System.currentTimeMillis() + Global.devConsoleUpdateIntervalMillis;
         }
     }
