@@ -18,7 +18,7 @@ public final class Global {
      *  This is necessary because since we load from resources so jars will work,
      *  we end up breaking normal python import keyword
      */
-    public final static String mainScript = fromProperty("betamax.mainScript", "objects.py");
+    public final static String mainScript = fromProperty("betamax.mainScript", "objects 2.py");
     public final static String textureCacheDir = fromProperty("betamax.textureCacheDir");
     public final static  int devConsoleUpdateIntervalMillis = 500;
 }
