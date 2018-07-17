@@ -10,10 +10,12 @@ import lombok.Setter;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static java.util.stream.Collectors.toList;
 
 /**
  * FIXME: Document this class
@@ -86,10 +88,8 @@ public class SpriteRegistry {
         LOG.trace("New render order: {}", spritesByRenderOrder);
     }
 
-    public void renderAll() {
-        for(SpriteName spriteName: spritesByRenderOrder) {
-            getSpriteByName(spriteName).render();
-        }
+    public List<Sprite> getSpritesInRenderOrder() {
+        return spritesByRenderOrder.stream().map(spriteName -> getSpriteByName(spriteName)).collect(toList());
     }
 
     public void dispatchEvents(LogicHandler logicHandler) {

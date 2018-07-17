@@ -9,6 +9,7 @@ import com.github.galdosd.betamax.opengl.VAO;
 import com.github.galdosd.betamax.opengl.VBO;
 import com.github.galdosd.betamax.scripting.EventType;
 import com.github.galdosd.betamax.scripting.ScriptWorld;
+import com.github.galdosd.betamax.sprite.Sprite;
 import com.github.galdosd.betamax.sprite.SpriteEvent;
 import com.github.galdosd.betamax.sprite.SpriteName;
 import com.github.galdosd.betamax.sprite.SpriteRegistry;
@@ -36,6 +37,8 @@ public class BetamaxGlProgram extends GlProgramBase {
     private ScriptWorld scriptWorld;
     private SpriteRegistry spriteRegistry;
     private Optional<SpriteName> highlightedSprite = Optional.empty();
+    private ShaderProgram defaultShaderProgram;
+    private ShaderProgram highlightShaderProgram;
 
     public static void main(String[] args) {
         new BetamaxGlProgram().run();
@@ -92,13 +95,20 @@ public class BetamaxGlProgram extends GlProgramBase {
     }
 
     private void prepareShaders() {
-        ShaderProgram shaderProgram = new ShaderProgram();
-        shaderProgram.attach(
+        defaultShaderProgram = new ShaderProgram();
+        defaultShaderProgram.attach(
                 Shader.loadAndCompileShader("default.vert", GL_VERTEX_SHADER));
-        shaderProgram.attach(
+        defaultShaderProgram.attach(
                 Shader.loadAndCompileShader("default.frag", GL_FRAGMENT_SHADER));
-        //shaderProgram.bindFragDataLocation(0, "outColor"); //unnecessary, we only have one output color
-        shaderProgram.linkAndUse();
+
+        highlightShaderProgram = new ShaderProgram();
+        highlightShaderProgram.attach(
+                Shader.loadAndCompileShader("default.vert", GL_VERTEX_SHADER));
+        highlightShaderProgram.attach(
+                Shader.loadAndCompileShader("highlight.frag", GL_FRAGMENT_SHADER));
+
+        defaultShaderProgram.link();
+        highlightShaderProgram.link();
     }
 
     @Override protected void keyPressEvent(int key, int mods) {
@@ -156,9 +166,12 @@ public class BetamaxGlProgram extends GlProgramBase {
     private int colorcycler = 0;
     private long nextConsoleUpdate = System.currentTimeMillis();
     @Override protected void updateView() {
+        defaultShaderProgram.use();
         glClearColor(((float)Math.sin(colorcycler*0.05f) + 1)*0.5f, 0.8f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        spriteRegistry.renderAll();
+        for(Sprite sprite: spriteRegistry.getSpritesInRenderOrder()) {
+            sprite.render();
+        }
         if(System.currentTimeMillis() > nextConsoleUpdate) {
             devConsole.updateSprites(spriteRegistry.getAllSprites(), highlightedSprite);
             highlightedSprite = Optional.empty();

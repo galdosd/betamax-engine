@@ -10,29 +10,42 @@ import static org.lwjgl.opengl.GL30.glBindFragDataLocation;
  */
 public final class ShaderProgram {
     private final int handle;
+    boolean linked = false;
 
     public ShaderProgram() {
         handle = glCreateProgram();
     }
 
     public void attach(Shader shader) {
+        checkState(!linked);
         glAttachShader(handle, shader.getHandle());
     }
 
     public void linkAndUse() {
-        glLinkProgram(handle);
-        int linkStatus = glGetProgrami(handle, GL_LINK_STATUS);
-        checkState(GL_TRUE == linkStatus, "glLinkProgram failed: " + glGetProgramInfoLog(handle));
+        link();
+        use();
+    }
+
+    public void use() {
+        checkState(linked);
         glUseProgram(handle);
     }
 
-    private int getAttribLocation(String varName) {
-        int result = glGetAttribLocation(handle, varName);
-        checkState(-1 != result);
-        return result;
-    }
+//    private int getAttribLocation(String varName) {
+//        int result = glGetAttribLocation(handle, varName);
+//        checkState(-1 != result);
+//        return result;
+//    }
+//
+//    public void bindFragDataLocation(int colorNumber, String colorName) {
+//        glBindFragDataLocation(handle, colorNumber, colorName);
+//    }
 
-    public void bindFragDataLocation(int colorNumber, String colorName) {
-        glBindFragDataLocation(handle, colorNumber, colorName);
+    public void link() {
+        checkState(!linked);
+        glLinkProgram(handle);
+        int linkStatus = glGetProgrami(handle, GL_LINK_STATUS);
+        checkState(GL_TRUE == linkStatus, "glLinkProgram failed: " + glGetProgramInfoLog(handle));
+        linked = true;
     }
 }
