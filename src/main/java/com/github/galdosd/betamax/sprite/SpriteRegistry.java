@@ -169,4 +169,8 @@ public class SpriteRegistry {
     public void loadTemplate(String templateName) {
         spriteTemplateRegistry.getTemplate(templateName);
     }
+
+    public Collection<Sprite> getAllSprites() {
+        return registeredSprites.values();
+    }
 }

@@ -70,4 +70,9 @@ class GameLoopFrameClock implements FrameClock {
         LOG.debug("Reset logic frame counter");
         nextLogicFrameTime = System.currentTimeMillis();
     }
+
+    /** return true at the first frame of each period of time of length secs in seconds */
+    public boolean everyFewSeconds(int secs) {
+        return 0 == getCurrentFrame() % (getTargetFps() * secs);
+    }
 }

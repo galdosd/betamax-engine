@@ -18,7 +18,7 @@ public final class SpriteTemplateRegistry {
     public SpriteTemplate getTemplate(String name) {
         SpriteTemplate template = registeredTemplates.get(name);
         if(null==template) {
-            template = new SpriteTemplate(Global.spriteBase+name);
+            template = new SpriteTemplate(name);
             registeredTemplates.put(name,template);
         }
         return template;

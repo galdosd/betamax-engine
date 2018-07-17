@@ -7,4 +7,6 @@ public interface FrameClock {
     int getCurrentFrame();
     boolean getPaused();
     void setPaused(boolean newPaused);
+
+
 }

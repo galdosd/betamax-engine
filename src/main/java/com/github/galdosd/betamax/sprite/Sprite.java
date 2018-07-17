@@ -18,4 +18,7 @@ public interface Sprite {
     int getLayer();
     int getCreationSerial();
     int getTotalFrames();
+
+    String getTemplateName();
+    int getAge();
 }

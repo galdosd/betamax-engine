@@ -1,6 +1,7 @@
 package com.github.galdosd.betamax.graphics;
 
 import com.github.galdosd.betamax.FrameClock;
+import com.github.galdosd.betamax.Global;
 import com.github.galdosd.betamax.graphics.Texture;
 import com.github.galdosd.betamax.graphics.TextureCoordinate;
 import com.github.galdosd.betamax.graphics.TextureImages;
@@ -31,8 +32,11 @@ public final class SpriteTemplate {
     private final List<Texture> textures;
     private final int textureCount;
     private static int nextCreationSerial = 0;
+    private final String templateName;
 
-    public SpriteTemplate(String pkgName) {
+    public SpriteTemplate(String templateName) {
+        this.templateName = templateName;
+        String pkgName = Global.spriteBase+templateName;
         Reflections reflections = new Reflections(pkgName+".", new ResourcesScanner());
         // TODO eliminate Reflections log line
         List<String> spriteFilenames = reflections.getResources(Pattern.compile(".*\\.tif"))
@@ -132,6 +136,14 @@ public final class SpriteTemplate {
 
         @Override public int getTotalFrames() {
             return textureCount;
+        }
+
+        @Override public String getTemplateName() {
+            return templateName;
+        }
+
+        @Override public int getAge() {
+            return frameClock.getCurrentFrame() - initialFrame;
         }
 
     }

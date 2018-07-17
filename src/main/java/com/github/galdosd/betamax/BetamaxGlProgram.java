@@ -2,6 +2,7 @@ package com.github.galdosd.betamax;
 
 
 import com.github.galdosd.betamax.graphics.*;
+import com.github.galdosd.betamax.gui.DevConsole;
 import com.github.galdosd.betamax.opengl.Shader;
 import com.github.galdosd.betamax.opengl.ShaderProgram;
 import com.github.galdosd.betamax.opengl.VAO;
@@ -30,9 +31,10 @@ public class BetamaxGlProgram extends GlProgramBase {
             LoggerFactory.getLogger(new Object(){}.getClass().getEnclosingClass());
 
     private final SpriteTemplateRegistry spriteTemplateRegistry = new SpriteTemplateRegistry();
-
+    private final DevConsole devConsole = new DevConsole();
     private ScriptWorld scriptWorld;
     private SpriteRegistry spriteRegistry;
+
 
     public static void main(String[] args) {
         new BetamaxGlProgram().run();
@@ -128,6 +130,9 @@ public class BetamaxGlProgram extends GlProgramBase {
     @Override protected void updateLogic() {
         colorcycler++;
         spriteRegistry.dispatchEvents(scriptWorld);
+        if(getFrameClock().everyFewSeconds(1)) {
+           devConsole.updateSprites(spriteRegistry.getAllSprites());
+        }
     }
 
     @Override protected String getWindowTitle() { return "BETAMAX DEMO"; }

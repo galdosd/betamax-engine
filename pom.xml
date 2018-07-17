@@ -6,9 +6,6 @@
         Bugs
         
         Working set features
-            Exceptions should show python filename
-            Save info on callback to debug duplicate callbacks and show source in callbacks inspector
-            Load screen / reset frame clock any time a synchronous load happens
             Display list of sprites and their current moments
                 Display global info
                 Display callbacks
@@ -17,6 +14,7 @@
                 Right click to select sprite
                 Right click menus?
                 Hide/show sprite/highlight visually
+            Load screen / reset frame clock any time a synchronous load happens
             Scripter timers
             Managed state, just integers and booleans
                 Proper hotloading including preserving state
@@ -25,10 +23,13 @@
             Rewind
             Invalidate cache based on file size, last mod
             Efficient preloading for rewind
+            Sprite positions/sizes
 
         Backlog features
+            Rewind
+                Efficient preloading for rewind
+                Single step backward
             Fancy mouse cursor
-            Sprite positions/sizes
             Advance sprite frame / pause sprite execution
             Fancy framebuffer CRT style post effects
             basic steam support
