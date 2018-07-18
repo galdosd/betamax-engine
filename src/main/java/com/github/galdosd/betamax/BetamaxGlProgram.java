@@ -158,6 +158,10 @@ public class BetamaxGlProgram extends GlProgramBase {
         if(button == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
             spriteRegistry.enqueueSpriteEvent(new SpriteEvent(EventType.SPRITE_CLICK, spriteName, 0));
         } else if (button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) {
+            Optional<SpriteName> selectedSprite = devConsole.getSelectedSprite();
+            if(selectedSprite.isPresent() && spriteName.equals(selectedSprite.get())) {
+                devConsole.clearHighlightedSprite();
+            }
             highlightedSprite = Optional.of(spriteName);
         }
     }
@@ -169,7 +173,13 @@ public class BetamaxGlProgram extends GlProgramBase {
         defaultShaderProgram.use();
         glClearColor(((float)Math.sin(colorcycler*0.05f) + 1)*0.5f, 0.8f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        Optional<SpriteName> selectedSprite = devConsole.getSelectedSprite();
         for(Sprite sprite: spriteRegistry.getSpritesInRenderOrder()) {
+            if(selectedSprite.isPresent() && sprite.getName().equals(selectedSprite.get())) {
+                highlightShaderProgram.use();
+            } else {
+                defaultShaderProgram.use();
+            }
             sprite.render();
         }
         if(System.currentTimeMillis() > nextConsoleUpdate) {

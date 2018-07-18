@@ -4,8 +4,11 @@ import com.github.galdosd.betamax.sprite.Sprite;
 import com.github.galdosd.betamax.sprite.SpriteName;
 import com.google.common.collect.Ordering;
 import javafx.application.Platform;
+import javafx.collections.ListChangeListener;
+import lombok.Getter;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -20,6 +23,8 @@ public final class DevConsole {
             LoggerFactory.getLogger(new Object(){}.getClass().getEnclosingClass());
 
     private final FxWindow window; // FIXME this gets replaced for some reason????
+    private final Object $LOCK = new Object();
+    @Getter private Optional<SpriteName> selectedSprite = Optional.empty();
 
     public DevConsole() {
         window = FxWindow.singleton();
@@ -52,7 +57,16 @@ public final class DevConsole {
             if(-1 != highlightedIndex[0]) {
                 window.selectSpriteIndex(highlightedIndex[0]);
             }
+            synchronized ($LOCK) {
+                selectedSprite = window.getSelectedSprite();
+            }
         });
     }
 
+    public void clearHighlightedSprite() {
+        Platform.runLater( () -> {
+            window.setSelectedSprite(null);
+        });
+
+    }
 }

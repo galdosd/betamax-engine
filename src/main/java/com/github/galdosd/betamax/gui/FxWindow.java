@@ -12,10 +12,13 @@ import javafx.scene.control.TabPane;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
+import lombok.Getter;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
@@ -51,6 +54,7 @@ public final class FxWindow extends Application {
     }
 
 
+    @Getter ObservableList<FxSprite> selectedItems;
     @Override public void start(Stage stage) {
 
         spriteTable = new TableView<>();
@@ -59,7 +63,6 @@ public final class FxWindow extends Application {
 
         spriteTable.setItems(spriteData);
         spriteTable.getColumns().addAll(new FxSprite(0).tableColumns());
-        spriteTable.getSelectionModel().clearSelection();
 
         Pane sceneRoot = new Pane();
         spriteTable.prefWidthProperty().bind(sceneRoot.widthProperty());
@@ -83,6 +86,8 @@ public final class FxWindow extends Application {
         stage.setHeight(640);
         stage.show();
         stage.setOnCloseRequest( x -> { x.consume(); LOG.info("Closing developer console forbidden"); } );
+        selectedItems = spriteTable.getSelectionModel().getSelectedItems();
+        setSelectedSprite(null);
         completeSingleton();
     }
 
@@ -94,33 +99,39 @@ public final class FxWindow extends Application {
         }
     }
 
+    private Map<SpriteName,FxSprite> spritesByName = new HashMap<>();
     public void updateSpriteData(List<FxSprite> updatedFxSprites) {
-        Map<SpriteName,FxSprite> spritesByName =
-                updatedFxSprites.stream().collect(toMap(
-                    FxSprite::getID,
-                    sprite -> sprite
-                ));
+        spritesByName = updatedFxSprites.stream().collect(toMap(
+            FxSprite::getID,
+            sprite -> sprite
+        ));
 
-        FxSprite selectedSprite = null;
-
-        int selectedIndex = spriteTable.getSelectionModel().getFocusedIndex();
-        if(spriteData.size() > 0 && selectedIndex != -1) {
-            SpriteName selectedSpriteName = spriteData.get(selectedIndex).getID();
-            selectedSprite = spritesByName.get(selectedSpriteName);
-        }
+        Optional<SpriteName> selectedSpriteName = getSelectedSprite();
 
         spriteData.setAll(updatedFxSprites);
 
-        if(null!=selectedSprite) {
-            spriteTable.getSelectionModel().select(selectedSprite.getTableIndex());
-        } else {
-            spriteTable.getSelectionModel().clearSelection();
-        }
+        setSelectedSprite(selectedSpriteName.orElse(null));
 
         if(null!=spriteTable) {
             spriteTable.refresh();
         }
+    }
 
+    void setSelectedSprite(SpriteName selectedSprite) {
+        if(null!=selectedSprite) {
+            spriteTable.getSelectionModel().select(spritesByName.get(selectedSprite).getTableIndex());
+        } else {
+            spriteTable.getSelectionModel().clearSelection();
+        }
+    }
+
+    Optional<SpriteName> getSelectedSprite() {
+        int selectedIndex = spriteTable.getSelectionModel().getFocusedIndex();
+        if(selectedIndex != -1) {
+            return Optional.of(spriteData.get(selectedIndex).getID());
+        } else {
+            return Optional.empty();
+        }
     }
 
     public void selectSpriteIndex(int index) {
