@@ -118,7 +118,7 @@ public final class FxWindow extends Application {
     }
 
     void setSelectedSprite(SpriteName selectedSprite) {
-        if(null!=selectedSprite) {
+        if(null!=selectedSprite && null!=spritesByName.get(selectedSprite)) {
             spriteTable.getSelectionModel().select(spritesByName.get(selectedSprite).getTableIndex());
         } else {
             spriteTable.getSelectionModel().clearSelection();

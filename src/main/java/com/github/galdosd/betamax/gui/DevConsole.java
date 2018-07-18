@@ -5,6 +5,7 @@ import com.github.galdosd.betamax.sprite.SpriteName;
 import com.google.common.collect.Ordering;
 import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
+import javafx.scene.control.Alert;
 import lombok.Getter;
 import org.slf4j.LoggerFactory;
 
@@ -63,6 +64,11 @@ public final class DevConsole {
         });
     }
 
+    public void helpWindow() {
+        Platform.runLater(() -> {
+            new Alert(Alert.AlertType.INFORMATION, "Help info\n\n no help for you\n you are stuck").showAndWait();
+        });
+    }
     public void clearHighlightedSprite() {
         Platform.runLater( () -> {
             window.setSelectedSprite(null);

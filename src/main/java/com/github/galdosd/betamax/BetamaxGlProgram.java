@@ -117,6 +117,9 @@ public class BetamaxGlProgram extends GlProgramBase {
             closeWindow();
             LOG.info("Exiting");
         }
+        else if(key == GLFW.GLFW_KEY_F1) {
+            devConsole.helpWindow();
+        }
         // show FPS metrics upon pause/break key
         else if(key == GLFW.GLFW_KEY_PRINT_SCREEN) {
             reportMetrics();
