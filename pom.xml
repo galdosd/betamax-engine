@@ -15,6 +15,7 @@
                 Right click menus?
                 Hide/show sprite/highlight visually
             Load screen / reset frame clock any time a synchronous load happens
+            Highlight sprite
             Scripter timers
             Managed state, just integers and booleans
                 Proper hotloading including preserving state
