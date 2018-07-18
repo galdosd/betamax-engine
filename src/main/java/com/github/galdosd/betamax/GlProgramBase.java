@@ -63,10 +63,13 @@ public abstract class GlProgramBase {
                 }
 
                 frameClock.resetLogicFrames();
-                while (!mainWindow.getShouldClose()) {
-                    loopOnce();
+                try {
+                    while (!mainWindow.getShouldClose()) {
+                        loopOnce();
+                    }
+                } finally {
+                    closeWindow();
                 }
-                closeWindow();
             }
         } finally {
             GlWindow.shutdownGlfw();
