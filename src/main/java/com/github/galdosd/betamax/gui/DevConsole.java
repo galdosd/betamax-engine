@@ -1,5 +1,7 @@
 package com.github.galdosd.betamax.gui;
 
+import com.github.galdosd.betamax.Global;
+import com.github.galdosd.betamax.OurTool;
 import com.github.galdosd.betamax.sprite.Sprite;
 import com.github.galdosd.betamax.sprite.SpriteName;
 import com.google.common.collect.Ordering;
@@ -66,7 +68,7 @@ public final class DevConsole {
 
     public void helpWindow() {
         Platform.runLater(() -> {
-            new Alert(Alert.AlertType.INFORMATION, "Help info\n\n no help for you\n you are stuck").showAndWait();
+            new Alert(Alert.AlertType.INFORMATION, OurTool.loadResource(Global.helpFile)).showAndWait();
         });
     }
     public void clearHighlightedSprite() {

@@ -1,0 +1,16 @@
+
+Main Screen keys
+
+    ESC - End program
+    F1 - show this help file
+    Print Screen (or Ctrl+Print Screen on some platforms) - Print out performance metrics to console log
+    Tab - When paused, step ahead one frame at a time
+    Page Up - Increase framerate
+    Page Down - Decrease framerate
+    F5 - Reload python scripts (You must Build > Build Project in IntelliJ first)
+    Ctrl+F5 - Reload python scripts and also restart game history
+    Right click on sprite - Highlight sprite
+    Right click on sprite already highlighted - Unhighlight sprite
+
+Dev console usage
+    Click on Sprite row - Highlight that sprite
