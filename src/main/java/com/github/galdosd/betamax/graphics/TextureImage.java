@@ -1,6 +1,7 @@
 package com.github.galdosd.betamax.graphics;
 
 import com.github.galdosd.betamax.OurTool;
+import com.github.galdosd.betamax.opengl.TextureCoordinate;
 import lombok.Getter;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.system.MemoryUtil;
@@ -75,8 +76,10 @@ public final class TextureImage {
     public ColorSample getPixel(TextureCoordinate coordinate) {
         checkArgument(!unloaded);
         // XXX: should this be rounding or truncating? i have no idea
-        int x = (int) (coordinate.getX() * width);
-        int y = (int) (coordinate.getY() * height);
+        int x = (int) (coordinate.getX() * (width - 1));
+        int y = (int) (coordinate.getY() * (height - 1));
+        checkArgument(x >= 0 && x < width);
+        checkArgument(y >= 0 && y < height);
         int offset = TextureImages.BANDS * (width * y + x);
         ColorSample colorSample = new ColorSample(
                 // these bytes have unsigned data stored on them

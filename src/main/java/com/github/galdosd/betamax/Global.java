@@ -24,5 +24,5 @@ public final class Global {
     // TODO make these fromProperty
     public static final int defaultTargetFps = 8;
     public static final  int devConsoleUpdateIntervalMillis = 500;
-    public static final boolean startFullScreen = false;
+    public static final boolean startFullScreen = true;
 }

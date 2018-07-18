@@ -2,13 +2,10 @@ package com.github.galdosd.betamax.graphics;
 
 import com.github.galdosd.betamax.FrameClock;
 import com.github.galdosd.betamax.Global;
-import com.github.galdosd.betamax.graphics.Texture;
-import com.github.galdosd.betamax.graphics.TextureCoordinate;
-import com.github.galdosd.betamax.graphics.TextureImages;
+import com.github.galdosd.betamax.opengl.TextureCoordinate;
 import com.github.galdosd.betamax.sprite.Sprite;
 import com.github.galdosd.betamax.sprite.SpriteName;
 import lombok.Getter;
-import lombok.Setter;
 import org.reflections.Reflections;
 import org.reflections.scanners.ResourcesScanner;
 import org.slf4j.LoggerFactory;

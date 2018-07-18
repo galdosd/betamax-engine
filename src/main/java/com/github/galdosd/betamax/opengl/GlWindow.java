@@ -24,11 +24,12 @@ public final class GlWindow implements AutoCloseable {
     private static boolean debugMode;
 
     private final long windowHandle;
-    private final int width;
-    private final int height;
+    private final int windowWidth;
+    private final int windowHeight;
     private final String title;
 
     private boolean isDestroyed = false;
+    private final boolean fullScreen;
 
     /** This must be called exactly once. It must be called before any GlWindow can be created */
     public static void initGlfw(boolean _debugMode) {
@@ -53,11 +54,12 @@ public final class GlWindow implements AutoCloseable {
         glfwTerminate();
     }
 
-    public GlWindow(int width, int height, String title,
-                    GLFWKeyCallbackI keyCallback, GLFWMouseButtonCallbackI mouseButtonCallback) {
-        this.width = width;
-        this.height = height;
+    public GlWindow(int windowWidth, int windowHeight, String title,
+                    GLFWKeyCallbackI keyCallback, GLFWMouseButtonCallbackI mouseButtonCallback, boolean fullScreen) {
+        this.windowWidth = windowWidth;
+        this.windowHeight = windowHeight;
         this.title = title;
+        this.fullScreen = fullScreen;
         windowHandle = createWindow();
 
         glfwSetKeyCallback(windowHandle, GLFWKeyCallback.create(keyCallback));
@@ -78,9 +80,12 @@ public final class GlWindow implements AutoCloseable {
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         if(debugMode) glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
 
-        long createdWindowHandle = glfwCreateWindow(width, height, title, NULL, NULL);
+        long monitor = fullScreen ? glfwGetPrimaryMonitor() : NULL;
+        long createdWindowHandle = glfwCreateWindow(windowWidth, windowHeight, title, monitor, NULL);
         checkState(NULL != createdWindowHandle);
-        centerWindow(createdWindowHandle);
+        if(!fullScreen) {
+            centerWindow(createdWindowHandle);
+        }
 
         glfwMakeContextCurrent(createdWindowHandle);
         glfwShowWindow(createdWindowHandle); // this has to be done before GL.createCapabilities()
@@ -105,8 +110,8 @@ public final class GlWindow implements AutoCloseable {
         GLFWVidMode vidMode = glfwGetVideoMode(glfwGetPrimaryMonitor()); // get the resolution
         glfwSetWindowPos(
                 createdWindowHandle,
-                (vidMode.width() - width) / 2,
-                (vidMode.height() - height) / 2
+                (vidMode.width() - windowWidth) / 2,
+                (vidMode.height() - windowHeight) / 2
         );
     }
 
@@ -120,6 +125,19 @@ public final class GlWindow implements AutoCloseable {
         glfwDestroyWindow(windowHandle);
         glfwFreeCallbacks(windowHandle);
         isDestroyed = true;
+    }
+
+    public TextureCoordinate windowToTextureCoord(double x, double y) {
+        double fieldWidth, fieldHeight;
+        if(fullScreen) {
+            GLFWVidMode vidMode = glfwGetVideoMode(glfwGetPrimaryMonitor()); // get the resolution
+            fieldWidth = vidMode.width();
+            fieldHeight = vidMode.height();
+        } else {
+            fieldWidth = windowWidth;
+            fieldHeight = windowHeight;
+        }
+        return new TextureCoordinate(x / fieldWidth, 1.0 - y / fieldHeight);
     }
 
     public final class RenderPhase implements AutoCloseable {

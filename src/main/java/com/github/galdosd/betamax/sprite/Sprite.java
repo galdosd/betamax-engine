@@ -1,7 +1,6 @@
 package com.github.galdosd.betamax.sprite;
 
-import com.github.galdosd.betamax.graphics.TextureCoordinate;
-import com.google.common.collect.Ordering;
+import com.github.galdosd.betamax.opengl.TextureCoordinate;
 
 /**
  * FIXME: Document this class

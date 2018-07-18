@@ -1,5 +1,6 @@
 package com.github.galdosd.betamax.graphics;
 
+import com.github.galdosd.betamax.opengl.TextureCoordinate;
 import lombok.NonNull;
 import org.lwjgl.opengl.GL11;
 import org.slf4j.LoggerFactory;

@@ -3,7 +3,7 @@ package com.github.galdosd.betamax;
 import com.codahale.metrics.ConsoleReporter;
 import com.codahale.metrics.Timer;
 import com.github.galdosd.betamax.opengl.GlWindow;
-import com.github.galdosd.betamax.graphics.TextureCoordinate;
+import com.github.galdosd.betamax.opengl.TextureCoordinate;
 import javafx.application.Platform;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFW;
@@ -54,7 +54,7 @@ public abstract class GlProgramBase {
         try {
             GlWindow.initGlfw(getDebugMode());
             try(GlWindow _mainWindow = new GlWindow(getWindowWidth(), getWindowHeight(), getWindowTitle(),
-                    this::keyCallback, this::mouseButtonCallback)){
+                    this::keyCallback, this::mouseButtonCallback, Global.startFullScreen)){
                 mainWindow = _mainWindow;
                 try (Timer.Context _unused_context = userInitTimer.time()) {
                     initialize();
@@ -81,12 +81,11 @@ public abstract class GlProgramBase {
             glfwGetCursorPos(window, xMousePosBuffer, yMousePosBuffer);
             double x = xMousePosBuffer.get(0);
             double y = yMousePosBuffer.get(0);
-            TextureCoordinate coord = new TextureCoordinate(x / (double) getWindowWidth(), 1.0 - y / (double) getWindowHeight());
+            TextureCoordinate coord = mainWindow.windowToTextureCoord(x,y);
             mouseClickEvent(coord, button);
         }
     }
 
-    // TODO break out input handling
     private void keyCallback(long window, int key, int scancode, int action, int mods) {
         if(action == GLFW.GLFW_PRESS) {
             keyPressEvent(key, mods);
