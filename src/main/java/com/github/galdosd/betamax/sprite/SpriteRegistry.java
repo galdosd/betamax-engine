@@ -31,7 +31,7 @@ public class SpriteRegistry {
     private static final Ordering<Sprite> CREATION_ORDERING = Ordering.natural().onResultOf(Sprite::getCreationSerial);
     private static final Ordering<Sprite> LAYER_ORDERING = Ordering.natural().onResultOf(Sprite::getLayer);
     private static final Ordering<Sprite> RENDER_ORDERING = LAYER_ORDERING.compound(CREATION_ORDERING);
-    private final NavigableSet<SpriteName> spritesByRenderOrder = new TreeSet<>(RENDER_ORDERING.onResultOf(this::getSpriteByName));
+    private final Ordering<SpriteName> NAME_RENDER_ORDERING = RENDER_ORDERING.onResultOf(this::getSpriteByName);
 
     public final SpriteTemplateRegistry spriteTemplateRegistry;
 
@@ -65,8 +65,6 @@ public class SpriteRegistry {
         SpriteName name = sprite.getName();
         checkArgument(!registeredSprites.containsKey(name), "duplicate sprite name: " + name);
         registeredSprites.put(name, sprite);
-        spritesByRenderOrder.add(name);
-        LOG.trace("New render order: {}", spritesByRenderOrder);
     }
 
     public Sprite getSpriteByName(SpriteName spriteName) {
@@ -77,16 +75,16 @@ public class SpriteRegistry {
 
     public void destroySprite(SpriteName spriteName) {
         LOG.debug("Destroying {}", spriteName);
-        Sprite sprite = getSpriteByName(spriteName);
-        boolean wasRemovedFromList = spritesByRenderOrder.remove(spriteName);
         registeredSprites.remove(spriteName);
-        checkState(wasRemovedFromList);
         enqueueSpriteEvent(new SpriteEvent(EventType.SPRITE_DESTROY, spriteName, 0));
-        LOG.trace("New render order: {}", spritesByRenderOrder);
     }
 
     public List<Sprite> getSpritesInRenderOrder() {
-        return spritesByRenderOrder.stream().map(spriteName -> getSpriteByName(spriteName)).collect(toList());
+        return registeredSprites.values().stream().sorted(RENDER_ORDERING).collect(toList());
+    }
+
+    public List<Sprite> getSpritesInReverseRenderOrder() {
+        return registeredSprites.values().stream().sorted(RENDER_ORDERING.reverse()).collect(toList());
     }
 
     public void dispatchEvents(LogicHandler logicHandler) {
@@ -122,11 +120,11 @@ public class SpriteRegistry {
         // while we are iterating over orderedSprites, resulting in a ConcurrentModificationException
         // ...ask me how i know
         List<SpriteEvent> generatedEvents = new ArrayList<>();
-        for(SpriteName spriteName: spritesByRenderOrder) {
+        for(Sprite sprite: getSpritesInRenderOrder()) {
             SpriteEvent momentEvent = new SpriteEvent(
                     EventType.SPRITE_MOMENT,
-                    spriteName,
-                    getSpriteByName(spriteName).getRenderedFrame()
+                    sprite.getName(),
+                    sprite.getRenderedFrame()
             );
             generatedEvents.add(momentEvent);
         }
@@ -145,10 +143,7 @@ public class SpriteRegistry {
 
     public Optional<SpriteName> getSpriteAtCoordinate(TextureCoordinate coordinate) {
         // look through sprites in reverse draw order, ie from front to back
-        List<SpriteName> spriteNames = spritesByRenderOrder.descendingSet().stream().collect(toList());
-        LOG.debug("Checking sprites for clickability: {}", spriteNames);
-        for(SpriteName spriteName: spriteNames) {
-            Sprite sprite = getSpriteByName(spriteName);
+        for(Sprite sprite: getSpritesInReverseRenderOrder()) {
             if (sprite.isClickableAtCoordinate(coordinate)) {
                 return Optional.of(sprite.getName());
             }
@@ -167,9 +162,5 @@ public class SpriteRegistry {
 
     public void loadTemplate(String templateName) {
         spriteTemplateRegistry.getTemplate(templateName);
-    }
-
-    public Collection<Sprite> getAllSprites() {
-        return registeredSprites.values();
     }
 }

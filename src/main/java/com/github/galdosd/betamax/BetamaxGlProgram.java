@@ -173,7 +173,7 @@ public class BetamaxGlProgram extends GlProgramBase {
             sprite.render();
         }
         if(System.currentTimeMillis() > nextConsoleUpdate) {
-            devConsole.updateSprites(spriteRegistry.getAllSprites(), highlightedSprite);
+            devConsole.updateSprites(spriteRegistry.getSpritesInRenderOrder(), highlightedSprite);
             highlightedSprite = Optional.empty();
             nextConsoleUpdate = System.currentTimeMillis() + Global.devConsoleUpdateIntervalMillis;
         }
