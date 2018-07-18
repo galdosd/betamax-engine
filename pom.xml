@@ -4,8 +4,12 @@
        sync; echo 3 | sudo tee /proc/sys/vm/drop_caches
     TODO
         Bugs
-        
+
+
         Working set features
+            Don't crash on script failure
+            Mark where script creation happens
+            On handler invocation, state function name info
             Display list of sprites and their current moments
                 Display global info
                 Display callbacks

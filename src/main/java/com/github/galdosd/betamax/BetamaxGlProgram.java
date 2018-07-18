@@ -161,8 +161,9 @@ public class BetamaxGlProgram extends GlProgramBase {
             Optional<SpriteName> selectedSprite = devConsole.getSelectedSprite();
             if(selectedSprite.isPresent() && spriteName.equals(selectedSprite.get())) {
                 devConsole.clearHighlightedSprite();
+            } else {
+                highlightedSprite = Optional.of(spriteName);
             }
-            highlightedSprite = Optional.of(spriteName);
         }
     }
 
@@ -171,7 +172,7 @@ public class BetamaxGlProgram extends GlProgramBase {
     private long nextConsoleUpdate = System.currentTimeMillis();
     @Override protected void updateView() {
         defaultShaderProgram.use();
-        glClearColor(((float)Math.sin(colorcycler*0.05f) + 1)*0.5f, 0.8f, 0.0f, 1.0f);
+        glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         Optional<SpriteName> selectedSprite = devConsole.getSelectedSprite();
         for(Sprite sprite: spriteRegistry.getSpritesInRenderOrder()) {
@@ -190,7 +191,7 @@ public class BetamaxGlProgram extends GlProgramBase {
     }
 
     @Override protected void updateLogic() {
-        colorcycler++;
+
         spriteRegistry.dispatchEvents(scriptWorld);
     }
 
