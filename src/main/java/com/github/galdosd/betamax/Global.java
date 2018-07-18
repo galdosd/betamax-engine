@@ -14,7 +14,7 @@ public final class Global {
     public static final String scriptBase = "com/github/galdosd/betamax/scripts/";
     public static final String helpFile = "help.txt";
 
-    /** Optionally, you can have multiple scripts loaded in order, comma seperated.
+    /** Optionally, you can have multiple scripts loaded in order, comma separated.
      *  This is necessary because since we load from resources so jars will work,
      *  we end up breaking normal python import keyword
      */
@@ -22,7 +22,7 @@ public final class Global {
     public static final String textureCacheDir = fromProperty("betamax.textureCacheDir");
 
     // TODO make these fromProperty
-    public static final int defaultTargetFps = 8;
-    public static final  int devConsoleUpdateIntervalMillis = 500;
-    public static final boolean startFullScreen = true;
+    public static final int targetFps = fromProperty("betamax.targetFps", 8);
+    public static final  int devConsoleUpdateIntervalMillis = fromProperty("betamax.devConsoleUpdateInterval", 500);
+    public static final boolean startFullScreen = fromProperty("betamax.fullScreen", false);
 }

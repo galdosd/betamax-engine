@@ -61,13 +61,19 @@ public final class OurTool {
         while(System.currentTimeMillis() < targetTime);
     }
 
+    public static boolean fromProperty(String propertyName, boolean defaultValue) {
+        String property = fromProperty(propertyName, null);
+        return null==property ? defaultValue : Boolean.valueOf(property);
+    }
+
+    public static int fromProperty(String propertyName, int defaultValue) {
+        String property = fromProperty(propertyName, null);
+        return null==property ? defaultValue : Integer.valueOf(property);
+    }
+
     public static String fromProperty(String propertyName, String defaultValue) {
         String property = System.getProperty(propertyName);
-        if(null!=property) {
-            return property;
-        } else {
-          return defaultValue;
-        }
+        return null==property ? defaultValue : property;
     }
 
     public static String fromProperty(String propertyName) {

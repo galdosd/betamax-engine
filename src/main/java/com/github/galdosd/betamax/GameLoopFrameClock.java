@@ -13,7 +13,7 @@ class GameLoopFrameClock implements FrameClock {
 
     // passage of time management
     private int frameCount = 0;
-    private int targetFps = Global.defaultTargetFps;
+    private int targetFps = Global.targetFps;
     private long nextLogicFrameTime;
     private boolean paused = false;
 
