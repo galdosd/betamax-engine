@@ -147,8 +147,6 @@ public class BetamaxGlProgram extends GlProgramBase {
         }
     }
 
-    /** cycle background color; can be helpful in debugging */
-    private int colorcycler = 0;
     private long nextConsoleUpdate = System.currentTimeMillis();
     @Override protected void updateView() {
         defaultShaderProgram.use();
@@ -163,6 +161,10 @@ public class BetamaxGlProgram extends GlProgramBase {
             }
             sprite.render();
         }
+        if(getFrameClock().getPaused()) {
+            defaultShaderProgram.use();
+            pausedTexture.render();
+        }
         if(System.currentTimeMillis() > nextConsoleUpdate) {
             devConsole.updateSprites(spriteRegistry.getSpritesInRenderOrder(), highlightedSprite);
             highlightedSprite = Optional.empty();
@@ -171,7 +173,6 @@ public class BetamaxGlProgram extends GlProgramBase {
     }
 
     @Override protected void updateLogic() {
-
         spriteRegistry.dispatchEvents(scriptWorld);
     }
 
