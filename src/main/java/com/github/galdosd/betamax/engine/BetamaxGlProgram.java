@@ -77,7 +77,11 @@ public class BetamaxGlProgram extends GlProgramBase {
         }
         scriptWorld = new ScriptWorld(spriteRegistry);
         String[] scriptNames = Global.mainScript.split(",");
-        scriptWorld.loadScripts(scriptNames);
+        try {
+            scriptWorld.loadScripts(scriptNames);
+        } catch(Exception e) {
+            handleCrash(e);
+        }
         getFrameClock().resetLogicFrames();
     }
 
@@ -195,10 +199,14 @@ public class BetamaxGlProgram extends GlProgramBase {
         try {
             spriteRegistry.dispatchEvents(scriptWorld);
         } catch(Exception e) {
-            LOG.error("Crashed! This is usually due to a python script bug, in which case you can try resuming", e);
-            getFrameClock().setPaused(true);
-            crashed = true;
+            handleCrash(e);
         }
+    }
+
+    private void handleCrash(Exception e) {
+        LOG.error("Crashed! This is usually due to a python script bug, in which case you can try resuming", e);
+        getFrameClock().setPaused(true);
+        crashed = true;
     }
 
     @Override protected String getWindowTitle() { return "BETAMAX DEMO"; }

@@ -4,6 +4,7 @@ import com.github.galdosd.betamax.sprite.Sprite;
 import com.github.galdosd.betamax.sprite.SpriteEvent;
 import com.github.galdosd.betamax.sprite.SpriteName;
 import com.github.galdosd.betamax.sprite.SpriteRegistry;
+import com.google.common.base.Preconditions;
 import lombok.NonNull;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +23,8 @@ public final class ScriptServicer {
     private final SpriteRegistry spriteRegistry;
     private final Map<SpriteEvent,ScriptCallback> callbacks = new HashMap<>();
     private final Map<EventType,ScriptCallback> globalCallbacks = new HashMap<>();
+    /** Only callback registering and logging is permitted until this is done */
+    private boolean initializing = true;
 
     public ScriptServicer(SpriteRegistry spriteRegistry) {
         this.spriteRegistry = spriteRegistry;
@@ -40,22 +43,26 @@ public final class ScriptServicer {
         System.exit(0);
     }
 
-    public Map<String, Object> getState() {
-        throw new UnsupportedOperationException("FIXME unimplemented");
+    private void checkInit() {
+        Preconditions.checkState(!initializing, "Only callback registration may be performed during initialization");
     }
 
     public Sprite getSpriteByName(SpriteName spriteName) {
+        checkInit();
         return spriteRegistry.getSpriteByName(spriteName);
     }
 
     public boolean spriteExists(SpriteName spriteName) {
+        checkInit();
         return spriteRegistry.spriteExists(spriteName);
     }
     public Sprite createSprite(String templateName, SpriteName spriteName) {
+        checkInit();
         return spriteRegistry.createSprite(templateName, spriteName);
     }
 
     public void destroySprite(SpriteName spriteName) {
+        checkInit();
         spriteRegistry.destroySprite(spriteName);
     }
 
@@ -76,6 +83,7 @@ public final class ScriptServicer {
     }
 
     public void loadTemplate(String templateName) {
+        checkInit();
         spriteRegistry.loadTemplate(templateName);
     }
 
@@ -84,6 +92,7 @@ public final class ScriptServicer {
     }
 
     public SpriteName newSpriteName(String name) {
+        checkInit();
         return new SpriteName(name);
     }
 
@@ -92,7 +101,11 @@ public final class ScriptServicer {
         globalCallbacks.put(eventType, callback);
     }
 
-    public ScriptCallback getCallback(@NonNull EventType eventType) {
+    ScriptCallback getCallback(@NonNull EventType eventType) {
         return globalCallbacks.get(eventType);
+    }
+
+    public void finishInit() {
+        initializing = false;
     }
 }

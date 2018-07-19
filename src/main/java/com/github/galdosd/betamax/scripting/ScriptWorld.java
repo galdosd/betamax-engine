@@ -77,6 +77,7 @@ public class ScriptWorld implements LogicHandler {
                 spriteRegistry.setAcceptingCallbacks(true);
                 LOG.info("Evaluating jython script from {}", scriptName);
                 pythonInterpreter.execfile(scriptStream, scriptName);
+                servicer.finishInit();
             } catch (IOException e) {
                 throw new RuntimeException(e);
             } finally {
