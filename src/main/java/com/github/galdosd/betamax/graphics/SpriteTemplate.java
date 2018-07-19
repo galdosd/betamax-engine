@@ -41,13 +41,7 @@ public final class SpriteTemplate {
                 .collect(toList());
         checkArgument(0!=spriteFilenames.size(), "no sprite frame files found for " + pkgName);
         LOG.debug("Loading {}-frame sprite {}", spriteFilenames.size(), pkgName);
-        textures = spriteFilenames.stream().map(name -> {
-            Texture texture = new Texture(TextureImages.fromRgbaFile(name, true, true));
-            texture.bind(GL_TEXTURE_2D);
-            texture.btSetParameters();
-            texture.btUploadTextureUnit();
-            return texture;
-        }).collect(toList());
+        textures = spriteFilenames.stream().map(Texture::simpleTexture).collect(toList());
         textureCount = textures.size();
     }
 
@@ -56,12 +50,8 @@ public final class SpriteTemplate {
     }
 
     private void renderTemplate(int whichFrame) {
-        // FIXME very leaky abstraction, bring more of the VBO and VAO stuff into SpriteTemplate
-        // while removing the VBO/VAO stuff from GlProgramBase
         Texture texture = textures.get(whichFrame);
-        texture.bind(GL_TEXTURE_2D);
-        glClear(GL_DEPTH_BUFFER_BIT);
-        glDrawArrays(GL_TRIANGLES, 0, 3*2);
+        texture.render();
     }
 
     /**

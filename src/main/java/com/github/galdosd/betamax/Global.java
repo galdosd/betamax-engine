@@ -13,6 +13,9 @@ public final class Global {
     public static final String spriteBase = "com.github.galdosd.betamax.sprites.";
     public static final String scriptBase = "com/github/galdosd/betamax/scripts/";
     public static final String helpFile = "help.txt";
+    public static final String pausedTextureFile = "paused.tif";
+    public static final String loadingTextureFile = "loading.tif";
+    public static final String crashTextureFile = "crash.tif";
 
     /** Optionally, you can have multiple scripts loaded in order, comma separated.
      *  This is necessary because since we load from resources so jars will work,

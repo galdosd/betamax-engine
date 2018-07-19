@@ -1,6 +1,7 @@
 package com.github.galdosd.betamax;
 
 
+import com.github.galdosd.betamax.graphics.Texture;
 import com.github.galdosd.betamax.gui.DevConsole;
 import com.github.galdosd.betamax.opengl.*;
 import com.github.galdosd.betamax.scripting.EventType;
@@ -34,6 +35,7 @@ public class BetamaxGlProgram extends GlProgramBase {
     private Optional<SpriteName> highlightedSprite = Optional.empty();
     private ShaderProgram defaultShaderProgram;
     private ShaderProgram highlightShaderProgram;
+    private Texture pausedTexture, loadingTexture, crashTexture;
 
     public static void main(String[] args) {
         new BetamaxGlProgram().run();
@@ -42,6 +44,7 @@ public class BetamaxGlProgram extends GlProgramBase {
     @Override protected void initialize() {
         prepareShaders();
         prepareForDrawing();
+        prepareBuiltinTextures();
 
         // enable transparency
         glEnable(GL_BLEND);
@@ -49,6 +52,12 @@ public class BetamaxGlProgram extends GlProgramBase {
         glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         newWorld(true);
+    }
+
+    private void prepareBuiltinTextures() {
+        pausedTexture = Texture.simpleTexture(Global.pausedTextureFile);
+        loadingTexture = Texture.simpleTexture(Global.loadingTextureFile);
+        crashTexture = Texture.simpleTexture(Global.crashTextureFile);
     }
 
     private void newWorld(boolean resetSprites) {

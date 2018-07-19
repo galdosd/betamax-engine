@@ -26,6 +26,14 @@ public final class Texture {
         this.textureImage = textureImage;
     }
 
+    public static Texture simpleTexture(String filename) {
+        Texture texture = new Texture(TextureImages.fromRgbaFile(filename, true, true));
+        texture.bind(GL_TEXTURE_2D);
+        texture.btSetParameters();
+        texture.btUploadTextureUnit();
+        return texture;
+    }
+
     public void bind(int target) {
         glBindTexture(target, handle);
         boundTarget = target;
@@ -63,4 +71,11 @@ public final class Texture {
         return transparentEnough;
     }
 
+    public void render() {
+        // FIXME very leaky abstraction, bring more of the VBO and VAO stuff into Texture
+        // while removing the VBO/VAO stuff from GlProgramBase
+        bind(GL_TEXTURE_2D);
+        glClear(GL_DEPTH_BUFFER_BIT);
+        glDrawArrays(GL_TRIANGLES, 0, 3*2);
+    }
 }
