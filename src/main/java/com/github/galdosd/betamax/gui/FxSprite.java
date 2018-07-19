@@ -1,5 +1,6 @@
 package com.github.galdosd.betamax.gui;
 
+import com.github.galdosd.betamax.sprite.Sprite;
 import com.github.galdosd.betamax.sprite.SpriteName;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -21,6 +22,8 @@ public final class FxSprite extends FxObject {
     SimpleIntegerProperty age = new SimpleIntegerProperty();
     SimpleIntegerProperty layer = new SimpleIntegerProperty();
     SimpleIntegerProperty serial = new SimpleIntegerProperty();
+    SimpleIntegerProperty repetitions = new SimpleIntegerProperty();
+
 
     public FxSprite(int tableIndex) {
         this.tableIndex = tableIndex;
@@ -77,5 +80,23 @@ public final class FxSprite extends FxObject {
     }
     public void setSerial(int serial) {
         this.serial.set(serial);
+    }
+
+    public int getRepetitions() {
+        return repetitions.get();
+    }
+    public void setRepetitions(int repetitions) {
+        this.repetitions.set(repetitions);
+    }
+
+    public void load(Sprite sprite) {
+        setSpriteName( sprite.getName().getName() );
+        setTemplate( sprite.getTemplateName() );
+        setMoment( sprite.getCurrentFrame() );
+        setLength( sprite.getTotalFrames() );
+        setAge( sprite.getAge() );
+        setSerial( sprite.getCreationSerial() );
+        setLayer( sprite.getLayer() );
+        setRepetitions(sprite.getRepetitions());
     }
 }
