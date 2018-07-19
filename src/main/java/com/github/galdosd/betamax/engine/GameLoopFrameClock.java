@@ -1,5 +1,7 @@
-package com.github.galdosd.betamax;
+package com.github.galdosd.betamax.engine;
 
+import com.github.galdosd.betamax.Global;
+import com.github.galdosd.betamax.OurTool;
 import org.slf4j.LoggerFactory;
 
 import static com.google.common.base.Preconditions.checkArgument;

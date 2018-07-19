@@ -1,7 +1,8 @@
-package com.github.galdosd.betamax;
+package com.github.galdosd.betamax.engine;
 
 import com.codahale.metrics.ConsoleReporter;
 import com.codahale.metrics.Timer;
+import com.github.galdosd.betamax.Global;
 import com.github.galdosd.betamax.opengl.GlWindow;
 import com.github.galdosd.betamax.opengl.TextureCoordinate;
 import javafx.application.Platform;

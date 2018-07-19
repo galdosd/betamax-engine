@@ -1,6 +1,6 @@
 package com.github.galdosd.betamax.sprite;
 
-import com.github.galdosd.betamax.FrameClock;
+import com.github.galdosd.betamax.engine.FrameClock;
 import com.github.galdosd.betamax.graphics.SpriteTemplateRegistry;
 import com.github.galdosd.betamax.opengl.TextureCoordinate;
 import com.github.galdosd.betamax.scripting.EventType;

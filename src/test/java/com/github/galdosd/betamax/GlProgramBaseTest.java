@@ -1,5 +1,7 @@
 package com.github.galdosd.betamax;
 
+import com.github.galdosd.betamax.engine.BetamaxGlProgram;
+import com.github.galdosd.betamax.engine.GlProgramBase;
 import com.github.galdosd.betamax.opengl.Shader;
 import com.github.galdosd.betamax.opengl.TextureCoordinate;
 import org.junit.Ignore;

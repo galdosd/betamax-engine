@@ -1,6 +1,6 @@
 package com.github.galdosd.betamax.graphics;
 
-import com.github.galdosd.betamax.FrameClock;
+import com.github.galdosd.betamax.engine.FrameClock;
 import com.github.galdosd.betamax.Global;
 import com.github.galdosd.betamax.opengl.TextureCoordinate;
 import com.github.galdosd.betamax.sprite.Sprite;
@@ -15,8 +15,6 @@ import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.stream.Collectors.toList;
-import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
 
 
 /** a full screen sprite

@@ -1,6 +1,7 @@
-package com.github.galdosd.betamax;
+package com.github.galdosd.betamax.engine;
 
 
+import com.github.galdosd.betamax.Global;
 import com.github.galdosd.betamax.graphics.Texture;
 import com.github.galdosd.betamax.gui.DevConsole;
 import com.github.galdosd.betamax.opengl.*;

@@ -152,7 +152,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>com.github.galdosd.betamax.BetamaxGlProgram</mainClass>
+                            <mainClass>com.github.galdosd.betamax.engine.BetamaxGlProgram</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
