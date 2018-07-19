@@ -92,7 +92,6 @@ public final class ScriptServicer {
     }
 
     public SpriteName newSpriteName(String name) {
-        checkInit();
         return new SpriteName(name);
     }
 
