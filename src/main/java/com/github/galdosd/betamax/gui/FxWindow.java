@@ -82,7 +82,7 @@ public final class FxWindow extends Application {
         Scene scene = new Scene(sceneRoot);
         stage.setScene(scene);
         stage.setTitle("Betamax Developer Console");
-        stage.setWidth(640);
+        stage.setWidth(800);
         stage.setHeight(640);
         stage.show();
         stage.setOnCloseRequest( x -> { x.consume(); LOG.info("Closing developer console forbidden"); } );
