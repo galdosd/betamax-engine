@@ -1,12 +1,17 @@
 package com.github.galdosd.betamax.graphics;
 
 import com.github.galdosd.betamax.opengl.TextureCoordinate;
+import com.github.galdosd.betamax.opengl.VAO;
+import com.github.galdosd.betamax.opengl.VBO;
 import lombok.NonNull;
 import org.lwjgl.opengl.GL11;
 import org.slf4j.LoggerFactory;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkState;
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL15.GL_ARRAY_BUFFER;
+import static org.lwjgl.opengl.GL15.GL_STATIC_DRAW;
 
 /**
  * FIXME: Document this class
@@ -72,10 +77,40 @@ public final class Texture {
     }
 
     public void render() {
-        // FIXME very leaky abstraction, bring more of the VBO and VAO stuff into Texture
-        // while removing the VBO/VAO stuff from GlProgramBase
+        checkState(null!=vbo && null!=vao);
+        vao.bind();
+        vbo.bind(GL_ARRAY_BUFFER);
         bind(GL_TEXTURE_2D);
         glClear(GL_DEPTH_BUFFER_BIT);
         glDrawArrays(GL_TRIANGLES, 0, 3*2);
+    }
+
+    private static VBO vbo;
+    private static VAO vao;
+
+    // FIXME this should be paired with SpriteTemplate#renderTemplate, there is indirect dependency between them
+    // via opengl VBO/VAO handles
+    public static void prepareForDrawing() {
+        // load our triangle vertices
+        vbo = new VBO();
+        vbo.bindAndLoad(GL_ARRAY_BUFFER, GL_STATIC_DRAW, new float[]{
+            // two right triangles that cover the full screen
+            // all our sprites are fullscreen! wow!
+               //xpos   ypos      xtex  ytex
+                -1.0f,  1.0f,     0.0f, 1.0f,
+                 1.0f,  1.0f,     1.0f, 1.0f,
+                -1.0f, -1.0f,     0.0f, 0.0f,
+
+                 1.0f,  1.0f,     1.0f, 1.0f,
+                 1.0f, -1.0f,     1.0f, 0.0f,
+                -1.0f, -1.0f,     0.0f, 0.0f,
+        });
+
+        // prepare vao
+        vao = new VAO();
+        vao.bind();
+        vbo.bind(GL_ARRAY_BUFFER);
+        VAO.vertexAttribPointer(0, 2, GL_FLOAT, false, 4 * Float.BYTES, 0);
+        VAO.vertexAttribPointer(1, 2, GL_FLOAT, false, 4 * Float.BYTES, 2 * Float.BYTES);
     }
 }

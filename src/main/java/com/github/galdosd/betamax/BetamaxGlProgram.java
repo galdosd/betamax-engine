@@ -18,7 +18,6 @@ import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkState;
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL20.*;
 
 /**
@@ -43,7 +42,7 @@ public class BetamaxGlProgram extends GlProgramBase {
 
     @Override protected void initialize() {
         prepareShaders();
-        prepareForDrawing();
+        Texture.prepareForDrawing();
         prepareBuiltinTextures();
 
         // enable transparency
@@ -70,32 +69,6 @@ public class BetamaxGlProgram extends GlProgramBase {
         String[] scriptNames = Global.mainScript.split(",");
         scriptWorld.loadScripts(scriptNames);
         getFrameClock().resetLogicFrames();
-    }
-
-    // FIXME this should be paired with SpriteTemplate#renderTemplate, there is indirect dependency between them
-    // via opengl VBO/VAO handles
-    private void prepareForDrawing() {
-        // load our triangle vertices
-        VBO vbo = new VBO();
-        vbo.bindAndLoad(GL_ARRAY_BUFFER, GL_STATIC_DRAW, new float[]{
-            // two right triangles that cover the full screen
-            // all our sprites are fullscreen! wow!
-               //xpos   ypos      xtex  ytex
-                -1.0f,  1.0f,     0.0f, 1.0f,
-                 1.0f,  1.0f,     1.0f, 1.0f,
-                -1.0f, -1.0f,     0.0f, 0.0f,
-
-                 1.0f,  1.0f,     1.0f, 1.0f,
-                 1.0f, -1.0f,     1.0f, 0.0f,
-                -1.0f, -1.0f,     0.0f, 0.0f,
-        });
-
-        // prepare vao
-        VAO vao = new VAO();
-        vao.bind();
-        vbo.bind(GL_ARRAY_BUFFER);
-        VAO.vertexAttribPointer(0, 2, GL_FLOAT, false, 4 * Float.BYTES, 0);
-        VAO.vertexAttribPointer(1, 2, GL_FLOAT, false, 4 * Float.BYTES, 2 * Float.BYTES);
     }
 
     private void prepareShaders() {
