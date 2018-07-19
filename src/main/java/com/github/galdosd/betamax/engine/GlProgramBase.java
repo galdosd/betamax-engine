@@ -62,7 +62,6 @@ public abstract class GlProgramBase {
                     checkGlError();
                     LOG.debug("User initialization done");
                 }
-
                 frameClock.resetLogicFrames();
                 try {
                     while (!mainWindow.getShouldClose()) {
@@ -74,6 +73,7 @@ public abstract class GlProgramBase {
             }
         } finally {
             GlWindow.shutdownGlfw();
+            Platform.exit();
         }
     }
 
@@ -99,7 +99,6 @@ public abstract class GlProgramBase {
 
     protected final void closeWindow() {
         mainWindow.setShouldClose(true);
-        Platform.exit();
     }
 
     private void loopOnce() {
