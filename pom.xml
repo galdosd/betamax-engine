@@ -8,7 +8,7 @@
 
         Working set features
             Don't crash on script failure
-            Mark where script creation happens
+            Mark where sprite creation happens
             On handler invocation, state function name info
             Display list of sprites and their current moments
                 Display global info
@@ -21,7 +21,7 @@
             Load screen / reset frame clock any time a synchronous load happens
             Scripter timers
                 Implement as setting number of loops for a sprite
-            Named sprites
+            Named sprite frames
             Locations
             Managed state, just integers and booleans
                 Proper hotloading including preserving state
