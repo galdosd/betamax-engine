@@ -9,4 +9,5 @@ public interface FrameClock {
     void setPaused(boolean newPaused);
 
 
+    void resetLogicFrames();
 }

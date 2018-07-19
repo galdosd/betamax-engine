@@ -37,7 +37,7 @@ class GameLoopFrameClock implements FrameClock {
             // unpause
             // we need to ignore the time spent in pause, otherwise we'll get a flood of catch up logic frames
             // and rendering will appear to skip
-            nextLogicFrameTime = System.currentTimeMillis();
+            resetLogicFrames();
             LOG.info("Unpaused");
         }
         paused = newPaused;
@@ -74,13 +74,8 @@ class GameLoopFrameClock implements FrameClock {
         return !getPaused() && System.currentTimeMillis() > nextLogicFrameTime;
     }
 
-    public void resetLogicFrames() {
+    @Override public void resetLogicFrames() {
         LOG.debug("Reset logic frame counter");
         nextLogicFrameTime = System.currentTimeMillis();
     }
-
-    /** return true at the first frame of each period of time of length secs in seconds */
-//    public boolean everyFewSeconds(int secs) {
-//        return 0 == getCurrentFrame() % (getTargetFps() * secs);
-//    }
 }

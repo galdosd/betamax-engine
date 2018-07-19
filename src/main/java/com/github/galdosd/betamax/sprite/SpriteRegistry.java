@@ -105,9 +105,8 @@ public class SpriteRegistry {
     private void dispatchBeginEvent(LogicHandler logicHandler) {
         if(!alreadyBegun) {
             alreadyBegun = true;
-            frameClock.setPaused(true);
             logicHandler.onBegin();
-            frameClock.setPaused(false);
+            frameClock.resetLogicFrames();
         }
     }
 

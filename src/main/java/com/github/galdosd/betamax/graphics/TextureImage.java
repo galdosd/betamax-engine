@@ -88,7 +88,7 @@ public final class TextureImage {
                 getBytePixelData().get(offset + 2) & 0xFF,
                 getBytePixelData().get(offset + 3) & 0xFF
         );
-        LOG.debug("Pixel at {}x{} is {} (from {})", x, y, colorSample, filename);
+        LOG.trace("Pixel at {}x{} is {} (from {})", x, y, colorSample, filename);
         return colorSample;
     }
 

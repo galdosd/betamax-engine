@@ -36,6 +36,7 @@ public class BetamaxGlProgram extends GlProgramBase {
     private ShaderProgram defaultShaderProgram;
     private ShaderProgram highlightShaderProgram;
     private Texture pausedTexture, loadingTexture, crashTexture;
+    private boolean crashed = false;
 
     public static void main(String[] args) {
         new BetamaxGlProgram().run();
@@ -62,6 +63,14 @@ public class BetamaxGlProgram extends GlProgramBase {
 
     private void newWorld(boolean resetSprites) {
         LOG.info("Starting new world");
+        if(crashed) {
+            LOG.warn("Restarting world after a crash. Unpredictable behavior could occur! (but maybe worth a shot...)");
+            if(!resetSprites) {
+                LOG.warn("F5 to resume is even more dangerous than Ctrl+F5, the crashed frame will not be repeated"
+                        +"but its effects prior to the crash will still have taken place. It's your funeral buddy.");
+            }
+        }
+        crashed = false;
         if(resetSprites) {
             LOG.info("Resetting sprites");
             spriteRegistry = new SpriteRegistry(spriteTemplateRegistry, getFrameClock());
@@ -107,7 +116,12 @@ public class BetamaxGlProgram extends GlProgramBase {
             updateLogic();
         }
         else if (key == GLFW.GLFW_KEY_PAUSE) {
-            getFrameClock().setPaused(!getFrameClock().getPaused());
+            checkState(getFrameClock().getPaused() || !crashed);
+            if(crashed) {
+                LOG.error("You can't unpause your way out of a crash. Use hotloading (F5 or Ctrl+F5) instead");
+            } else {
+                getFrameClock().setPaused(!getFrameClock().getPaused());
+            }
             // FIXME this will fuck up the metrics,we need a cooked Clock for Metrics to ignore
             // the passage of time during pause
             // page up/down to change target FPS
@@ -130,12 +144,15 @@ public class BetamaxGlProgram extends GlProgramBase {
         LOG.debug("Clicked at {} x {}", coordinate.getX(), coordinate.getY());
         Optional<SpriteName> clickedSprite = spriteRegistry.getSpriteAtCoordinate(coordinate);
         if(clickedSprite.isPresent()) {
-            LOG.debug("Clicked on sprite {} (button {})", clickedSprite.get(), button);
             handleSpriteClick(clickedSprite.get(), button);
         }
     }
 
     private void handleSpriteClick(SpriteName spriteName, int button) {
+        if(getFrameClock().getPaused()) {
+            return;
+        }
+        LOG.debug("Clicked on {} button {}", spriteName, button);
         if(button == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
             spriteRegistry.enqueueSpriteEvent(new SpriteEvent(EventType.SPRITE_CLICK, spriteName, 0));
         } else if (button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) {
@@ -164,7 +181,8 @@ public class BetamaxGlProgram extends GlProgramBase {
         }
         if(getFrameClock().getPaused()) {
             defaultShaderProgram.use();
-            pausedTexture.render();
+            Texture texture = crashed ? crashTexture : pausedTexture;
+            texture.render();
         }
         if(System.currentTimeMillis() > nextConsoleUpdate) {
             devConsole.updateSprites(spriteRegistry.getSpritesInRenderOrder(), highlightedSprite);
@@ -174,7 +192,13 @@ public class BetamaxGlProgram extends GlProgramBase {
     }
 
     @Override protected void updateLogic() {
-        spriteRegistry.dispatchEvents(scriptWorld);
+        try {
+            spriteRegistry.dispatchEvents(scriptWorld);
+        } catch(Exception e) {
+            LOG.error("Crashed! This is usually due to a python script bug, in which case you can try resuming", e);
+            getFrameClock().setPaused(true);
+            crashed = true;
+        }
     }
 
     @Override protected String getWindowTitle() { return "BETAMAX DEMO"; }
