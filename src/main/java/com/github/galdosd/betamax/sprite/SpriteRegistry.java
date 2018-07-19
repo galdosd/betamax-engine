@@ -123,7 +123,7 @@ public class SpriteRegistry {
             SpriteEvent momentEvent = new SpriteEvent(
                     EventType.SPRITE_MOMENT,
                     sprite.getName(),
-                    sprite.getRenderedFrame()
+                    sprite.getCurrentFrame()
             );
             generatedEvents.add(momentEvent);
         }

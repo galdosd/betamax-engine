@@ -59,12 +59,13 @@ public final class SpriteTemplate {
      * different places, for example.
      */
     private class SpriteImpl implements Sprite {
-        private final SpriteName name;
+        @Getter private final SpriteName name;
         private final FrameClock frameClock;
-        private final int creationSerial;
+        @Getter private final int creationSerial;
         private int initialFrame;
         private boolean clickableEverywhere = false;
         @Getter private int layer = 0;
+        @Getter private int repetitions = 1;
 
         private SpriteImpl(SpriteName name, FrameClock frameClock){
             this.frameClock = frameClock;
@@ -74,35 +75,28 @@ public final class SpriteTemplate {
         }
 
         @Override public void render() {
-            renderTemplate(getRenderedFrame());
+            renderTemplate(getRenderedTexture());
         }
 
-        @Override public void resetRenderedFrame() {
-            initialFrame = frameClock.getCurrentFrame();
-        }
-
-        @Override public int getRenderedFrame() {
-            return (frameClock.getCurrentFrame() - initialFrame) % textureCount;
-        }
-
-        @Override public void advanceRenderedFrame(int frames) {
-            initialFrame += frames;
-        }
-
-        @Override public SpriteName getName() {
-            return name;
+        @Override public int getCurrentFrame() {
+            return (frameClock.getCurrentFrame() - initialFrame) % getTotalFrames();
         }
 
         @Override public String toString() {
             return "Sprite(" + getName() + ")";
         }
+
         @Override public boolean isClickableAtCoordinate(TextureCoordinate coord) {
             if(clickableEverywhere) {
                 return true;
             }
-            boolean transparentAtCoordinate = textures.get(getRenderedFrame()).isTransparentAtCoordinate(coord);
+            boolean transparentAtCoordinate = textures.get(getRenderedTexture()).isTransparentAtCoordinate(coord);
             LOG.trace("{}.isClickableAtCoordinate({}) == {}", this, coord, !transparentAtCoordinate);
             return !transparentAtCoordinate;
+        }
+
+        private int getRenderedTexture() {
+            return getCurrentFrame() % textureCount;
         }
 
         @Override public void setClickableEverywhere(boolean clickableEverywhere) {
@@ -115,12 +109,14 @@ public final class SpriteTemplate {
             this.layer = layer;
         }
 
-        @Override public int getCreationSerial() {
-            return creationSerial;
+        @Override public int getTotalFrames() {
+            return textureCount * repetitions;
         }
 
-        @Override public int getTotalFrames() {
-            return textureCount;
+        @Override public void setRepetitions(int repetitions) {
+            checkArgument(getAge()==0, "Only can setRepetitions when sprite is first created");
+            checkArgument(repetitions>0);
+            this.repetitions = repetitions;
         }
 
         @Override public String getTemplateName() {

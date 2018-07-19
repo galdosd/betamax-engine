@@ -8,16 +8,18 @@ import com.github.galdosd.betamax.opengl.TextureCoordinate;
 public interface Sprite {
     void render();
     boolean isClickableAtCoordinate(TextureCoordinate coordinate);
+    /** used by scripts */
     void setClickableEverywhere(boolean clickableEverywhere);
-    void resetRenderedFrame();
-    int getRenderedFrame();
-    void advanceRenderedFrame(int frames);
+    int getCurrentFrame();
     SpriteName getName();
+    /** used by scripts */
     void setLayer(int layer);
     int getLayer();
     int getCreationSerial();
     int getTotalFrames();
 
+    void setRepetitions(int repetitions);
+    int getRepetitions();
     String getTemplateName();
     int getAge();
 }
