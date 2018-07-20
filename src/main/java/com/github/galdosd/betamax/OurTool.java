@@ -1,12 +1,15 @@
 package com.github.galdosd.betamax;
 
 import com.google.common.base.Charsets;
+import com.google.common.io.ByteStreams;
 import com.google.common.io.CharStreams;
 import com.google.common.io.Files;
 import lombok.NonNull;
+import org.lwjgl.system.MemoryUtil;
 
 import java.io.*;
 import java.net.URL;
+import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
@@ -117,5 +120,17 @@ public final class OurTool {
        return new File(Global.textureCacheDir + uuid.toString() + ".dat");
    }
 
+    /** You must deallocate this manually! */
+    public static ByteBuffer readOffHeapBuffer(String fileName) {
+        try(InputStream inputStream = streamResource(fileName)){
+            byte[] bytes = ByteStreams.toByteArray(inputStream);
+            ByteBuffer byteBuffer = MemoryUtil.memAlloc(bytes.length);
+            byteBuffer.put(bytes);
+            byteBuffer.flip();
+            return byteBuffer;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
 
