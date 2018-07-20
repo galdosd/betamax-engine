@@ -1,7 +1,10 @@
 package com.github.galdosd.betamax.sound;
 
 import com.github.galdosd.betamax.OurTool;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.ToString;
+import lombok.experimental.FieldDefaults;
 import org.lwjgl.openal.*;
 import org.lwjgl.system.MemoryUtil;
 
@@ -19,25 +22,32 @@ import static org.lwjgl.system.libc.LibCStdlib.free;
 /**
  * FIXME: Document this class
  */
-public class SoundExperiment {
+public class SoundExperiment implements AutoCloseable {
     private static final IntBuffer channelsBuffer = MemoryUtil.memAllocInt(1);
     private static final IntBuffer sampleRateBuffer = MemoryUtil.memAllocInt(1);
+    private long device;
+    private long context;
     private static int channelsToFormat(int channels) {
         if(channels == 1) return AL10.AL_FORMAT_MONO16;
         if(channels == 2) return AL10.AL_FORMAT_STEREO16;
         return -1;
     }
-    long   device;
-    long  context;
     public static void main(String[] args) {
-        new SoundExperiment().doStuff();
+        try(SoundExperiment soundExperiment = new SoundExperiment()) {
+            soundExperiment.initOpenAl();
+
+            String filename = "test1.ogg";
+            SoundBuffer soundBufferHandle = loadSoundBuffer(filename);
+            soundExperiment.playSound(soundBufferHandle);
+        }
     }
 
-    private void doStuff() {
-        initOpenAl();
+    @Override public void close() {
+        alcDestroyContext(context);
+        alcCloseDevice(device);
+    }
 
-        String filename = "test1.ogg";
-        SoundBuffer soundBufferHandle = loadSoundBuffer(filename);
+    private void playSound(SoundBuffer soundBufferHandle) {
         int sourcePointer = alGenSources();
 
         alSourcei(sourcePointer, AL_BUFFER, soundBufferHandle.handle);
@@ -50,9 +60,6 @@ public class SoundExperiment {
         }
 
         alDeleteSources(sourcePointer);
-
-        alcDestroyContext(context);
-        alcCloseDevice(device);
     }
 
     void checkAlError(){
@@ -74,14 +81,23 @@ public class SoundExperiment {
         checkAlError();
     }
 
+    @ToString @FieldDefaults(level= AccessLevel.PRIVATE, makeFinal = true)
     public static class SoundBuffer implements AutoCloseable{
         @Getter int handle;
-        SoundBuffer(int handle) {
+        @Getter int channels;
+        @Getter int sampleRate;
+        @Getter int bytes;
+        @Getter String filename;
+
+        private SoundBuffer(int handle, int channels, int sampleRate, int bytes, String filename) {
             this.handle = handle;
+            this.channels = channels;
+            this.sampleRate = sampleRate;
+            this.bytes = bytes;
+            this.filename = filename;
         }
 
-        @Override
-        public void close() throws Exception {
+        @Override public void close() {
             alDeleteBuffers(handle);
         }
     }
@@ -100,7 +116,7 @@ public class SoundExperiment {
 
         int bufferPointer = alGenBuffers();
         alBufferData(bufferPointer, channelsToFormat(channels), rawAudioBuffer, sampleRate);
-        return new SoundBuffer(bufferPointer);
+        return new SoundBuffer(bufferPointer, channels, sampleRate, rawAudioBuffer.limit()*Short.BYTES, filename);
     }
 
 }
