@@ -128,7 +128,7 @@ public class SpriteRegistry {
             generatedEvents.add(momentEvent);
         }
         for(SpriteEvent event: generatedEvents) {
-            logicHandler.onSpriteEvent(event);
+            dispatchSingleSpriteEvent(logicHandler, event);
         }
         lastDispatchedMoment = frameClock.getCurrentFrame();
     }
@@ -136,6 +136,12 @@ public class SpriteRegistry {
     private void dispatchEnqueuedSpriteEvents(LogicHandler logicHandler) {
         SpriteEvent event;
         while(null != (event = enqueuedSpriteEvents.poll())) {
+            dispatchSingleSpriteEvent(logicHandler, event);
+        }
+    }
+
+    private void dispatchSingleSpriteEvent(LogicHandler logicHandler, SpriteEvent event) {
+        if(spriteExists(event.spriteName) || event.eventType == EventType.SPRITE_DESTROY) {
             logicHandler.onSpriteEvent(event);
         }
     }
