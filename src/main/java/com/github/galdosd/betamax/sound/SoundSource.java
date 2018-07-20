@@ -29,4 +29,20 @@ import static org.lwjgl.openal.AL10.*;
     @Override public void close() {
         alDeleteSources(handle);
     }
+
+    public void resume() {
+
+    }
+
+    public void pause() {
+
+    }
+
+    public void mute() {
+
+    }
+
+    public void unmute() {
+
+    }
 }

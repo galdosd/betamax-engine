@@ -90,4 +90,8 @@ import static org.lwjgl.stb.STBVorbis.stb_vorbis_decode_memory;
             }
         }
     }
+
+    public SoundSource beginPlaying() {
+        throw new UnsupportedOperationException();
+    }
 }

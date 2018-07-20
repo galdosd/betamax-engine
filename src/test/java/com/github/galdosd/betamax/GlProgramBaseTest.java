@@ -57,6 +57,8 @@ public class GlProgramBaseTest {
             @Override protected int getWindowHeight() { return 100; }
             @Override protected int getWindowWidth() { return 100; }
             @Override protected boolean getDebugMode() { return false; }
+
+            @Override public void close() { }
         }.run();
     }
 }

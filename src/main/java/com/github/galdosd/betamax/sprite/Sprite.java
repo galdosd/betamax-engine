@@ -5,7 +5,7 @@ import com.github.galdosd.betamax.opengl.TextureCoordinate;
 /**
  * FIXME: Document this class
  */
-public interface Sprite {
+public interface Sprite extends AutoCloseable {
     void render();
     boolean isClickableAtCoordinate(TextureCoordinate coordinate);
     /** used by scripts */
@@ -22,4 +22,12 @@ public interface Sprite {
     int getRepetitions();
     String getTemplateName();
     int getAge();
+
+    boolean getPaused();
+    void setPaused(boolean paused);
+
+    boolean getHidden();
+    void setHidden(boolean hidden);
+
+    void close();
 }

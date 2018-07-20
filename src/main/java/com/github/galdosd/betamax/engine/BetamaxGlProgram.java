@@ -73,6 +73,9 @@ public class BetamaxGlProgram extends GlProgramBase {
         crashed = false;
         if(resetSprites) {
             LOG.info("Resetting sprites");
+            if(null!=spriteRegistry) {
+                spriteRegistry.close();
+            }
             spriteRegistry = new SpriteRegistry(spriteTemplateRegistry, getFrameClock());
         }
         scriptWorld = new ScriptWorld(spriteRegistry);
@@ -213,5 +216,12 @@ public class BetamaxGlProgram extends GlProgramBase {
     @Override protected int getWindowHeight() { return 540; }
     @Override protected int getWindowWidth() { return 960; }
     @Override protected boolean getDebugMode() { return true; }
+
+    @Override public void close() {
+        spriteTemplateRegistry.close();
+        if(null!=spriteRegistry) {
+            spriteRegistry.close();
+        }
+    }
 }
 

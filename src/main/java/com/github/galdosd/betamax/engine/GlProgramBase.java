@@ -23,7 +23,7 @@ import static org.lwjgl.glfw.GLFW.glfwGetCursorPos;
  *  textures, etc. basically try as hard as possible to fight the dumbass statefullness of GL calls
  *  that require params to be "bound"
  */
-public abstract class GlProgramBase {
+public abstract class GlProgramBase implements AutoCloseable {
     //TODO all GL wrapped arguments passed from subclass/users of GlprogramBase should be typesafe, not
     //some fucking ints. fuck you C people.
     private static final org.slf4j.Logger LOG =
@@ -57,18 +57,22 @@ public abstract class GlProgramBase {
             try(GlWindow _mainWindow = new GlWindow(getWindowWidth(), getWindowHeight(), getWindowTitle(),
                     this::keyCallback, this::mouseButtonCallback, Global.startFullScreen)){
                 mainWindow = _mainWindow;
-                try (Timer.Context _unused_context = userInitTimer.time()) {
-                    initialize();
-                    checkGlError();
-                    LOG.debug("User initialization done");
-                }
-                frameClock.resetLogicFrames();
                 try {
-                    while (!mainWindow.getShouldClose()) {
-                        loopOnce();
+                    try (Timer.Context _unused_context = userInitTimer.time()) {
+                        initialize();
+                        checkGlError();
+                        LOG.debug("User initialization done");
+                    }
+                    frameClock.resetLogicFrames();
+                    try {
+                        while (!mainWindow.getShouldClose()) {
+                            loopOnce();
+                        }
+                    } finally {
+                        closeWindow();
                     }
                 } finally {
-                    closeWindow();
+                    close();
                 }
             }
         } finally {
@@ -135,5 +139,6 @@ public abstract class GlProgramBase {
     protected abstract int getWindowHeight();
     protected abstract int getWindowWidth();
     protected abstract boolean getDebugMode(); //TODO get from cmd line property
+    public abstract void close();
 
 }

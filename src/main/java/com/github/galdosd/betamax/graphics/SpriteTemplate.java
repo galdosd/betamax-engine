@@ -4,6 +4,9 @@ import com.github.galdosd.betamax.engine.FrameClock;
 import com.github.galdosd.betamax.Global;
 import com.github.galdosd.betamax.opengl.TextureCoordinate;
 import com.github.galdosd.betamax.sound.SoundBuffer;
+import com.github.galdosd.betamax.sound.SoundName;
+import com.github.galdosd.betamax.sound.SoundRegistry;
+import com.github.galdosd.betamax.sound.SoundSource;
 import com.github.galdosd.betamax.sprite.Sprite;
 import com.github.galdosd.betamax.sprite.SpriteName;
 import lombok.Getter;
@@ -16,6 +19,7 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkState;
 import static java.util.stream.Collectors.toList;
 
 
@@ -28,8 +32,8 @@ public final class SpriteTemplate {
     private static final org.slf4j.Logger LOG =
             LoggerFactory.getLogger(new Object(){}.getClass().getEnclosingClass());
     private final List<Texture> textures;
-    private SoundBuffer soundBuffer = null;
-    private final String soundFilename;
+    private Optional<SoundName> soundName;
+    private Optional<SoundBuffer> soundBuffer = Optional.empty();
     private final int textureCount;
     private static int nextCreationSerial = 0;
     private final String templateName;
@@ -38,7 +42,6 @@ public final class SpriteTemplate {
         this.templateName = templateName;
         String pkgName = Global.spriteBase+templateName;
         Reflections reflections = new Reflections(pkgName+".", new ResourcesScanner());
-        // TODO eliminate Reflections log line
         List<String> spriteFilenames = reflections.getResources(Pattern.compile(".*\\.tif"))
                 .stream().sorted().collect(toList());
         List<String> soundFilenames = reflections.getResources(Pattern.compile(".*\\.ogg"))
@@ -48,12 +51,17 @@ public final class SpriteTemplate {
         LOG.debug("Loading {}-frame sprite {}", spriteFilenames.size(), pkgName);
         textures = spriteFilenames.stream().map(Texture::simpleTexture).collect(toList());
         if(soundFilenames.size() > 0) {
-            soundFilename = soundFilenames.get(0);
-            LOG.debug("Detected sprite sound {}", soundFilename);
+            soundName = Optional.of(new SoundName(soundFilenames.get(0)));
+            LOG.debug("Detected sprite sound {}", soundName);
         } else {
-            soundFilename = null;
+            soundName = Optional.empty();
         }
         textureCount = textures.size();
+    }
+
+    public void loadSoundBuffer(SoundRegistry soundRegistry) {
+        if(soundBuffer.isPresent() || !soundName.isPresent()) return;
+        soundBuffer = Optional.of(soundRegistry.getSoundBuffer(soundName.get()));
     }
 
     public Sprite create(SpriteName name, FrameClock frameClock) {
@@ -79,20 +87,34 @@ public final class SpriteTemplate {
         private boolean clickableEverywhere = false;
         @Getter private int layer = 0;
         @Getter private int repetitions = 1;
+        private boolean paused = false;
+        private boolean hidden = false;
+        private int pausedFrame = 0;
+        private final Optional<SoundSource> soundSource;
 
         private SpriteImpl(SpriteName name, FrameClock frameClock){
             this.frameClock = frameClock;
             this.name = name;
+            if(soundBuffer.isPresent()) {
+                soundSource = Optional.of(soundBuffer.get().beginPlaying());
+            } else {
+                checkState(!soundName.isPresent(), "Sound was not loaded!");
+                soundSource = Optional.empty();
+            }
             initialFrame = frameClock.getCurrentFrame();
             creationSerial = nextCreationSerial++;
         }
 
         @Override public void render() {
-            renderTemplate(getRenderedTexture());
+            if(!getHidden()) renderTemplate(getRenderedTexture());
         }
 
         @Override public int getCurrentFrame() {
-            return (frameClock.getCurrentFrame() - initialFrame) % getTotalFrames();
+            if(paused) {
+                return pausedFrame;
+            } else {
+                return (frameClock.getCurrentFrame() - initialFrame) % getTotalFrames();
+            }
         }
 
         @Override public String toString() {
@@ -140,5 +162,42 @@ public final class SpriteTemplate {
             return frameClock.getCurrentFrame() - initialFrame;
         }
 
+        @Override public boolean getPaused() {
+            return paused;
+        }
+
+        @Override public void setPaused(boolean paused) {
+            if(paused == this.paused) return;
+            if(paused) doPause();
+            if(!paused) doUnpause();
+        }
+
+        @Override public boolean getHidden() {
+            return hidden;
+        }
+
+        private void doUnpause() {
+            initialFrame = frameClock.getCurrentFrame() - pausedFrame;
+            pausedFrame = 0;
+            if(soundSource.isPresent()) soundSource.get().resume();
+            paused = false;
+        }
+
+        private void doPause() {
+            pausedFrame = getCurrentFrame();
+            if(soundSource.isPresent()) soundSource.get().pause();
+            paused = true;
+        }
+
+        @Override public void setHidden(boolean hidden) {
+            if(this.hidden == hidden) return;
+            if(hidden && soundSource.isPresent()) soundSource.get().mute();
+            if(!hidden && soundSource.isPresent()) soundSource.get().unmute();
+            this.hidden = hidden;
+        }
+
+        @Override public void close() {
+            if(soundSource.isPresent()) soundSource.get().close();
+        }
     }
 }

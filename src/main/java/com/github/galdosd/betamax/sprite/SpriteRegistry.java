@@ -19,7 +19,7 @@ import static java.util.stream.Collectors.toList;
 /**
  * FIXME: Document this class
  */
-public class SpriteRegistry {
+public class SpriteRegistry implements AutoCloseable {
     private static final org.slf4j.Logger LOG =
             LoggerFactory.getLogger(new Object(){}.getClass().getEnclosingClass());
 
@@ -75,6 +75,9 @@ public class SpriteRegistry {
 
     public void destroySprite(SpriteName spriteName) {
         LOG.debug("Destroying {}", spriteName);
+        Sprite sprite = registeredSprites.get(spriteName);
+        checkState(sprite!=null, "no such sprite: " + spriteName);
+        sprite.close();
         registeredSprites.remove(spriteName);
         enqueueSpriteEvent(new SpriteEvent(EventType.SPRITE_DESTROY, spriteName, 0));
     }
@@ -167,5 +170,9 @@ public class SpriteRegistry {
 
     public void loadTemplate(String templateName) {
         spriteTemplateRegistry.getTemplate(templateName);
+    }
+
+    public void close() {
+        registeredSprites.values().stream().forEach(Sprite::close);
     }
 }

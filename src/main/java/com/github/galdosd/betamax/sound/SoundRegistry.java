@@ -12,7 +12,15 @@ public class SoundRegistry implements  AutoCloseable {
         soundSource = soundWorld.newSource();
     }
 
-    @Override public void close() throws Exception {
+
+
+
+    @Override public void close() {
         soundSource.close();
+        soundWorld.close();
+    }
+
+    public SoundBuffer getSoundBuffer(SoundName soundName) {
+        throw new UnsupportedOperationException();
     }
 }
