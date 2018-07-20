@@ -11,6 +11,7 @@ import org.reflections.scanners.ResourcesScanner;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -25,6 +26,7 @@ public final class SpriteTemplate {
     private static final org.slf4j.Logger LOG =
             LoggerFactory.getLogger(new Object(){}.getClass().getEnclosingClass());
     private final List<Texture> textures;
+    private final String soundFilename;
     private final int textureCount;
     private static int nextCreationSerial = 0;
     private final String templateName;
@@ -35,11 +37,18 @@ public final class SpriteTemplate {
         Reflections reflections = new Reflections(pkgName+".", new ResourcesScanner());
         // TODO eliminate Reflections log line
         List<String> spriteFilenames = reflections.getResources(Pattern.compile(".*\\.tif"))
-                .stream().sorted()
-                .collect(toList());
+                .stream().sorted().collect(toList());
+        List<String> soundFilenames = reflections.getResources(Pattern.compile(".*\\.ogg"))
+                .stream().sorted().collect(toList());
+        checkArgument(soundFilenames.size() <= 1, "Too many OGG files for sprite template %s", templateName);
         checkArgument(0!=spriteFilenames.size(), "no sprite frame files found for " + pkgName);
         LOG.debug("Loading {}-frame sprite {}", spriteFilenames.size(), pkgName);
         textures = spriteFilenames.stream().map(Texture::simpleTexture).collect(toList());
+        if(soundFilenames.size() > 0) {
+            soundFilename = soundFilenames.get(0);
+        } else {
+            soundFilename = null;
+        }
         textureCount = textures.size();
     }
 
