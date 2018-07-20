@@ -197,9 +197,15 @@ public class BetamaxGlProgram extends GlProgramBase {
 
     @Override protected void updateLogic() {
         try {
-            spriteRegistry.dispatchEvents(scriptWorld);
+            if(!getFrameClock().getPaused()) spriteRegistry.dispatchEvents(scriptWorld);
         } catch(Exception e) {
+<<<<<<< HEAD
             handleCrash(e);
+=======
+            LOG.error("Crashed! This is usually due to a python script bug, in which case you can try resuming", new RuntimeException(e));
+            getFrameClock().setPaused(true);
+            crashed = true;
+>>>>>>> game.py
         }
     }
 

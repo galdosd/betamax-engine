@@ -52,7 +52,7 @@ public class TextureImages {
                 checkState(colorSamples == readPixelBytes, "read failure: cache file pixel data");
 
                 checkState(bytePixelData.position()==0);
-                LOG.info("Loaded from cache: {}", filename);
+                LOG.trace("Loaded from cache: {}", filename);
                 return Optional.of(new TextureImage(width, height, bytePixelData, filename));
             }
         } else {
