@@ -1,9 +1,11 @@
 package com.github.galdosd.betamax.sound;
 
+import com.github.galdosd.betamax.OurTool;
 import org.lwjgl.openal.*;
 import org.slf4j.LoggerFactory;
 
 import static com.google.common.base.Preconditions.checkState;
+import static org.lwjgl.openal.AL10.*;
 import static org.lwjgl.openal.ALC10.*;
 
 /**
@@ -17,18 +19,23 @@ public class SoundRegistry implements AutoCloseable {
     private static boolean initialized = false;
 
     private final long context, device;
+    private final ALCapabilities alCapabilities;
+    private final ALCCapabilities alcCapabilities;
 
     public static void main(String[] args) {
         try(SoundRegistry soundRegistry = new SoundRegistry()) {
             try(Sound sound = soundRegistry.loadSound("test1.ogg")) {
                 soundRegistry.playSound(sound);
+                OurTool.sleepUntilPrecisely(System.currentTimeMillis()+9000);
             }
         }
     }
 
     public Sound loadSound(String filename) {
         // we wrap the package private Sound#loadSoundFromFile because it should not be called of openal is not initialized
-        return Sound.loadSoundFromFile(filename);
+        Sound sound = Sound.loadSoundFromFile(filename);
+        checkAlError();
+        return sound;
     }
 
     public SoundRegistry() {
@@ -42,13 +49,29 @@ public class SoundRegistry implements AutoCloseable {
         context = alcCreateContext(device, attributes);
         alcMakeContextCurrent(context);
 
-        ALCCapabilities alcCapabilities = ALC.createCapabilities(device);
-        ALCapabilities alCapabilities = AL.createCapabilities(alcCapabilities);
+        alcCapabilities = ALC.createCapabilities(device);
+        alCapabilities = AL.createCapabilities(alcCapabilities);
+        checkAlError();
+    }
 
+    void checkAlError(){
+        int alError = alGetError();
+        checkState(alError==AL_NO_ERROR, "OpenAL error " + alError);
+        int alcError = alcGetError(device);
+        checkState(alcError==ALC_NO_ERROR, "OpenALC error " + alcError);
     }
 
     public void playSound(Sound sound){
         checkState(initialized);
+        LOG.debug("Playing sound {}", sound);
+        int sourceHandle = alGenSources();
+        try {
+            alSourcei(sourceHandle, AL_BUFFER, sound.getHandle());
+            alSourcePlay(sourceHandle);
+            checkAlError();
+        } finally {
+            alDeleteSources(sourceHandle);
+        }
 
     }
 

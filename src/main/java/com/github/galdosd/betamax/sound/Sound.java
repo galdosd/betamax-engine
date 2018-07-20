@@ -1,6 +1,7 @@
 package com.github.galdosd.betamax.sound;
 
 import com.github.galdosd.betamax.OurTool;
+import lombok.ToString;
 import lombok.Value;
 import org.lwjgl.openal.AL10;
 import org.lwjgl.system.MemoryUtil;
@@ -23,7 +24,7 @@ import static org.lwjgl.stb.STBVorbis.stb_vorbis_get_error;
 /**
  * FIXME: Document this class
  */
-public final class Sound implements AutoCloseable {
+@ToString public final class Sound implements AutoCloseable {
     private static final org.slf4j.Logger LOG =
             LoggerFactory.getLogger(new Object(){}.getClass().getEnclosingClass());
 
@@ -51,6 +52,10 @@ public final class Sound implements AutoCloseable {
         alDeleteBuffers(handle);
     }
 
+    int getHandle() {
+        return handle;
+    }
+
     private static int channelsToFormat(int channels) {
         if(channels == 1) return AL10.AL_FORMAT_MONO16;
         if(channels == 2) return AL10.AL_FORMAT_STEREO16;
@@ -65,6 +70,7 @@ public final class Sound implements AutoCloseable {
             try {
                 soundFileBuffer = OurTool.readOffHeapBuffer(filename);
                 rawAudioBuffer = stb_vorbis_decode_memory(soundFileBuffer, channelsBuffer, sampleRateBuffer);
+                //rawAudioBuffer = stb_vorbis_decode_filename("/tmp/test1.ogg", channelsBuffer, sampleRateBuffer);
                 // TODO seems like it would be some legwork to construct a stb decoder just to get the damn error code
                 checkState(null!=rawAudioBuffer, "could not load " + filename);
                 int channels = channelsBuffer.get();
@@ -75,16 +81,16 @@ public final class Sound implements AutoCloseable {
             }
             catch(Exception e) {
                 if(null!=handle) {
-                    alDeleteBuffers(handle);
+                    //alDeleteBuffers(handle);
                 }
                 throw new RuntimeException(e);
             }
             finally {
                 if(null!=soundFileBuffer) {
-                    MemoryUtil.memFree(soundFileBuffer);
+                    //MemoryUtil.memFree(soundFileBuffer);
                 }
                 if(null!=rawAudioBuffer) {
-                    LibCStdlib.free(rawAudioBuffer);
+                    //LibCStdlib.free(rawAudioBuffer);
                 }
             }
         }
