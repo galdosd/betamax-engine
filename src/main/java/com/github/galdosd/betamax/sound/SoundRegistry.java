@@ -20,10 +20,15 @@ public class SoundRegistry implements AutoCloseable {
 
     public static void main(String[] args) {
         try(SoundRegistry soundRegistry = new SoundRegistry()) {
-            try(Sound sound = Sound.loadSound("test1.ogg")) {
+            try(Sound sound = soundRegistry.loadSound("test1.ogg")) {
                 soundRegistry.playSound(sound);
             }
         }
+    }
+
+    public Sound loadSound(String filename) {
+        // we wrap the package private Sound#loadSoundFromFile because it should not be called of openal is not initialized
+        return Sound.loadSoundFromFile(filename);
     }
 
     public SoundRegistry() {
@@ -41,7 +46,6 @@ public class SoundRegistry implements AutoCloseable {
         ALCapabilities alCapabilities = AL.createCapabilities(alcCapabilities);
 
     }
-
 
     public void playSound(Sound sound){
         checkState(initialized);
