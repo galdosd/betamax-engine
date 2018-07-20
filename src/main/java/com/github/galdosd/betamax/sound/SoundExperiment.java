@@ -7,6 +7,7 @@ import lombok.ToString;
 import lombok.experimental.FieldDefaults;
 import org.lwjgl.openal.*;
 import org.lwjgl.system.MemoryUtil;
+import org.lwjgl.system.libc.LibCStdlib;
 
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
@@ -103,20 +104,34 @@ public class SoundExperiment implements AutoCloseable {
     }
 
     private static SoundBuffer loadSoundBuffer(String filename) {
-        ShortBuffer rawAudioBuffer;
+        ShortBuffer rawAudioBuffer = null;
+        ByteBuffer soundFileBuffer = null;
+        Integer bufferHandle = null;
+        try {
+            soundFileBuffer = OurTool.readOffHeapBuffer(filename);
+            rawAudioBuffer = stb_vorbis_decode_memory(soundFileBuffer, channelsBuffer, sampleRateBuffer);
+            // TODO seems like it would be some legwork to construct a stb decoder just to get the damn error code
+            checkState(null != rawAudioBuffer, "could not load " + filename);
+            //rawAudioBuffer = stb_vorbis_decode_filename("/tmp/test1.ogg", channelsBuffer, sampleRateBuffer);
+            System.out.println("Size " + rawAudioBuffer.limit() * Short.BYTES);
 
+            int channels = channelsBuffer.get(0);
+            int sampleRate = sampleRateBuffer.get(0);
 
-        ByteBuffer soundFileBuffer = OurTool.readOffHeapBuffer(filename);
-        rawAudioBuffer = stb_vorbis_decode_memory(soundFileBuffer, channelsBuffer, sampleRateBuffer);
-        //rawAudioBuffer = stb_vorbis_decode_filename("/tmp/test1.ogg", channelsBuffer, sampleRateBuffer);
-        System.out.println("Size " + rawAudioBuffer.limit() * Short.BYTES);
-
-        int channels = channelsBuffer.get(0);
-        int sampleRate = sampleRateBuffer.get(0);
-
-        int bufferPointer = alGenBuffers();
-        alBufferData(bufferPointer, channelsToFormat(channels), rawAudioBuffer, sampleRate);
-        return new SoundBuffer(bufferPointer, channels, sampleRate, rawAudioBuffer.limit()*Short.BYTES, filename);
+            bufferHandle = alGenBuffers();
+            alBufferData(bufferHandle, channelsToFormat(channels), rawAudioBuffer, sampleRate);
+            return new SoundBuffer(bufferHandle, channels, sampleRate, rawAudioBuffer.limit() * Short.BYTES, filename);
+        } catch(Exception e) {
+            if(null!=bufferHandle) alDeleteBuffers(bufferHandle);
+            throw new RuntimeException(e);
+        } finally {
+            if(null!=soundFileBuffer) {
+                MemoryUtil.memFree(soundFileBuffer);
+            }
+            if(null!=rawAudioBuffer) {
+                LibCStdlib.free(rawAudioBuffer);
+            }
+        }
     }
 
 }
