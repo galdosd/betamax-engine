@@ -11,7 +11,7 @@ import static org.lwjgl.openal.ALC10.*;
 /**
  * FIXME: Document this class
  */
-public class SoundRegistry implements AutoCloseable {
+public final class SoundRegistry implements AutoCloseable {
     private static final org.slf4j.Logger LOG =
             LoggerFactory.getLogger(new Object(){}.getClass().getEnclosingClass());
 
@@ -22,21 +22,26 @@ public class SoundRegistry implements AutoCloseable {
     private final ALCapabilities alCapabilities;
     private final ALCCapabilities alcCapabilities;
 
-    public static void main(String[] args) {
-        try(SoundRegistry soundRegistry = new SoundRegistry()) {
-            
-            try(Sound sound = soundRegistry.loadSound("test1.ogg")) {
-                soundRegistry.playSound(sound);
-                OurTool.sleepUntilPrecisely(System.currentTimeMillis()+9000);
-            }
-        }
+//    public static void main(String[] args) {
+//        try(SoundRegistry soundRegistry = new SoundRegistry()) {
+//            try(SoundSource source = soundRegistry.newSource()) {
+//                try (SoundBuffer soundBuffer = soundRegistry.loadSound("test1.ogg")) {
+//                    source.playSound(soundBuffer);
+//                    OurTool.sleepUntilPrecisely(System.currentTimeMillis() + 9000);
+//                }
+//            }
+//        }
+//    }
+
+    public SoundSource newSource() {
+        return new SoundSource();
     }
 
-    public Sound loadSound(String filename) {
-        // we wrap the package private Sound#loadSoundFromFile because it should not be called of openal is not initialized
-        Sound sound = Sound.loadSoundFromFile(filename);
+    public SoundBuffer loadSound(String filename) {
+        // we wrap the package private SoundBuffer#loadSoundFromFile because it should not be called of openal is not initialized
+        SoundBuffer soundBuffer = SoundBuffer.loadSoundFromFile(filename);
         checkAlError();
-        return sound;
+        return soundBuffer;
     }
 
     public SoundRegistry() {
@@ -52,28 +57,20 @@ public class SoundRegistry implements AutoCloseable {
 
         alcCapabilities = ALC.createCapabilities(device);
         alCapabilities = AL.createCapabilities(alcCapabilities);
+        LOG.info("Initialized OpenAL device {} context {} ({})", device, context, defaultDeviceName);
         checkAlError();
     }
 
-    void checkAlError(){
-        int alError = alGetError();
-        checkState(alError==AL_NO_ERROR, "OpenAL error " + alError);
+
+    private void checkAlcError() {
+        checkAlError();
         int alcError = alcGetError(device);
         checkState(alcError==ALC_NO_ERROR, "OpenALC error " + alcError);
     }
 
-    public void playSound(Sound sound){
-        checkState(initialized);
-        LOG.debug("Playing sound {}", sound);
-        int sourceHandle = alGenSources();
-        try {
-            alSourcei(sourceHandle, AL_BUFFER, sound.getHandle());
-            alSourcePlay(sourceHandle);
-            checkAlError();
-        } finally {
-            //alDeleteSources(sourceHandle);
-        }
-
+    static void checkAlError(){
+        int alError = alGetError();
+        checkState(alError==AL_NO_ERROR, "OpenAL error " + alError);
     }
 
     @Override public void close() {

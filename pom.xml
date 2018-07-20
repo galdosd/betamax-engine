@@ -25,7 +25,7 @@
             Managed state, just integers and booleans
                 Proper hotloading including preserving state
                 Save/load state
-            Sound
+            SoundBuffer
             Rewind
             Invalidate cache based on file size, last mod
             Efficient preloading for rewind
