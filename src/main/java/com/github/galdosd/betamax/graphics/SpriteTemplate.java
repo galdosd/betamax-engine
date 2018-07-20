@@ -3,6 +3,7 @@ package com.github.galdosd.betamax.graphics;
 import com.github.galdosd.betamax.engine.FrameClock;
 import com.github.galdosd.betamax.Global;
 import com.github.galdosd.betamax.opengl.TextureCoordinate;
+import com.github.galdosd.betamax.sound.SoundBuffer;
 import com.github.galdosd.betamax.sprite.Sprite;
 import com.github.galdosd.betamax.sprite.SpriteName;
 import lombok.Getter;
@@ -23,9 +24,11 @@ import static java.util.stream.Collectors.toList;
  * each of which can be at different points in time in their animation (see Sprite interface)
  */
 public final class SpriteTemplate {
+    // TODO Textures and SoundBuffers should be unloaded, implement AutoCloseable down the line
     private static final org.slf4j.Logger LOG =
             LoggerFactory.getLogger(new Object(){}.getClass().getEnclosingClass());
     private final List<Texture> textures;
+    private SoundBuffer soundBuffer = null;
     private final String soundFilename;
     private final int textureCount;
     private static int nextCreationSerial = 0;
@@ -46,6 +49,7 @@ public final class SpriteTemplate {
         textures = spriteFilenames.stream().map(Texture::simpleTexture).collect(toList());
         if(soundFilenames.size() > 0) {
             soundFilename = soundFilenames.get(0);
+            LOG.debug("Detected sprite sound {}", soundFilename);
         } else {
             soundFilename = null;
         }

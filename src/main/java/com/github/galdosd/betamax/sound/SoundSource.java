@@ -22,7 +22,7 @@ import static org.lwjgl.openal.AL10.*;
         LOG.debug("Playing {} on {}", soundBuffer, this);
         alSourcei(handle, AL10.AL_BUFFER, soundBuffer.getHandle());
         alSourcePlay(handle);
-        SoundRegistry.checkAlError();
+        SoundWorld.checkAlError();
     }
 
 

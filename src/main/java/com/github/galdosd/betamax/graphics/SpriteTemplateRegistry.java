@@ -1,6 +1,6 @@
 package com.github.galdosd.betamax.graphics;
 
-import com.github.galdosd.betamax.Global;
+import com.github.galdosd.betamax.sound.SoundWorld;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,6 +9,7 @@ import java.util.Map;
  * FIXME: Document this class
  */
 public final class SpriteTemplateRegistry {
+    private final SoundWorld soundWorld = new SoundWorld();
     private final Map<String,SpriteTemplate> registeredTemplates = new HashMap<>();
     // TODO it might be nice to have some mechanism by which templates not used for a while are unloaded
     // that said it probably makes sense to have that partially manually controlled (to group templates into
@@ -19,6 +20,7 @@ public final class SpriteTemplateRegistry {
         SpriteTemplate template = registeredTemplates.get(name);
         if(null==template) {
             template = new SpriteTemplate(name);
+
             registeredTemplates.put(name,template);
         }
         return template;
