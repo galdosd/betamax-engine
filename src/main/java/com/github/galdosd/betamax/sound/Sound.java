@@ -63,35 +63,33 @@ import static org.lwjgl.stb.STBVorbis.stb_vorbis_get_error;
     }
 
     static Sound loadSoundFromFile(String filename) {
-        synchronized ($LOCK) {
-            ByteBuffer soundFileBuffer = null;
-            ShortBuffer rawAudioBuffer = null;
-            Integer handle = null;
-            try {
-                soundFileBuffer = OurTool.readOffHeapBuffer(filename);
+        ByteBuffer soundFileBuffer = null;
+        ShortBuffer rawAudioBuffer = null;
+        Integer handle = null;
+        int channels, sampleRate;
+        try {
+            soundFileBuffer = OurTool.readOffHeapBuffer(filename);
+            synchronized ($LOCK) {
                 rawAudioBuffer = stb_vorbis_decode_memory(soundFileBuffer, channelsBuffer, sampleRateBuffer);
-                //rawAudioBuffer = stb_vorbis_decode_filename("/tmp/test1.ogg", channelsBuffer, sampleRateBuffer);
                 // TODO seems like it would be some legwork to construct a stb decoder just to get the damn error code
-                checkState(null!=rawAudioBuffer, "could not load " + filename);
-                int channels = channelsBuffer.get();
-                int sampleRate = sampleRateBuffer.get();
-                handle = alGenBuffers();
-                alBufferData(handle, channelsToFormat(channels), rawAudioBuffer, sampleRate);
-                return new Sound(channels, sampleRate, handle, rawAudioBuffer.limit() * Short.BYTES, filename);
+                checkState(null != rawAudioBuffer, "could not load " + filename);
+                channels = channelsBuffer.get();
+                sampleRate = sampleRateBuffer.get();
             }
-            catch(Exception e) {
-                if(null!=handle) {
-                    //alDeleteBuffers(handle);
-                }
-                throw new RuntimeException(e);
+            handle = alGenBuffers();
+            alBufferData(handle, channelsToFormat(channels), rawAudioBuffer, sampleRate);
+            return new Sound(channels, sampleRate, handle, rawAudioBuffer.limit() * Short.BYTES, filename);
+        } catch (Exception e) {
+            if (null != handle) {
+                alDeleteBuffers(handle);
             }
-            finally {
-                if(null!=soundFileBuffer) {
-                    //MemoryUtil.memFree(soundFileBuffer);
-                }
-                if(null!=rawAudioBuffer) {
-                    //LibCStdlib.free(rawAudioBuffer);
-                }
+            throw new RuntimeException(e);
+        } finally {
+            if (null != soundFileBuffer) {
+                MemoryUtil.memFree(soundFileBuffer);
+            }
+            if (null != rawAudioBuffer) {
+                LibCStdlib.free(rawAudioBuffer);
             }
         }
     }

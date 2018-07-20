@@ -23,30 +23,37 @@ import static org.lwjgl.system.libc.LibCStdlib.free;
 /**
  * FIXME: Document this class
  */
-public class SoundExperiment implements AutoCloseable {
+public final class SoundExperiment implements AutoCloseable {
     private static final IntBuffer channelsBuffer = MemoryUtil.memAllocInt(1);
     private static final IntBuffer sampleRateBuffer = MemoryUtil.memAllocInt(1);
-    private long device;
-    private long context;
-    private static int channelsToFormat(int channels) {
-        if(channels == 1) return AL10.AL_FORMAT_MONO16;
-        if(channels == 2) return AL10.AL_FORMAT_STEREO16;
-        return -1;
-    }
-    public static void main(String[] args) {
-        try(SoundExperiment soundExperiment = new SoundExperiment()) {
-            soundExperiment.initOpenAl();
+    private final long device;
+    private final long context;
 
-            String filename = "test1.ogg";
-            SoundBuffer soundBufferHandle = loadSoundBuffer(filename);
-            soundExperiment.playSound(soundBufferHandle);
+    public static void main(String[] args) {
+        try(SoundExperiment soundExperiment = SoundExperiment.init()) {
+            try(SoundBuffer soundBufferHandle = loadSoundBuffer("test1.ogg")) {
+                soundExperiment.playSound(soundBufferHandle);
+            }
         }
+    }
+
+    private SoundExperiment(long device, long context) {
+        this.device=device;
+        this.context=context;
+        checkAlError();
     }
 
     @Override public void close() {
         alcDestroyContext(context);
         alcCloseDevice(device);
     }
+
+    private static int channelsToFormat(int channels) {
+        if(channels == 1) return AL10.AL_FORMAT_MONO16;
+        if(channels == 2) return AL10.AL_FORMAT_STEREO16;
+        return -1;
+    }
+
 
     private void playSound(SoundBuffer soundBufferHandle) {
         int sourcePointer = alGenSources();
@@ -63,23 +70,23 @@ public class SoundExperiment implements AutoCloseable {
         alDeleteSources(sourcePointer);
     }
 
-    void checkAlError(){
+    private void checkAlError(){
         int alError = alGetError();
         checkState(alError==AL_NO_ERROR, "OpenAL error " + alError);
         int alcError = alcGetError(device);
         checkState(alcError==ALC_NO_ERROR, "OpenALC error " + alcError);
     }
 
-    private void initOpenAl() {
+    public static SoundExperiment init() {
         String defaultDeviceName = alcGetString(0, ALC_DEFAULT_DEVICE_SPECIFIER);
-        device = alcOpenDevice(defaultDeviceName);
+        long device = alcOpenDevice(defaultDeviceName);
         int[] attributes = {0};
-        context = alcCreateContext(device, attributes);
+        long context = alcCreateContext(device, attributes);
         alcMakeContextCurrent(context);
 
         ALCCapabilities alcCapabilities = ALC.createCapabilities(device);
         ALCapabilities alCapabilities  = AL.createCapabilities(alcCapabilities);
-        checkAlError();
+        return new SoundExperiment(device,context);
     }
 
     @ToString @FieldDefaults(level= AccessLevel.PRIVATE, makeFinal = true)
@@ -103,7 +110,7 @@ public class SoundExperiment implements AutoCloseable {
         }
     }
 
-    private static SoundBuffer loadSoundBuffer(String filename) {
+    public static SoundBuffer loadSoundBuffer(String filename) {
         ShortBuffer rawAudioBuffer = null;
         ByteBuffer soundFileBuffer = null;
         Integer bufferHandle = null;
@@ -112,12 +119,8 @@ public class SoundExperiment implements AutoCloseable {
             rawAudioBuffer = stb_vorbis_decode_memory(soundFileBuffer, channelsBuffer, sampleRateBuffer);
             // TODO seems like it would be some legwork to construct a stb decoder just to get the damn error code
             checkState(null != rawAudioBuffer, "could not load " + filename);
-            //rawAudioBuffer = stb_vorbis_decode_filename("/tmp/test1.ogg", channelsBuffer, sampleRateBuffer);
-            System.out.println("Size " + rawAudioBuffer.limit() * Short.BYTES);
-
             int channels = channelsBuffer.get(0);
             int sampleRate = sampleRateBuffer.get(0);
-
             bufferHandle = alGenBuffers();
             alBufferData(bufferHandle, channelsToFormat(channels), rawAudioBuffer, sampleRate);
             return new SoundBuffer(bufferHandle, channels, sampleRate, rawAudioBuffer.limit() * Short.BYTES, filename);

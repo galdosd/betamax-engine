@@ -24,6 +24,7 @@ public class SoundRegistry implements AutoCloseable {
 
     public static void main(String[] args) {
         try(SoundRegistry soundRegistry = new SoundRegistry()) {
+            
             try(Sound sound = soundRegistry.loadSound("test1.ogg")) {
                 soundRegistry.playSound(sound);
                 OurTool.sleepUntilPrecisely(System.currentTimeMillis()+9000);
@@ -70,7 +71,7 @@ public class SoundRegistry implements AutoCloseable {
             alSourcePlay(sourceHandle);
             checkAlError();
         } finally {
-            alDeleteSources(sourceHandle);
+            //alDeleteSources(sourceHandle);
         }
 
     }
