@@ -12,8 +12,8 @@ import lombok.experimental.FieldDefaults;
  * FIXME: Document this class
  */
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-public final class FxSprite extends FxObject {
-    @Getter @FxObject.IgnoreColumn final int tableIndex;
+public final class FxSprite extends FxRow<SpriteName> {
+    @Getter @FxRow.IgnoreColumn final int tableIndex;
 
     SimpleStringProperty spriteName = new SimpleStringProperty();
     SimpleStringProperty template = new SimpleStringProperty();
@@ -29,7 +29,7 @@ public final class FxSprite extends FxObject {
         this.tableIndex = tableIndex;
     }
 
-    public SpriteName getID() {
+    @Override public SpriteName getID() {
         return new SpriteName(getSpriteName());
     }
 

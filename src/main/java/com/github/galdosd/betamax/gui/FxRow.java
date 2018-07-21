@@ -12,7 +12,7 @@ import java.util.Arrays;
 /**
  * FIXME: Document this class
  */
-public class FxObject {
+public abstract class FxRow<T_id> {
     private static TableColumn tableColumn(String columnName) {
         TableColumn tableColumn = new TableColumn(columnName);
         tableColumn.setMinWidth(10*columnName.length() + 20);
@@ -31,16 +31,13 @@ public class FxObject {
         return Arrays.stream(clazz.getDeclaredFields())
                 .filter(f -> f.getAnnotationsByType(IgnoreColumn.class).length == 0)
                 .map(Field::getName)
-                .map(FxObject::tableColumn)
+                .map(FxRow::tableColumn)
                 .toArray(TableColumn[]::new);
-//        return new TableColumn[]{
-//                tableColumn("spriteName"),
-//                tableColumn("template"),
-//                tableColumn("moment"),
-//                tableColumn("length"),
-//                tableColumn("age"),
-//        };
     }
+
+    public abstract T_id getID();
+
+    public abstract int getTableIndex();
 
     @Retention(RetentionPolicy.RUNTIME)
     public @interface IgnoreColumn { }

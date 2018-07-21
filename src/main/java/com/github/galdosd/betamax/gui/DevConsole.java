@@ -44,12 +44,12 @@ public final class DevConsole {
                 .collect(toList());
 
         Platform.runLater( () -> {
-            window.updateSpriteData(updatedFxSprites);
+            window.getSpriteTable().updateSpriteData(updatedFxSprites);
             if(highlightedSprite.isPresent()) {
-                window.setSelectedSprite(highlightedSprite.get());
+                window.getSpriteTable().setSelectedSprite(highlightedSprite.get());
             }
             synchronized ($LOCK) {
-                selectedSprite = window.getSelectedSprite();
+                selectedSprite = window.getSpriteTable().getSelectedSprite();
             }
         });
     }
@@ -61,7 +61,7 @@ public final class DevConsole {
     }
     public void clearHighlightedSprite() {
         Platform.runLater( () -> {
-            window.setSelectedSprite(null);
+            window.getSpriteTable().setSelectedSprite(null);
         });
 
     }
