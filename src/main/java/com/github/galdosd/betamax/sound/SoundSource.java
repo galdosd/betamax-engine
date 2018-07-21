@@ -22,6 +22,7 @@ import static org.lwjgl.openal.AL10.*;
 
     private static final Set<SoundSource> allSoundSources = new HashSet<>();
     private static final Object LOCK$allSoundSources = new Object();
+    private static float currentGlobalPitch = 1.0f;
 
     static void globalUnpause() {
         allSoundSources.stream().forEach(SoundSource::resume);
@@ -45,6 +46,7 @@ import static org.lwjgl.openal.AL10.*;
         alSourcei(handle, AL10.AL_BUFFER, soundBuffer.getHandle());
         SoundWorld.checkAlError();
         alSourcePlay(handle);
+        setPitch(currentGlobalPitch);
         SoundWorld.checkAlError();
     }
 
@@ -91,7 +93,7 @@ import static org.lwjgl.openal.AL10.*;
 
     public static void globalPitch(float newPitch) {
         allSoundSources.stream().forEach(s -> s.setPitch(newPitch));
-
+        currentGlobalPitch = newPitch;
     }
 
     private void setPitch(float newPitch) {
