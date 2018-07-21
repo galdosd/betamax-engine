@@ -15,7 +15,9 @@ import static org.lwjgl.openal.AL10.*;
     private final int handle;
 
     SoundSource() {
+        LOG.debug("New {}", this);
         handle = alGenSources();
+        SoundWorld.checkAlError();
     }
 
     public void playSound(SoundBuffer soundBuffer){
@@ -28,21 +30,22 @@ import static org.lwjgl.openal.AL10.*;
 
     @Override public void close() {
         alDeleteSources(handle);
+        SoundWorld.checkAlError();
     }
 
     public void resume() {
-
+        throw new UnsupportedOperationException("DOM DINT IMPLENT DIS YAT");
     }
 
     public void pause() {
-
+        throw new UnsupportedOperationException("DOM DINT IMPLENT DIS YAT");
     }
 
     public void mute() {
-
+        throw new UnsupportedOperationException("DOM DINT IMPLENT DIS YAT");
     }
 
     public void unmute() {
-
+        throw new UnsupportedOperationException("DOM DINT IMPLENT DIS YAT");
     }
 }

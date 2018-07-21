@@ -92,6 +92,13 @@ import static org.lwjgl.stb.STBVorbis.stb_vorbis_decode_memory;
     }
 
     public SoundSource beginPlaying() {
-        throw new UnsupportedOperationException();
+        SoundSource soundSource = new SoundSource();
+        try {
+            soundSource.playSound(this);
+        } catch(Exception e) {
+            soundSource.close();
+            throw new RuntimeException(e);
+        }
+        return soundSource;
     }
 }

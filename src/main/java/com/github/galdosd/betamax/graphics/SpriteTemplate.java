@@ -38,6 +38,7 @@ public final class SpriteTemplate implements  AutoCloseable {
     private static int nextCreationSerial = 0;
     private final String templateName;
 
+
     public SpriteTemplate(String templateName) {
         this.templateName = templateName;
         String pkgName = Global.spriteBase+templateName;
