@@ -25,6 +25,7 @@ public final class ScriptServicer {
     private final Map<EventType,ScriptCallback> globalCallbacks = new HashMap<>();
     /** Only callback registering and logging is permitted until this is done */
     private boolean initializing = true;
+    private Map<SpriteEvent, ScriptCallback> allCallbacks;
 
     public ScriptServicer(SpriteRegistry spriteRegistry) {
         this.spriteRegistry = spriteRegistry;
@@ -106,5 +107,9 @@ public final class ScriptServicer {
 
     public void finishInit() {
         initializing = false;
+    }
+
+    public Map<SpriteEvent, ScriptCallback> getAllCallbacks() {
+        return callbacks;
     }
 }

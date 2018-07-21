@@ -1,5 +1,6 @@
 package com.github.galdosd.betamax.gui;
 
+import com.github.galdosd.betamax.sprite.SpriteEvent;
 import com.github.galdosd.betamax.sprite.SpriteName;
 import com.google.common.base.Preconditions;
 import javafx.application.Application;
@@ -27,6 +28,7 @@ public final class FxWindow extends Application {
     private static final Object LOCK$singleton = new Object();
 
     @Getter private FxTable<FxSprite,SpriteName> spriteTable;
+    @Getter private FxTable<FxCallback,SpriteEvent> callbackTable;
 
     public static FxWindow singleton() {
         new Thread( () -> {
@@ -65,7 +67,10 @@ public final class FxWindow extends Application {
 
     private void addTabs(Pane sceneRoot, TabPane tabPane) {
         spriteTable = new FxTable<>();
-        tabPane.getTabs().addAll(spriteTable.start(sceneRoot, new FxSprite(0).tableColumns(), "Sprites"));
+        tabPane.getTabs().addAll(spriteTable.start(sceneRoot, FxSprite.class, "Sprites"));
+
+        callbackTable = new FxTable<>();
+        tabPane.getTabs().addAll(callbackTable.start(sceneRoot, FxCallback.class, "Callbacks"));
     }
 
     private void completeSingleton() {

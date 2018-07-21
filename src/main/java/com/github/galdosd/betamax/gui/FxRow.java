@@ -3,6 +3,7 @@ package com.github.galdosd.betamax.gui;
 import javafx.scene.control.Control;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.cell.PropertyValueFactory;
+import lombok.Getter;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -13,6 +14,8 @@ import java.util.Arrays;
  * FIXME: Document this class
  */
 public abstract class FxRow<T_id> {
+    @Getter @FxRow.IgnoreColumn protected int tableIndex;
+
     private static TableColumn tableColumn(String columnName) {
         TableColumn tableColumn = new TableColumn(columnName);
         tableColumn.setMinWidth(10*columnName.length() + 20);
@@ -23,11 +26,11 @@ public abstract class FxRow<T_id> {
         return tableColumn;
     }
 
-    public TableColumn[] tableColumns() {
+    TableColumn[] tableColumns() {
         return columns(this.getClass());
     }
 
-    private static TableColumn[] columns(Class<?> clazz) {
+    static TableColumn[] columns(Class<?> clazz) {
         return Arrays.stream(clazz.getDeclaredFields())
                 .filter(f -> f.getAnnotationsByType(IgnoreColumn.class).length == 0)
                 .map(Field::getName)
@@ -36,8 +39,6 @@ public abstract class FxRow<T_id> {
     }
 
     public abstract T_id getID();
-
-    public abstract int getTableIndex();
 
     @Retention(RetentionPolicy.RUNTIME)
     public @interface IgnoreColumn { }

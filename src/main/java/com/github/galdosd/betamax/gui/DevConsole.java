@@ -2,7 +2,9 @@ package com.github.galdosd.betamax.gui;
 
 import com.github.galdosd.betamax.Global;
 import com.github.galdosd.betamax.OurTool;
+import com.github.galdosd.betamax.scripting.ScriptCallback;
 import com.github.galdosd.betamax.sprite.Sprite;
+import com.github.galdosd.betamax.sprite.SpriteEvent;
 import com.github.galdosd.betamax.sprite.SpriteName;
 import com.google.common.collect.Ordering;
 import javafx.application.Platform;
@@ -12,6 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static java.util.stream.Collectors.toList;
@@ -32,19 +35,25 @@ public final class DevConsole {
         LOG.info("FxWindow launched");
     }
 
-    public void updateSprites(Collection<Sprite> sprites, Optional<SpriteName> highlightedSprite) {
-        final int[] tableIndex = {0};
+    public void updateView(
+            Collection<Sprite> sprites,
+            Optional<SpriteName> highlightedSprite,
+            Map<SpriteEvent,ScriptCallback> allCallbacks
+    ) {
+        final int[] tableIndex = {0,0};
         List<FxSprite> updatedFxSprites = sprites.stream()
                 .sorted(Ordering.natural().onResultOf(Sprite::getAge).reverse())
-                .map(sprite -> {
-                    FxSprite fxSprite = new FxSprite(tableIndex[0]++);
-                    fxSprite.load(sprite);
-                    return fxSprite;
-                })
+                .map(sprite -> new FxSprite(tableIndex[0]++, sprite))
+                .collect(toList());
+
+        List<FxCallback> updatedCallbacks = allCallbacks.entrySet().stream()
+                .sorted(Ordering.natural().onResultOf(entry -> entry.getKey().toString()))
+                .map(entry -> new FxCallback(tableIndex[1]++, entry.getKey(), entry.getValue()))
                 .collect(toList());
 
         Platform.runLater( () -> {
-            window.getSpriteTable().updateSpriteData(updatedFxSprites);
+            window.getSpriteTable().updateRowData(updatedFxSprites);
+            window.getCallbackTable().updateRowData(updatedCallbacks);
             if(highlightedSprite.isPresent()) {
                 window.getSpriteTable().setSelectedSprite(highlightedSprite.get());
             }
@@ -59,6 +68,7 @@ public final class DevConsole {
             new Alert(Alert.AlertType.INFORMATION, OurTool.loadResource(Global.helpFile)).showAndWait();
         });
     }
+
     public void clearHighlightedSprite() {
         Platform.runLater( () -> {
             window.getSpriteTable().setSelectedSprite(null);

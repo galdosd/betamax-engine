@@ -13,8 +13,6 @@ import lombok.experimental.FieldDefaults;
  */
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public final class FxSprite extends FxRow<SpriteName> {
-    @Getter @FxRow.IgnoreColumn final int tableIndex;
-
     SimpleStringProperty spriteName = new SimpleStringProperty();
     SimpleStringProperty template = new SimpleStringProperty();
     SimpleIntegerProperty moment = new SimpleIntegerProperty();
@@ -24,9 +22,16 @@ public final class FxSprite extends FxRow<SpriteName> {
     SimpleIntegerProperty serial = new SimpleIntegerProperty();
     SimpleIntegerProperty repetitions = new SimpleIntegerProperty();
 
-
-    public FxSprite(int tableIndex) {
+    public FxSprite(int tableIndex, Sprite sprite) {
         this.tableIndex = tableIndex;
+        setSpriteName( sprite.getName().getName() );
+        setTemplate( sprite.getTemplateName() );
+        setMoment( sprite.getCurrentFrame() );
+        setLength( sprite.getTotalFrames() );
+        setAge( sprite.getAge() );
+        setSerial( sprite.getCreationSerial() );
+        setLayer( sprite.getLayer() );
+        setRepetitions(sprite.getRepetitions());
     }
 
     @Override public SpriteName getID() {
@@ -89,14 +94,4 @@ public final class FxSprite extends FxRow<SpriteName> {
         this.repetitions.set(repetitions);
     }
 
-    public void load(Sprite sprite) {
-        setSpriteName( sprite.getName().getName() );
-        setTemplate( sprite.getTemplateName() );
-        setMoment( sprite.getCurrentFrame() );
-        setLength( sprite.getTotalFrames() );
-        setAge( sprite.getAge() );
-        setSerial( sprite.getCreationSerial() );
-        setLayer( sprite.getLayer() );
-        setRepetitions(sprite.getRepetitions());
-    }
 }

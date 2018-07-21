@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkState;
 
@@ -84,5 +85,9 @@ public class ScriptWorld implements LogicHandler {
                 spriteRegistry.setAcceptingCallbacks(false);
             }
         }
+    }
+
+    public Map<SpriteEvent,ScriptCallback> getAllCallbacks() {
+        return servicer.getAllCallbacks();
     }
 }

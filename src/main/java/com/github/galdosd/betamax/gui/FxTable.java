@@ -23,13 +23,13 @@ public class FxTable<T_row extends FxRow<T_id>, T_id> {
     @Getter ObservableList<T_row> selectedItems;
     private Map<T_id,T_row> rowsById = new HashMap<>();
 
-    public Tab start(Pane sceneRoot, TableColumn[] columns, String title) {
+    public Tab start(Pane sceneRoot, Class<T_row> clazz, String title) {
         table = new TableView<>();
 
         table.setEditable(false);
 
         table.setItems(rowData);
-        table.getColumns().addAll(columns);
+        table.getColumns().addAll(FxRow.columns(clazz));
 
         table.prefWidthProperty().bind(sceneRoot.widthProperty());
 
@@ -44,7 +44,7 @@ public class FxTable<T_row extends FxRow<T_id>, T_id> {
 
     }
 
-    public void updateSpriteData(List<T_row> updatedFxRows) {
+    public void updateRowData(List<T_row> updatedFxRows) {
         Stream<T_row> stream = updatedFxRows.stream();
         rowsById = stream.collect(toMap(
                 T_row::getID,
