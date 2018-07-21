@@ -67,6 +67,8 @@ import static org.lwjgl.stb.STBVorbis.stb_vorbis_decode_memory;
         try {
             soundFileBuffer = OurTool.readOffHeapBuffer(filename);
             synchronized ($LOCK) {
+                channelsBuffer.position(0);
+                sampleRateBuffer.position(0);
                 rawAudioBuffer = stb_vorbis_decode_memory(soundFileBuffer, channelsBuffer, sampleRateBuffer);
                 // TODO seems like it would be some legwork to construct a stb decoder just to get the damn error code
                 checkState(null != rawAudioBuffer, "could not load " + filename);
