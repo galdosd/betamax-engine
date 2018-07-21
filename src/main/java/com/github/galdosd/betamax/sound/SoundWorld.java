@@ -2,6 +2,7 @@ package com.github.galdosd.betamax.sound;
 
 import com.github.galdosd.betamax.OurTool;
 import org.lwjgl.openal.*;
+import org.lwjgl.system.MemoryUtil;
 import org.slf4j.LoggerFactory;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -24,8 +25,8 @@ public final class SoundWorld implements AutoCloseable {
 
 //    public static void main(String[] args) {
 //        try(SoundWorld soundRegistry = new SoundWorld()) {
-//            try(SoundSource source = soundRegistry.newSource()) {
-//                try (SoundBuffer soundBuffer = soundRegistry.loadSound("test1.ogg")) {
+//            try (SoundBuffer soundBuffer = soundRegistry.loadSound(new SoundName("com/github/galdosd/betamax/sprites/demowalk/test2.ogg"))) {
+//                try(SoundSource source = soundRegistry.newSource()) {
 //                    source.playSound(soundBuffer);
 //                    OurTool.sleepUntilPrecisely(System.currentTimeMillis() + 9000);
 //                }
@@ -75,10 +76,13 @@ public final class SoundWorld implements AutoCloseable {
 
     @Override public void close() {
         checkAlcError();
+        // after this alGetError can no longer be called, or it will generate a "spurious" error"
+        // https://github.com/LWJGL/lwjgl3/issues/219
+        alcMakeContextCurrent(MemoryUtil.NULL);
         alcDestroyContext(context);
-        checkAlcError();
         alcCloseDevice(device);
-        checkAlcError();
+        int alcError = alcGetError(device);
+        checkState(alcError==ALC_NO_ERROR, "OpenALC error " + alcError);
         synchronized ($LOCK) {
             initialized = false;
         }
