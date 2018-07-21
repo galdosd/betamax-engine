@@ -143,9 +143,11 @@ public class BetamaxGlProgram extends GlProgramBase {
             // page up/down to change target FPS
         } else if (key == GLFW.GLFW_KEY_PAGE_UP) {
             getFrameClock().setTargetFps(getFrameClock().getTargetFps()+1);
+            resetPitch();
         } else if (key == GLFW.GLFW_KEY_PAGE_DOWN) {
             if (getFrameClock().getTargetFps() > 1) {
                 getFrameClock().setTargetFps(getFrameClock().getTargetFps()-1);
+                resetPitch();
             }
         } else if(key == GLFW.GLFW_KEY_F5) {
             // restart the world if Ctrl+F5 is pressed
@@ -154,6 +156,11 @@ public class BetamaxGlProgram extends GlProgramBase {
             // once we manage state in-engine we'll be fine
             newWorld((mods&GLFW.GLFW_MOD_CONTROL)!=0);
         }
+    }
+
+    /** make sound slow down / speed up as animation does */
+    private void resetPitch() {
+        soundWorld.globalPitch(((float)getFrameClock().getTargetFps()) / ((float)Global.targetFps));
     }
 
     @Override protected void mouseClickEvent(TextureCoordinate coordinate, int button) {

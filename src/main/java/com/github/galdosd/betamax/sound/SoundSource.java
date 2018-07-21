@@ -88,4 +88,13 @@ import static org.lwjgl.openal.AL10.*;
         LOG.debug("Unmute {}", this);
         alSourcef(handle, AL_GAIN, 1f);
     }
+
+    public static void globalPitch(float newPitch) {
+        allSoundSources.stream().forEach(s -> s.setPitch(newPitch));
+
+    }
+
+    private void setPitch(float newPitch) {
+        alSourcef(handle, AL_PITCH, newPitch);
+    }
 }
