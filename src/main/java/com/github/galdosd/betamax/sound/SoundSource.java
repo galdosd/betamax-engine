@@ -15,8 +15,8 @@ import static org.lwjgl.openal.AL10.*;
     private final int handle;
 
     SoundSource() {
-        LOG.debug("New {}", this);
         handle = alGenSources();
+        LOG.debug("New {}", this);
         SoundWorld.checkAlError();
     }
 
@@ -29,6 +29,8 @@ import static org.lwjgl.openal.AL10.*;
 
 
     @Override public void close() {
+        LOG.debug("Closing {}", this);
+        SoundWorld.checkAlError();
         alDeleteSources(handle);
         SoundWorld.checkAlError();
     }

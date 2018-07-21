@@ -40,7 +40,7 @@ public final class SoundWorld implements AutoCloseable {
     public SoundBuffer loadSound(SoundName filename) {
         // we wrap the package private SoundBuffer#loadSoundFromFile because it should not be called of openal is not initialized
         SoundBuffer soundBuffer = SoundBuffer.loadSoundFromFile(filename.getName());
-        checkAlError();
+        checkAlcError();
         return soundBuffer;
     }
 
@@ -58,14 +58,14 @@ public final class SoundWorld implements AutoCloseable {
         alcCapabilities = ALC.createCapabilities(device);
         alCapabilities = AL.createCapabilities(alcCapabilities);
         LOG.info("Initialized OpenAL device {} context {} ({})", device, context, defaultDeviceName);
-        checkAlError();
+        checkAlcError();
     }
 
 
     private void checkAlcError() {
-        checkAlError();
         int alcError = alcGetError(device);
         checkState(alcError==ALC_NO_ERROR, "OpenALC error " + alcError);
+        checkAlError();
     }
 
     static void checkAlError(){
@@ -74,8 +74,11 @@ public final class SoundWorld implements AutoCloseable {
     }
 
     @Override public void close() {
+        checkAlcError();
         alcDestroyContext(context);
+        checkAlcError();
         alcCloseDevice(device);
+        checkAlcError();
         synchronized ($LOCK) {
             initialized = false;
         }

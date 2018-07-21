@@ -10,18 +10,15 @@ import java.util.Map;
  */
 public class SoundRegistry implements  AutoCloseable {
     private final SoundWorld soundWorld;
-    private final SoundSource soundSource;
     private final Map<SoundName,SoundBuffer> registeredBuffers = new HashMap<>();
 
     public SoundRegistry() {
         soundWorld = new SoundWorld();
-        soundSource = soundWorld.newSource();
     }
 
     @Override public void close() {
-        soundSource.close();
-        soundWorld.close();
         registeredBuffers.values().forEach(SoundBuffer::close);
+        soundWorld.close();
     }
 
     public SoundBuffer getSoundBuffer(SoundName soundName) {

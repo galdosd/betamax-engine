@@ -218,10 +218,10 @@ public class BetamaxGlProgram extends GlProgramBase {
     @Override protected boolean getDebugMode() { return true; }
 
     @Override public void close() {
-        spriteTemplateRegistry.close();
         if(null!=spriteRegistry) {
             spriteRegistry.close();
         }
+        spriteTemplateRegistry.close();
     }
 }
 

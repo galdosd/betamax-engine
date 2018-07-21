@@ -46,7 +46,9 @@ import static org.lwjgl.stb.STBVorbis.stb_vorbis_decode_memory;
     }
 
     @Override public void close() {
+        SoundWorld.checkAlError();
         alDeleteBuffers(handle);
+        SoundWorld.checkAlError();
     }
 
     int getHandle() {
@@ -77,6 +79,7 @@ import static org.lwjgl.stb.STBVorbis.stb_vorbis_decode_memory;
             }
             handle = alGenBuffers();
             alBufferData(handle, channelsToFormat(channels), rawAudioBuffer, sampleRate);
+            SoundWorld.checkAlError();
             return new SoundBuffer(channels, sampleRate, handle, rawAudioBuffer.limit() * Short.BYTES, filename);
         } catch (Exception e) {
             if (null != handle) {
