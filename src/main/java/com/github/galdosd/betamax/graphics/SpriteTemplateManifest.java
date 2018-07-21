@@ -5,9 +5,11 @@ import com.github.galdosd.betamax.sound.SoundName;
 import lombok.Value;
 import org.reflections.Reflections;
 import org.reflections.scanners.ResourcesScanner;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -19,9 +21,12 @@ import static java.util.stream.Collectors.toList;
  * like resolving named moments
  */
 @Value public class SpriteTemplateManifest {
+    private static final org.slf4j.Logger LOG =
+            LoggerFactory.getLogger(new Object(){}.getClass().getEnclosingClass());
     private static final Pattern TIF_PATTERN = Pattern.compile("^.*\\.tif$");
     private static final Pattern OGG_PATTERN = Pattern.compile("^.*\\.ogg$");
     private static final Pattern MOMENT_PATTERN = Pattern.compile("^.*/([^/]+)\\.tif$");
+    private static final Pattern MOMENT_TAG_PATTERN = Pattern.compile("^.*\\[([^\\[\\]]+)\\]$");
     String templateName;
     List<String> spriteFilenames;
     Optional<SoundName> soundName;
@@ -48,9 +53,16 @@ import static java.util.stream.Collectors.toList;
 
     public List<String> getMomentNames() {
         return spriteFilenames.stream().map(filename -> {
-            String frameName = MOMENT_PATTERN.matcher(filename).group(1);
+            Matcher frameNameMatcher = MOMENT_PATTERN.matcher(filename);
+            checkState(frameNameMatcher.matches(), "Malformed sprite frame filemane %s", filename);
+            String frameName = frameNameMatcher.group(1);
             checkState(frameName != null && frameName.length() > 0, "Malformed sprite frame filename %s", filename);
-            return frameName;
+            Matcher matcher = MOMENT_TAG_PATTERN.matcher(frameName);
+            if(matcher.matches()) {
+                return matcher.group(1);
+            } else {
+                return frameName;
+            }
         }).collect(toList());
     }
 
@@ -62,6 +74,6 @@ import static java.util.stream.Collectors.toList;
             }
             momentId++;
         }
-        throw new IllegalArgumentException("No moment name " +soughtMomentName+ "in sprite template " +templateName);
+        throw new IllegalArgumentException("No moment name " +soughtMomentName+ " in sprite template " +templateName);
     }
 }
