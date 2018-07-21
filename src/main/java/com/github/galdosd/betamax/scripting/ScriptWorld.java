@@ -45,7 +45,7 @@ public class ScriptWorld implements LogicHandler {
             callback = servicer.getCallback(negativeEvent);
         }
         if(null!=callback) {
-            LOG.debug("Handling {}", event);
+            LOG.debug("Handling {}\nvia {}", event, callback);
             callback.invoke();
         }
     }
