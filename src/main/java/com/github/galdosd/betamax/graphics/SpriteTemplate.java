@@ -175,6 +175,7 @@ public final class SpriteTemplate implements  AutoCloseable {
             if(paused == this.paused) return;
             if(paused) doPause();
             if(!paused) doUnpause();
+            this.paused = paused;
         }
 
         @Override public boolean getHidden() {
@@ -185,13 +186,11 @@ public final class SpriteTemplate implements  AutoCloseable {
             initialFrame = frameClock.getCurrentFrame() - pausedFrame;
             pausedFrame = 0;
             if(soundSource.isPresent()) soundSource.get().resume();
-            paused = false;
         }
 
         private void doPause() {
             pausedFrame = getCurrentFrame();
             if(soundSource.isPresent()) soundSource.get().pause();
-            paused = true;
         }
 
         @Override public void setHidden(boolean hidden) {
