@@ -7,6 +7,8 @@ import com.github.galdosd.betamax.gui.DevConsole;
 import com.github.galdosd.betamax.opengl.*;
 import com.github.galdosd.betamax.scripting.EventType;
 import com.github.galdosd.betamax.scripting.ScriptWorld;
+import com.github.galdosd.betamax.sound.SoundRegistry;
+import com.github.galdosd.betamax.sound.SoundWorld;
 import com.github.galdosd.betamax.sprite.Sprite;
 import com.github.galdosd.betamax.sprite.SpriteEvent;
 import com.github.galdosd.betamax.sprite.SpriteName;
@@ -28,7 +30,9 @@ public class BetamaxGlProgram extends GlProgramBase {
     private static final org.slf4j.Logger LOG =
             LoggerFactory.getLogger(new Object(){}.getClass().getEnclosingClass());
 
-    private final SpriteTemplateRegistry spriteTemplateRegistry = new SpriteTemplateRegistry();
+    private final SoundWorld soundWorld = new SoundWorld();
+    private final SoundRegistry soundRegistry = new SoundRegistry(soundWorld);
+    private final SpriteTemplateRegistry spriteTemplateRegistry = new SpriteTemplateRegistry(soundRegistry);
     private final DevConsole devConsole = new DevConsole();
     private ScriptWorld scriptWorld;
     private SpriteRegistry spriteRegistry;
@@ -69,6 +73,9 @@ public class BetamaxGlProgram extends GlProgramBase {
                 LOG.warn("F5 to resume is even more dangerous than Ctrl+F5, the crashed frame will not be repeated"
                         +"but its effects prior to the crash will still have taken place. It's your funeral buddy.");
             }
+        }
+        if(crashed) {
+            soundWorld.globalUnpause();
         }
         crashed = false;
         if(resetSprites) {
@@ -128,6 +135,8 @@ public class BetamaxGlProgram extends GlProgramBase {
                 LOG.error("You can't unpause your way out of a crash. Use hotloading (F5 or Ctrl+F5) instead");
             } else {
                 getFrameClock().setPaused(!getFrameClock().getPaused());
+                if(getFrameClock().getPaused()) soundWorld.globalPause();
+                else soundWorld.globalUnpause();
             }
             // FIXME this will fuck up the metrics,we need a cooked Clock for Metrics to ignore
             // the passage of time during pause
@@ -209,6 +218,7 @@ public class BetamaxGlProgram extends GlProgramBase {
     private void handleCrash(Exception e) {
         LOG.error("Crashed! This is usually due to a python script bug, in which case you can try resuming", new RuntimeException(e));
         getFrameClock().setPaused(true);
+        soundWorld.globalPause();
         crashed = true;
     }
 

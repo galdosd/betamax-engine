@@ -4,6 +4,9 @@ import lombok.ToString;
 import org.lwjgl.openal.AL10;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import static org.lwjgl.openal.AL10.*;
 
 /**
@@ -17,10 +20,24 @@ import static org.lwjgl.openal.AL10.*;
     /** we use this like a semaphore so it can be reentrantly paused so global and per-sprite pause both work easily */
     private int pauseLevel = 0;
 
+    private static final Set<SoundSource> allSoundSources = new HashSet<>();
+    private static final Object LOCK$allSoundSources = new Object();
+
+    static void globalUnpause() {
+        allSoundSources.stream().forEach(SoundSource::resume);
+    }
+
+    static void globalPause() {
+        allSoundSources.stream().forEach(SoundSource::pause);
+    }
+
     SoundSource() {
         handle = alGenSources();
         LOG.debug("New {}", this);
         SoundWorld.checkAlError();
+        synchronized (LOCK$allSoundSources) {
+            allSoundSources.add(this);
+        }
     }
 
     public void playSound(SoundBuffer soundBuffer){
@@ -36,6 +53,9 @@ import static org.lwjgl.openal.AL10.*;
         SoundWorld.checkAlError();
         alDeleteSources(handle);
         SoundWorld.checkAlError();
+        synchronized (LOCK$allSoundSources) {
+            allSoundSources.remove(this);
+        }
     }
 
     public void resume() {

@@ -12,8 +12,8 @@ public class SoundRegistry implements  AutoCloseable {
     private final SoundWorld soundWorld;
     private final Map<SoundName,SoundBuffer> registeredBuffers = new HashMap<>();
 
-    public SoundRegistry() {
-        soundWorld = new SoundWorld();
+    public SoundRegistry(SoundWorld soundWorld) {
+        this.soundWorld = soundWorld;
     }
 
     @Override public void close() {

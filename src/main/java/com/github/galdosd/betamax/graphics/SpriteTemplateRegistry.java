@@ -10,8 +10,13 @@ import java.util.Map;
  * FIXME: Document this class
  */
 public final class SpriteTemplateRegistry implements AutoCloseable {
-    private final SoundRegistry soundRegistry = new SoundRegistry();
+    private final SoundRegistry soundRegistry;
     private final Map<String,SpriteTemplate> registeredTemplates = new HashMap<>();
+
+    public SpriteTemplateRegistry(SoundRegistry soundRegistry) {
+        this.soundRegistry = soundRegistry;
+    }
+
     // TODO it might be nice to have some mechanism by which templates not used for a while are unloaded
     // that said it probably makes sense to have that partially manually controlled (to group templates into
     // dayparts for example) rather than entirely automagical, especially since the performance implications are
