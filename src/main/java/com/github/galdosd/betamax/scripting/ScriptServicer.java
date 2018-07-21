@@ -8,6 +8,7 @@ import com.google.common.base.Preconditions;
 import lombok.NonNull;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,9 +24,8 @@ public final class ScriptServicer {
     private final SpriteRegistry spriteRegistry;
     private final Map<SpriteEvent,ScriptCallback> callbacks = new HashMap<>();
     private final Map<EventType,ScriptCallback> globalCallbacks = new HashMap<>();
-    /** Only callback registering and logging is permitted until this is done */
+    /** Only callback registering and logging and state vars is permitted until this is done */
     private boolean initializing = true;
-    private Map<SpriteEvent, ScriptCallback> allCallbacks;
 
     public ScriptServicer(SpriteRegistry spriteRegistry) {
         this.spriteRegistry = spriteRegistry;
@@ -115,5 +115,24 @@ public final class ScriptServicer {
 
     public int getNamedMoment(String templateName, String momentName) {
         return spriteRegistry.getNamedMoment(templateName,momentName);
+    }
+
+
+    private final Map<String,String> stateVariables = new HashMap<>();
+
+    public Map<String,String> getAllStateVariables() {
+        return Collections.unmodifiableMap(stateVariables);
+    }
+
+    public void setStateVariable(String key, String val) {
+        checkArgument(null!=key);
+        checkArgument(null!=val);
+        stateVariables.put(key,val);
+    }
+
+    public String getStateVariable(String key) {
+        String val = stateVariables.get(key);
+        checkArgument(null!=val, "No such state variable: %s", key);
+        return val;
     }
 }
