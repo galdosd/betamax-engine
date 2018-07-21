@@ -38,9 +38,10 @@ public final class DevConsole {
     public void updateView(
             Collection<Sprite> sprites,
             Optional<SpriteName> highlightedSprite,
-            Map<SpriteEvent,ScriptCallback> allCallbacks
+            Map<SpriteEvent,ScriptCallback> allCallbacks,
+            Map<String, String> stateVariables
     ) {
-        final int[] tableIndex = {0,0};
+        final int[] tableIndex = {0,0,0};
         List<FxSprite> updatedFxSprites = sprites.stream()
                 .sorted(Ordering.natural().onResultOf(Sprite::getAge).reverse())
                 .map(sprite -> new FxSprite(tableIndex[0]++, sprite))
@@ -51,9 +52,15 @@ public final class DevConsole {
                 .map(entry -> new FxCallback(tableIndex[1]++, entry.getKey(), entry.getValue()))
                 .collect(toList());
 
+        List<FxVariable> updatedStateVariables = stateVariables.entrySet().stream()
+                .sorted(Ordering.natural().onResultOf(entry -> entry.getKey()))
+                .map(entry -> new FxVariable(tableIndex[2]++, entry.getKey(), entry.getValue()))
+                .collect(toList());
+
         Platform.runLater( () -> {
             window.getSpriteTable().updateRowData(updatedFxSprites);
             window.getCallbackTable().updateRowData(updatedCallbacks);
+            window.getStateTable().updateRowData(updatedStateVariables);
             if(highlightedSprite.isPresent()) {
                 window.getSpriteTable().setSelectedSprite(highlightedSprite.get());
             }

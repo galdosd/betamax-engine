@@ -90,4 +90,8 @@ public class ScriptWorld implements LogicHandler {
     public Map<SpriteEvent,ScriptCallback> getAllCallbacks() {
         return servicer.getAllCallbacks();
     }
+
+    public Map<String, String> getStateVariables() {
+        return servicer.getAllStateVariables();
+    }
 }

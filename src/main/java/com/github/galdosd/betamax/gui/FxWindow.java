@@ -29,6 +29,8 @@ public final class FxWindow extends Application {
 
     @Getter private FxTable<FxSprite,SpriteName> spriteTable;
     @Getter private FxTable<FxCallback,SpriteEvent> callbackTable;
+    @Getter private FxTable<FxVariable,String> stateTable;
+    @Getter private FxTable<FxVariable,String> paramTable;
 
     public static FxWindow singleton() {
         new Thread( () -> {
@@ -71,6 +73,12 @@ public final class FxWindow extends Application {
 
         callbackTable = new FxTable<>();
         tabPane.getTabs().addAll(callbackTable.start(sceneRoot, FxCallback.class, "Callbacks"));
+
+        stateTable = new FxTable<>();
+        tabPane.getTabs().addAll(stateTable.start(sceneRoot, FxVariable.class, "State"));
+
+        paramTable = new FxTable<>();
+        tabPane.getTabs().addAll(paramTable.start(sceneRoot, FxVariable.class, "Parameters"));
     }
 
     private void completeSingleton() {

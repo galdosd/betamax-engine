@@ -224,7 +224,8 @@ public class BetamaxGlProgram extends GlProgramBase {
             devConsole.updateView(
                     spriteRegistry.getSpritesInRenderOrder(),
                     highlightedSprite,
-                    scriptWorld.getAllCallbacks()
+                    scriptWorld.getAllCallbacks(),
+                    scriptWorld.getStateVariables()
             );
             highlightedSprite = Optional.empty();
             nextConsoleUpdate = System.currentTimeMillis() + Global.devConsoleUpdateIntervalMillis;
