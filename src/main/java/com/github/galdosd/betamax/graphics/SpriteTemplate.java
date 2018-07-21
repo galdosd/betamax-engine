@@ -27,7 +27,7 @@ import static java.util.stream.Collectors.toList;
  * a single SpriteTemplate can be used to have several sprites on the screen at once or at different times
  * each of which can be at different points in time in their animation (see Sprite interface)
  */
-public final class SpriteTemplate {
+public final class SpriteTemplate implements  AutoCloseable {
     // TODO Textures and SoundBuffers should be unloaded, implement AutoCloseable down the line
     private static final org.slf4j.Logger LOG =
             LoggerFactory.getLogger(new Object(){}.getClass().getEnclosingClass());
@@ -71,6 +71,10 @@ public final class SpriteTemplate {
     private void renderTemplate(int whichFrame) {
         Texture texture = textures.get(whichFrame);
         texture.render();
+    }
+
+    public void close() {
+        textures.forEach(Texture::close);
     }
 
     /**

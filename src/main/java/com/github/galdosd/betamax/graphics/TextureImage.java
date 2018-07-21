@@ -18,7 +18,7 @@ import static com.google.common.base.Preconditions.checkState;
 /**
  * FIXME: Document this class
  */
-public final class TextureImage {
+public final class TextureImage implements  AutoCloseable {
     private static final org.slf4j.Logger LOG =
             LoggerFactory.getLogger(new Object(){}.getClass().getEnclosingClass());
 
@@ -67,7 +67,7 @@ public final class TextureImage {
      * or you'll get a memory leak. we have to do this to have performant use of off heap memory
      * for opengl. no, finalizers are not a reasonable solution, they're crazy.
      */
-    public void unload() {
+    public void close() {
         checkArgument(!unloaded);
         MemoryUtil.memFree(bytePixelData);
         unloaded = true;

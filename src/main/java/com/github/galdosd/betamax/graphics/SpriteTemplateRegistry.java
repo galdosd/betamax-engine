@@ -32,5 +32,6 @@ public final class SpriteTemplateRegistry implements AutoCloseable {
 
     @Override public void close() {
         soundRegistry.close();
+        registeredTemplates.values().forEach(SpriteTemplate::close);
     }
 }

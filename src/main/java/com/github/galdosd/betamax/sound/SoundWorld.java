@@ -37,9 +37,9 @@ public final class SoundWorld implements AutoCloseable {
         return new SoundSource();
     }
 
-    public SoundBuffer loadSound(String filename) {
+    public SoundBuffer loadSound(SoundName filename) {
         // we wrap the package private SoundBuffer#loadSoundFromFile because it should not be called of openal is not initialized
-        SoundBuffer soundBuffer = SoundBuffer.loadSoundFromFile(filename);
+        SoundBuffer soundBuffer = SoundBuffer.loadSoundFromFile(filename.getName());
         checkAlError();
         return soundBuffer;
     }

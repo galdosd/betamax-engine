@@ -17,7 +17,7 @@ import static org.lwjgl.opengl.GL15.GL_STATIC_DRAW;
  * FIXME: Document this class
  * For methods beginning with name of "bt" bind() must be called first
  */
-public final class Texture {
+public final class Texture implements  AutoCloseable {
     private static final org.slf4j.Logger LOG =
             LoggerFactory.getLogger(new Object(){}.getClass().getEnclosingClass());
 
@@ -112,5 +112,9 @@ public final class Texture {
         vbo.bind(GL_ARRAY_BUFFER);
         VAO.vertexAttribPointer(0, 2, GL_FLOAT, false, 4 * Float.BYTES, 0);
         VAO.vertexAttribPointer(1, 2, GL_FLOAT, false, 4 * Float.BYTES, 2 * Float.BYTES);
+    }
+
+    @Override public void close() {
+        textureImage.close();
     }
 }
