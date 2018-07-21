@@ -112,4 +112,8 @@ public final class ScriptServicer {
     public Map<SpriteEvent, ScriptCallback> getAllCallbacks() {
         return callbacks;
     }
+
+    public int getNamedMoment(String templateName, String momentName) {
+        return spriteRegistry.getNamedMoment(templateName,momentName);
+    }
 }

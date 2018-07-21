@@ -39,25 +39,12 @@ public final class SpriteTemplate implements  AutoCloseable {
     private final String templateName;
 
 
-    public SpriteTemplate(String templateName) {
-        this.templateName = templateName;
-        String pkgName = Global.spriteBase+templateName;
-        Reflections reflections = new Reflections(pkgName+".", new ResourcesScanner());
-        List<String> spriteFilenames = reflections.getResources(Pattern.compile(".*\\.tif"))
-                .stream().sorted().collect(toList());
-        List<String> soundFilenames = reflections.getResources(Pattern.compile(".*\\.ogg"))
-                .stream().sorted().collect(toList());
-        checkArgument(soundFilenames.size() <= 1, "Too many OGG files for sprite template %s", templateName);
-        checkArgument(0!=spriteFilenames.size(), "no sprite frame files found for " + pkgName);
-        LOG.debug("Loading {}-frame sprite {}", spriteFilenames.size(), pkgName);
-        textures = spriteFilenames.stream().map(Texture::simpleTexture).collect(toList());
-        if(soundFilenames.size() > 0) {
-            soundName = Optional.of(new SoundName(soundFilenames.get(0)));
-            LOG.debug("Detected sprite sound {}", soundName);
-        } else {
-            soundName = Optional.empty();
-        }
+    public SpriteTemplate(SpriteTemplateManifest manifest) {
+        this.templateName = manifest.getTemplateName();
+        LOG.debug("Loading {}-frame sprite {}", manifest.getSpriteFilenames().size(), templateName);
+        this.textures = manifest.getSpriteFilenames().stream().map(Texture::simpleTexture).collect(toList());
         textureCount = textures.size();
+        this.soundName = manifest.getSoundName();
     }
 
     public void loadSoundBuffer(SoundRegistry soundRegistry) {
@@ -101,6 +88,7 @@ public final class SpriteTemplate implements  AutoCloseable {
             this.frameClock = frameClock;
             this.name = name;
             if(soundBuffer.isPresent()) {
+                LOG.debug("Playing sound for sprite {}", getName());
                 soundSource = Optional.of(soundBuffer.get().beginPlaying());
             } else {
                 checkState(!soundName.isPresent(), "Sound was not loaded!");

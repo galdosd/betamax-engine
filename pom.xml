@@ -59,6 +59,7 @@
             Performance instrumentation, showing VRAM and RAM used etc
             Put data together to help with HDD seek time (for Steam release; on Gallery we use SSD so don't matter)
             Fast texture loading
+                Reflections, we only need one instance for all sprites, not keep loading one every time we load
                 Show VRAM and RAM texture usage, metrics gauges
                 More Metrics timers
                 Cooked Metrics Clock so pause time does not count

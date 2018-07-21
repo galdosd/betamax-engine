@@ -175,4 +175,8 @@ public class SpriteRegistry implements AutoCloseable {
     public void close() {
         registeredSprites.values().stream().forEach(Sprite::close);
     }
+
+    public int getNamedMoment(String templateName, String momentName) {
+        return spriteTemplateRegistry.getNamedMoment(templateName,momentName);
+    }
 }
