@@ -113,6 +113,7 @@ public class BetamaxGlProgram extends GlProgramBase {
     }
 
     @Override protected void keyPressEvent(int key, int mods) {
+        boolean controlKeyPressed = (mods & GLFW.GLFW_MOD_CONTROL) != 0;
         // exit upon ESC key
         if (key == GLFW.GLFW_KEY_ESCAPE) {
             closeWindow();
@@ -126,36 +127,47 @@ public class BetamaxGlProgram extends GlProgramBase {
             reportMetrics();
         }
         else if(key == GLFW.GLFW_KEY_TAB && getFrameClock().getPaused()) {
+            // FIXME this does not advance sound!
             getFrameClock().stepFrame();
             updateLogic();
         }
         else if (key == GLFW.GLFW_KEY_PAUSE) {
             checkState(getFrameClock().getPaused() || !crashed);
-            if(crashed) {
+            if (crashed) {
                 LOG.error("You can't unpause your way out of a crash. Use hotloading (F5 or Ctrl+F5) instead");
             } else {
                 getFrameClock().setPaused(!getFrameClock().getPaused());
-                if(getFrameClock().getPaused()) soundWorld.globalPause();
+                if (getFrameClock().getPaused()) soundWorld.globalPause();
                 else soundWorld.globalUnpause();
             }
             // FIXME this will fuck up the metrics,we need a cooked Clock for Metrics to ignore
             // the passage of time during pause
             // page up/down to change target FPS
         } else if (key == GLFW.GLFW_KEY_PAGE_UP) {
-            getFrameClock().setTargetFps(getFrameClock().getTargetFps()+1);
-            resetPitch();
+            if(controlKeyPressed) {
+                updateFps(getFrameClock().getTargetFps() * 2);
+            } else {
+                updateFps(getFrameClock().getTargetFps() + 1);
+            }
         } else if (key == GLFW.GLFW_KEY_PAGE_DOWN) {
-            if (getFrameClock().getTargetFps() > 1) {
-                getFrameClock().setTargetFps(getFrameClock().getTargetFps()-1);
-                resetPitch();
+            if(controlKeyPressed) {
+                updateFps(getFrameClock().getTargetFps() / 2);
+            } else {
+                updateFps(getFrameClock().getTargetFps() - 1);
             }
         } else if(key == GLFW.GLFW_KEY_F5) {
             // restart the world if Ctrl+F5 is pressed
             // just reload scripts without affecting sprite state if just F5 is pressed
             // FIXME: right now state is managed in-python so the state will still be dropped
             // once we manage state in-engine we'll be fine
-            newWorld((mods&GLFW.GLFW_MOD_CONTROL)!=0);
+            newWorld(controlKeyPressed);
         }
+    }
+
+    private void updateFps(int newFps) {
+        if(newFps <= 0) return;
+        getFrameClock().setTargetFps(newFps);
+        resetPitch();
     }
 
     /** make sound slow down / speed up as animation does */
