@@ -2,6 +2,7 @@ package com.github.galdosd.betamax.graphics;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Gauge;
+import com.codahale.metrics.Timer;
 import com.github.galdosd.betamax.Global;
 import com.github.galdosd.betamax.OurTool;
 import com.github.galdosd.betamax.opengl.TextureCoordinate;
@@ -24,6 +25,7 @@ import static com.google.common.base.Preconditions.checkState;
  */
 public final class TextureImage implements  AutoCloseable {
     private static final Counter ramImageBytesCounter = Global.metrics.counter("ramImageBytes");
+    private static final Timer textureUploadTimer = Global.metrics.timer("textureUploadTimer");
 
     private static final org.slf4j.Logger LOG =
             LoggerFactory.getLogger(new Object(){}.getClass().getEnclosingClass());
@@ -102,9 +104,11 @@ public final class TextureImage implements  AutoCloseable {
 
     void uploadGl(int boundTarget) {
         checkArgument(!unloaded);
-        GL11.glTexImage2D( // TODO add a metrics timer here
-                boundTarget, 0, GL11.GL_RGBA8, getWidth(), getHeight(), 0,
-                GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, bytePixelData
-        );
+        try (Timer.Context _unused_context = textureUploadTimer.time()) {
+            GL11.glTexImage2D( // TODO add a metrics timer here
+                    boundTarget, 0, GL11.GL_RGBA8, getWidth(), getHeight(), 0,
+                    GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, bytePixelData
+            );
+        }
     }
 }

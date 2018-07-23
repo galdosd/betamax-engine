@@ -39,28 +39,39 @@ public final class DevConsole {
             Collection<Sprite> sprites,
             Optional<SpriteName> highlightedSprite,
             Map<SpriteEvent,ScriptCallback> allCallbacks,
-            Map<String, String> stateVariables
+            Map<String, String> stateVariables,
+            Map<String, String> paramVariables
     ) {
-        final int[] tableIndex = {0,0,0};
+        final int[] tableIndex = {0};
+        tableIndex[0] = 0;
         List<FxSprite> updatedFxSprites = sprites.stream()
                 .sorted(Ordering.natural().onResultOf(Sprite::getAge).reverse())
                 .map(sprite -> new FxSprite(tableIndex[0]++, sprite))
                 .collect(toList());
 
+        tableIndex[0] = 0;
         List<FxCallback> updatedCallbacks = allCallbacks.entrySet().stream()
                 .sorted(Ordering.natural().onResultOf(entry -> entry.getKey().toString()))
-                .map(entry -> new FxCallback(tableIndex[1]++, entry.getKey(), entry.getValue()))
+                .map(entry -> new FxCallback(tableIndex[0]++, entry.getKey(), entry.getValue()))
                 .collect(toList());
 
+        tableIndex[0] = 0;
         List<FxVariable> updatedStateVariables = stateVariables.entrySet().stream()
                 .sorted(Ordering.natural().onResultOf(entry -> entry.getKey()))
-                .map(entry -> new FxVariable(tableIndex[2]++, entry.getKey(), entry.getValue()))
+                .map(entry -> new FxVariable(tableIndex[0]++, entry.getKey(), entry.getValue()))
+                .collect(toList());
+
+        tableIndex[0] = 0;
+        List<FxVariable> updatedParamVariables = paramVariables.entrySet().stream()
+                .sorted(Ordering.natural().onResultOf(entry -> entry.getKey()))
+                .map(entry -> new FxVariable(tableIndex[0]++, entry.getKey(), entry.getValue()))
                 .collect(toList());
 
         Platform.runLater( () -> {
             window.getSpriteTable().updateRowData(updatedFxSprites);
             window.getCallbackTable().updateRowData(updatedCallbacks);
             window.getStateTable().updateRowData(updatedStateVariables);
+            window.getParamTable().updateRowData(updatedParamVariables);
             if(highlightedSprite.isPresent()) {
                 window.getSpriteTable().setSelectedSprite(highlightedSprite.get());
             }

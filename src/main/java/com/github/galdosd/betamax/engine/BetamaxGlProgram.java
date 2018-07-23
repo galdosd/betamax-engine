@@ -1,6 +1,7 @@
 package com.github.galdosd.betamax.engine;
 
 
+import com.codahale.metrics.Snapshot;
 import com.github.galdosd.betamax.Global;
 import com.github.galdosd.betamax.graphics.Texture;
 import com.github.galdosd.betamax.gui.DevConsole;
@@ -17,6 +18,8 @@ import com.github.galdosd.betamax.graphics.SpriteTemplateRegistry;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -206,6 +209,16 @@ public class BetamaxGlProgram extends GlProgramBase {
         defaultShaderProgram.use();
         glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        renderAllSprites();
+        if(getFrameClock().getPaused()) {
+            defaultShaderProgram.use();
+            Texture texture = crashed ? crashTexture : pausedTexture;
+            texture.render();
+        }
+        updateDevConsole();
+    }
+
+    private void renderAllSprites() {
         Optional<SpriteName> selectedSprite = devConsole.getSelectedSprite();
         for(Sprite sprite: spriteRegistry.getSpritesInRenderOrder()) {
             if(selectedSprite.isPresent() && sprite.getName().equals(selectedSprite.get())) {
@@ -215,21 +228,41 @@ public class BetamaxGlProgram extends GlProgramBase {
             }
             sprite.render();
         }
-        if(getFrameClock().getPaused()) {
-            defaultShaderProgram.use();
-            Texture texture = crashed ? crashTexture : pausedTexture;
-            texture.render();
-        }
+    }
+
+    private void updateDevConsole() {
         if(System.currentTimeMillis() > nextConsoleUpdate) {
             devConsole.updateView(
                     spriteRegistry.getSpritesInRenderOrder(),
                     highlightedSprite,
                     scriptWorld.getAllCallbacks(),
-                    scriptWorld.getStateVariables()
+                    scriptWorld.getStateVariables(),
+                    getDebugParameters()
             );
             highlightedSprite = Optional.empty();
             nextConsoleUpdate = System.currentTimeMillis() + Global.devConsoleUpdateIntervalMillis;
         }
+    }
+
+    final static int MS_PER_NS = 1000000;
+    private Map<String, String> getDebugParameters() {
+        return new HashMap<String,String>() {{
+            put("Target FPS", String.valueOf(getFrameClock().getTargetFps()));
+            put("Frame Budget", String.valueOf(1000.0 / getFrameClock().getTargetFps()));
+            put("Animation", crashed ? "CRASH" : (getFrameClock().getPaused() ? "PAUSE" : "PLAY"));
+            Global.metrics.getCounters().entrySet().stream().forEach( entry ->
+                put(entry.getKey(), String.valueOf(entry.getValue().getCount()))
+            );
+            Global.metrics.getTimers().entrySet().stream().forEach( entry -> {
+                Snapshot snapshot = entry.getValue().getSnapshot();
+
+                put(entry.getKey(), String.format("median=%.1f (min=%.1f;   max=%.1f;   95p=%.1f)",
+                        snapshot.getMedian()/ MS_PER_NS,
+                        (double)snapshot.getMin()/ MS_PER_NS,
+                        (double)snapshot.getMax()/ MS_PER_NS,
+                        snapshot.get95thPercentile()/ MS_PER_NS));
+            });
+        }};
     }
 
     @Override protected void updateLogic() {
