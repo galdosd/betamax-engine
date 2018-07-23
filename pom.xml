@@ -7,35 +7,38 @@
 
 
         Working set features
-            Named sprite frames
+            Performance
+                Dev console global info: Used bytes in RAM, VRAM, etc
+                Metrics timers
+                Streaming textures
+                LZ4 & related instrumenting
+                Load screen / reset frame clock any time a synchronous load happens
+                    TAB key and resetLogicFrames does not respect music position
+                Swap texture in and out of VRAM / Click bitmaps
+                Compute rendered FPS
             Managed state (JSON)
                 Proper hotloading including preserving state
                 Save/load state
                 Dev console state & history
-            LZ4 & related instrumenting
             Sprite positions/sizes
-            Load screen / reset frame clock any time a synchronous load happens
-            Swap texture in and out of VRAM / Click bitmaps
 
         Backlog features
-            Invalidate cache based on file size, last mod
             Fancy mouse cursor
             Rewind
                 Efficient preloading for rewind
                 Single step backward
-            TAB key and resetLogicFrames does not respect music position
-            Dev console global info
             Fancy framebuffer CRT style post effects
             basic steam support
-            osx support
             steam achievements
+            osx support
+
+        Junk features
             Advance sprite frame
             Switch in and out of full screen at runtime
             Sound should not begin playing till first frame is rendered, so not in SpriteImpl constructor
             Mark where sprite creation happens
             "this" sprite reference / replace_sprite()
             safe sprite references
-            @regarding
 
         Maintenance
             Refactoring
