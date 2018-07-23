@@ -9,6 +9,7 @@
         Working set features
             Performance
                 Dev console global info: Used bytes in RAM, VRAM, etc
+                Seperate thread for loading textures, cache texture-by-texture so we can stream a sprite
                 Metrics timers
                 Streaming textures
                 LZ4 & related instrumenting

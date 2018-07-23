@@ -247,7 +247,7 @@ public class BetamaxGlProgram extends GlProgramBase {
     final static int MS_PER_NS = 1000000;
     private Map<String, String> getDebugParameters() {
         return new HashMap<String,String>() {{
-            put("Target FPS", String.valueOf(getFrameClock().getTargetFps()));
+            put("FPS (target)", String.valueOf(getFrameClock().getTargetFps()));
             put("Frame Budget", String.valueOf(1000.0 / getFrameClock().getTargetFps()));
             put("Animation", crashed ? "CRASH" : (getFrameClock().getPaused() ? "PAUSE" : "PLAY"));
             Global.metrics.getCounters().entrySet().stream().forEach( entry ->
@@ -262,6 +262,12 @@ public class BetamaxGlProgram extends GlProgramBase {
                         (double)snapshot.getMax()/ MS_PER_NS,
                         snapshot.get95thPercentile()/ MS_PER_NS));
             });
+
+            Global.metrics.getGauges().entrySet().stream().forEach( entry ->
+                put(entry.getKey(), String.valueOf(entry.getValue().getValue()))
+            );
+
+
         }};
     }
 

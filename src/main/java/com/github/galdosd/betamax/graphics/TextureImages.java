@@ -1,5 +1,7 @@
 package com.github.galdosd.betamax.graphics;
 
+import com.codahale.metrics.Timer;
+import com.github.galdosd.betamax.Global;
 import com.github.galdosd.betamax.OurTool;
 import org.lwjgl.system.MemoryUtil;
 import org.slf4j.LoggerFactory;
@@ -24,6 +26,7 @@ import static com.google.common.base.Preconditions.checkState;
 public class TextureImages {
     private static final org.slf4j.Logger LOG =
             LoggerFactory.getLogger(new Object(){}.getClass().getEnclosingClass());
+    private static final Timer cachedImageLoadTimer = Global.metrics.timer("cachedImageLoadTimer");
     static final String CACHE_KEY = "TextureImages#fromRgbaFile";
     static final int BANDS = 4; // RGBA so 4 samples per pixel
 
@@ -33,31 +36,37 @@ public class TextureImages {
             try(FileChannel readChannel = optionalFileChannel.get()) {
                 LOG.trace("Loading from cache: {}", filename);
 
-                final int headerSizeInBytes = 2 * Integer.BYTES;
-                ByteBuffer byteHeader = ByteBuffer.allocate(headerSizeInBytes);
-                IntBuffer intHeader = byteHeader.asIntBuffer();
-                int readHeaderBytes = readChannel.read(byteHeader);
-                checkState(headerSizeInBytes == readHeaderBytes, "read failure: cache file header");
-                int width = intHeader.get();
-                int height = intHeader.get();
-
-                final int colorSamples = width * height * BANDS;
-                // these limits are arbitrary, maybe someday a 250 megapixel image will be reasonable
-                checkArgument(width > 0 && height > 0 && width < 16384 && height < 16384,
-                        "bad image size %sx%s", width, height);
-
-                ByteBuffer bytePixelData = MemoryUtil.memAlloc(colorSamples);
-                int readPixelBytes = readChannel.read(bytePixelData); // TODO add metrics timer
-                bytePixelData.flip();
-                checkState(colorSamples == readPixelBytes, "read failure: cache file pixel data");
-
-                checkState(bytePixelData.position()==0);
-                LOG.trace("Loaded from cache: {}", filename);
-                return Optional.of(new TextureImage(width, height, bytePixelData, filename));
+                try(Timer.Context _unused = cachedImageLoadTimer.time()) {
+                    return loadFromChannel(filename, readChannel);
+                }
             }
         } else {
             return Optional.empty();
         }
+    }
+
+    private static Optional<TextureImage> loadFromChannel(String filename, FileChannel readChannel) throws IOException {
+        final int headerSizeInBytes = 2 * Integer.BYTES;
+        ByteBuffer byteHeader = ByteBuffer.allocate(headerSizeInBytes);
+        IntBuffer intHeader = byteHeader.asIntBuffer();
+        int readHeaderBytes = readChannel.read(byteHeader);
+        checkState(headerSizeInBytes == readHeaderBytes, "read failure: cache file header");
+        int width = intHeader.get();
+        int height = intHeader.get();
+
+        final int colorSamples = width * height * BANDS;
+        // these limits are arbitrary, maybe someday a 250 megapixel image will be reasonable
+        checkArgument(width > 0 && height > 0 && width < 16384 && height < 16384,
+                "bad image size %sx%s", width, height);
+
+        ByteBuffer bytePixelData = MemoryUtil.memAlloc(colorSamples);
+        int readPixelBytes = readChannel.read(bytePixelData); // TODO add metrics timer
+        bytePixelData.flip();
+        checkState(colorSamples == readPixelBytes, "read failure: cache file pixel data");
+
+        checkState(bytePixelData.position()==0);
+        LOG.trace("Loaded from cache: {}", filename);
+        return Optional.of(new TextureImage(width, height, bytePixelData, filename));
     }
 
     /** Load image from a file, possibly using a temporary directory as a cache.

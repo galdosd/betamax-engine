@@ -1,6 +1,8 @@
 package com.github.galdosd.betamax.engine;
 
 import com.codahale.metrics.ConsoleReporter;
+import com.codahale.metrics.Gauge;
+import com.codahale.metrics.SlidingTimeWindowReservoir;
 import com.codahale.metrics.Timer;
 import com.github.galdosd.betamax.Global;
 import com.github.galdosd.betamax.opengl.GlWindow;
@@ -40,7 +42,11 @@ public abstract class GlProgramBase implements AutoCloseable {
     private final Timer userInitTimer = Global.metrics.timer("userInitTimer");
     private final Timer renderTimer = Global.metrics.timer("renderTimer");
     private final Timer logicTimer = Global.metrics.timer("logicTimer");
+    private final Timer fullLogicTimer = Global.metrics.timer("fullLogicTimer");
     private final Timer idleTimer = Global.metrics.timer("idleTimer");
+    private final Timer idleTimer5s = Global.metrics.timer("idleTimer5s", () ->
+            new Timer(new SlidingTimeWindowReservoir(5, TimeUnit.SECONDS)));
+
     private final ConsoleReporter reporter = ConsoleReporter.forRegistry(Global.metrics)
             .convertRatesTo(TimeUnit.SECONDS)
             .convertDurationsTo(TimeUnit.MILLISECONDS)
@@ -107,18 +113,22 @@ public abstract class GlProgramBase implements AutoCloseable {
 
     private void loopOnce() {
         try (Timer.Context _unused_context = idleTimer.time()) {
-            frameClock.sleepTillNextLogicFrame();
-        }
-        do {
-            try (Timer.Context _unused_context = logicTimer.time()) {
-                // the pause function continues logic updates because logic updates should be idempotent in the absence
-                // of user input, which can be useful. The frame clock should be checked and if duplicate frames are
-                // received, no new time-triggered events should happen. This is the responsibility of the updateLogic
-                // implementation.
-                frameClock.beginLogicFrame();
-                updateLogic();
+            try (Timer.Context _unused_context_2 = idleTimer5s.time()) {
+                frameClock.sleepTillNextLogicFrame();
             }
-        } while(frameClock.moreLogicFramesNeeded());
+        }
+        try (Timer.Context _unused_context = fullLogicTimer.time()) {
+            do {
+                try (Timer.Context _unused_context_2 = logicTimer.time()) {
+                    // the pause function continues logic updates because logic updates should be idempotent in the absence
+                    // of user input, which can be useful. The frame clock should be checked and if duplicate frames are
+                    // received, no new time-triggered events should happen. This is the responsibility of the updateLogic
+                    // implementation.
+                    frameClock.beginLogicFrame();
+                    updateLogic();
+                }
+            } while (frameClock.moreLogicFramesNeeded());
+        }
         try (Timer.Context _unused_context = renderTimer.time()) {
             try (GlWindow.RenderPhase __unused_context = mainWindow.renderPhase()) {
                 updateView();
