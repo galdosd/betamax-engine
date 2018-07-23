@@ -1,5 +1,7 @@
 package com.github.galdosd.betamax.graphics;
 
+import com.codahale.metrics.Counter;
+import com.github.galdosd.betamax.Global;
 import com.github.galdosd.betamax.opengl.TextureCoordinate;
 import com.github.galdosd.betamax.opengl.VAO;
 import com.github.galdosd.betamax.opengl.VBO;
@@ -18,6 +20,9 @@ import static org.lwjgl.opengl.GL15.GL_STATIC_DRAW;
  * For methods beginning with name of "bt" bind() must be called first
  */
 public final class Texture implements  AutoCloseable {
+    private static final Counter vramImageBytesCounter = Global.metrics.counter("vramImageBytes");
+    private static final Counter texturesCounter = Global.metrics.counter("textures");
+
     private static final org.slf4j.Logger LOG =
             LoggerFactory.getLogger(new Object(){}.getClass().getEnclosingClass());
 
@@ -29,6 +34,7 @@ public final class Texture implements  AutoCloseable {
     public Texture(@NonNull TextureImage textureImage) {
         handle = GL11.glGenTextures();
         this.textureImage = textureImage;
+        texturesCounter.inc();
     }
 
     public static Texture simpleTexture(String filename) {
@@ -67,6 +73,7 @@ public final class Texture implements  AutoCloseable {
     public void btUploadTextureUnit() {
         rebind();
         textureImage.uploadGl(boundTarget);
+        vramImageBytesCounter.inc(textureImage.getBytePixelData().capacity());
     }
 
     public boolean isTransparentAtCoordinate(TextureCoordinate coordinate) {
@@ -116,5 +123,8 @@ public final class Texture implements  AutoCloseable {
 
     @Override public void close() {
         textureImage.close();
+        GL11.glDeleteTextures(handle);
+        texturesCounter.dec();
+        vramImageBytesCounter.dec(textureImage.getBytePixelData().capacity());
     }
 }

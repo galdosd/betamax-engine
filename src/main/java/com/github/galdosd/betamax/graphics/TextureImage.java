@@ -1,5 +1,8 @@
 package com.github.galdosd.betamax.graphics;
 
+import com.codahale.metrics.Counter;
+import com.codahale.metrics.Gauge;
+import com.github.galdosd.betamax.Global;
 import com.github.galdosd.betamax.OurTool;
 import com.github.galdosd.betamax.opengl.TextureCoordinate;
 import lombok.Getter;
@@ -11,6 +14,7 @@ import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.nio.channels.FileChannel;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
@@ -19,6 +23,8 @@ import static com.google.common.base.Preconditions.checkState;
  * FIXME: Document this class
  */
 public final class TextureImage implements  AutoCloseable {
+    private static final Counter ramImageBytesCounter = Global.metrics.counter("ramImageBytes");
+
     private static final org.slf4j.Logger LOG =
             LoggerFactory.getLogger(new Object(){}.getClass().getEnclosingClass());
 
@@ -34,6 +40,7 @@ public final class TextureImage implements  AutoCloseable {
         this.height = height;
         this.bytePixelData = bytePixelData;
         bytePixelData.position(0);
+        ramImageBytesCounter.inc(bytePixelData.capacity());
         this.filename = filename;
     }
 
@@ -70,6 +77,7 @@ public final class TextureImage implements  AutoCloseable {
     public void close() {
         checkArgument(!unloaded);
         MemoryUtil.memFree(bytePixelData);
+        ramImageBytesCounter.dec(bytePixelData.capacity());
         unloaded = true;
     }
 
@@ -92,7 +100,7 @@ public final class TextureImage implements  AutoCloseable {
         return colorSample;
     }
 
-    public void uploadGl(int boundTarget) {
+    void uploadGl(int boundTarget) {
         checkArgument(!unloaded);
         GL11.glTexImage2D( // TODO add a metrics timer here
                 boundTarget, 0, GL11.GL_RGBA8, getWidth(), getHeight(), 0,
