@@ -39,6 +39,7 @@
             Mark where sprite creation happens
             "this" sprite reference / replace_sprite()
             safe sprite references
+            better exception traces for jython code?
 
         Maintenance
             Refactoring
