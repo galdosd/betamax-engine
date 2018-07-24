@@ -2,6 +2,7 @@ package com.github.galdosd.betamax.engine;
 
 
 import com.codahale.metrics.Snapshot;
+import com.codahale.metrics.Timer;
 import com.github.galdosd.betamax.Global;
 import com.github.galdosd.betamax.graphics.Texture;
 import com.github.galdosd.betamax.graphics.TextureRegistry;
@@ -34,6 +35,9 @@ import static org.lwjgl.opengl.GL20.*;
 public class BetamaxGlProgram extends GlProgramBase {
     private static final org.slf4j.Logger LOG =
             LoggerFactory.getLogger(new Object(){}.getClass().getEnclosingClass());
+
+    private final Timer lateTextureUploadPhaseTimer = Global.metrics.timer("lateTextureUploadPhaseTimer");
+    private final Timer loadingPhaseTimer = Global.metrics.timer("loadingPhaseTimer");
 
     private final SoundWorld soundWorld = new SoundWorld();
     private final SoundRegistry soundRegistry = new SoundRegistry(soundWorld);
@@ -213,6 +217,7 @@ public class BetamaxGlProgram extends GlProgramBase {
         }
     }
 
+    private Timer.Context loadingPhaseTimerContext = null;
     private long nextConsoleUpdate = System.currentTimeMillis();
     @Override protected void updateView() {
         List<Sprite> spritesInRenderOrder = spriteRegistry.getSpritesInRenderOrder();
@@ -224,6 +229,9 @@ public class BetamaxGlProgram extends GlProgramBase {
                 LOG.debug("exited LOADING state");
                 loading = false;
                 getFrameClock().setPaused(false);
+                checkState(null!=loadingPhaseTimerContext);
+                loadingPhaseTimerContext.close();
+                loadingPhaseTimerContext = null;
             }
             clearScreen();
             renderAllSprites(spritesInRenderOrder);
@@ -231,6 +239,8 @@ public class BetamaxGlProgram extends GlProgramBase {
             LOG.debug("entered LOADING state");
             getFrameClock().setPaused(true);
             loading = true;
+            checkState(null==loadingPhaseTimer);
+            loadingPhaseTimerContext = loadingPhaseTimer.time();
         }
         showPauseScreen();
         updateDevConsole();
@@ -256,10 +266,12 @@ public class BetamaxGlProgram extends GlProgramBase {
     }
 
     private void renderAllSprites(List<Sprite> spritesInRenderOrder) {
-        Optional<SpriteName> selectedSprite = devConsole.getSelectedSprite();
-        for(Sprite sprite: spritesInRenderOrder) {
-            sprite.uploadCurrentFrame();
+        try(Timer.Context ignored = lateTextureUploadPhaseTimer.time()) {
+            for (Sprite sprite : spritesInRenderOrder) {
+                sprite.uploadCurrentFrame();
+            }
         }
+        Optional<SpriteName> selectedSprite = devConsole.getSelectedSprite();
         for(Sprite sprite: spritesInRenderOrder) {
             if(selectedSprite.isPresent() && sprite.getName().equals(selectedSprite.get())) {
                 highlightShaderProgram.use();

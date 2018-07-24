@@ -36,11 +36,11 @@
             basic steam support
             steam achievements
             osx support
+
+        Junk features
             Rewind
                 Efficient preloading for rewind
                 Single step backward
-
-        Junk features
             Advance sprite frame
             Switch in and out of full screen at runtime
             Sound should not begin playing till first frame is rendered, so not in SpriteImpl constructor

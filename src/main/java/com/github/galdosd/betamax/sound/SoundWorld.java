@@ -1,5 +1,7 @@
 package com.github.galdosd.betamax.sound;
 
+import com.codahale.metrics.Timer;
+import com.github.galdosd.betamax.Global;
 import com.github.galdosd.betamax.OurTool;
 import org.lwjgl.openal.*;
 import org.lwjgl.system.MemoryUtil;
@@ -15,6 +17,7 @@ import static org.lwjgl.openal.ALC10.*;
 public final class SoundWorld implements AutoCloseable {
     private static final org.slf4j.Logger LOG =
             LoggerFactory.getLogger(new Object(){}.getClass().getEnclosingClass());
+    private final Timer soundLoadTimer = Global.metrics.timer("soundLoadtimer");
 
     private static final Object $LOCK = new Object();
     private static boolean initialized = false;
@@ -51,9 +54,11 @@ public final class SoundWorld implements AutoCloseable {
     }
     public SoundBuffer loadSound(SoundName filename) {
         // we wrap the package private SoundBuffer#loadSoundFromFile because it should not be called of openal is not initialized
-        SoundBuffer soundBuffer = SoundBuffer.loadSoundFromFile(filename.getName());
-        checkAlcError();
-        return soundBuffer;
+        try(Timer.Context ignored = soundLoadTimer.time()) {
+            SoundBuffer soundBuffer = SoundBuffer.loadSoundFromFile(filename.getName());
+            checkAlcError();
+            return soundBuffer;
+        }
     }
 
     public SoundWorld() {
