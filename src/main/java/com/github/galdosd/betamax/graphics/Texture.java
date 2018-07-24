@@ -76,6 +76,9 @@ public final class Texture implements  AutoCloseable {
         vramImageBytesCounter.inc(textureImage.getBytePixelData().capacity());
     }
 
+    // because BetamaxGlProgram#loopOnce called RenderPhase#close (which calls glfwPollEvents) in the same frame
+    // this should check against the same frame textures we JUST rendered, so we should
+    // never end up JIT loading just for a damn collision check
     public boolean isTransparentAtCoordinate(TextureCoordinate coordinate) {
         ColorSample color = textureImage.getPixel(coordinate);
         boolean transparentEnough = color.isTransparentEnough();
