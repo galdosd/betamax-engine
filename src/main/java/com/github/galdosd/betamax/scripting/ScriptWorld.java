@@ -5,6 +5,7 @@ import com.github.galdosd.betamax.OurTool;
 import com.github.galdosd.betamax.sprite.LogicHandler;
 import com.github.galdosd.betamax.sprite.SpriteEvent;
 import com.github.galdosd.betamax.sprite.SpriteRegistry;
+import org.python.core.Py;
 import org.python.util.PythonInterpreter;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +35,7 @@ public class ScriptWorld implements LogicHandler {
     public ScriptWorld(SpriteRegistry spriteRegistry) {
         this.spriteRegistry = spriteRegistry;
         servicer = new ScriptServicer(spriteRegistry);
-        pythonInterpreter = new PythonInterpreter();
+        pythonInterpreter = PythonInterpreter.threadLocalStateInterpreter(null);
     }
 
     @Override public void onSpriteEvent(SpriteEvent event) {

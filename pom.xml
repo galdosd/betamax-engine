@@ -29,16 +29,16 @@
                 Save/load state
                 Dev console state & history
             Sprite positions/sizes
+            Fancy mouse cursor
 
         Backlog features
-            Fancy mouse cursor
-            Rewind
-                Efficient preloading for rewind
-                Single step backward
             Fancy framebuffer CRT style post effects
             basic steam support
             steam achievements
             osx support
+            Rewind
+                Efficient preloading for rewind
+                Single step backward
 
         Junk features
             Advance sprite frame
