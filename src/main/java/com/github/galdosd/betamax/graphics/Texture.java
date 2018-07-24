@@ -20,6 +20,7 @@ import static org.lwjgl.opengl.GL15.GL_STATIC_DRAW;
  * For methods beginning with name of "bt" bind() must be called first
  */
 public final class Texture implements  AutoCloseable {
+    private static final Counter rendertimeUploadsCounter = Global.metrics.counter("rendertimeUploads");
     private static final Counter vramImageBytesCounter = Global.metrics.counter("vramImageBytes");
     private static final Counter vramTexturesCounter = Global.metrics.counter("vramTextures");
 
@@ -87,6 +88,7 @@ public final class Texture implements  AutoCloseable {
         checkState(null != vbo && null != vao);
         if (!getVramLoaded()) {
             LOG.warn("Loading texture at rendertime: {}", textureImage);
+            rendertimeUploadsCounter.inc();
         }
         setVramLoaded(true);
         bind(GL_TEXTURE_2D);
