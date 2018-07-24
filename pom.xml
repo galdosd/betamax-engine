@@ -24,6 +24,7 @@
                     TAB key and resetLogicFrames does not respect music position
                 Swap texture in and out of VRAM / Click bitmaps
                 Compute rendered FPS
+                Sound performance :(
             Managed state (JSON)
                 Proper hotloading including preserving state
                 Save/load state

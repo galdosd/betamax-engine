@@ -17,7 +17,7 @@ import static org.lwjgl.openal.ALC10.*;
 public final class SoundWorld implements AutoCloseable {
     private static final org.slf4j.Logger LOG =
             LoggerFactory.getLogger(new Object(){}.getClass().getEnclosingClass());
-    private final Timer soundLoadTimer = Global.metrics.timer("soundLoadtimer");
+    private final Timer soundLoadTimer = Global.metrics.timer("soundLoadTimer");
 
     private static final Object $LOCK = new Object();
     private static boolean initialized = false;

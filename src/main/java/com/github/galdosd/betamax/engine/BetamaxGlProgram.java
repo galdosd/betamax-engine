@@ -300,6 +300,7 @@ public class BetamaxGlProgram extends GlProgramBase {
     /* FIXME move to DevConsole */
     private Map<String, String> getDebugParameters() {
         return new HashMap<String,String>() {{
+            put("Frame#", String.valueOf(getFrameClock().getCurrentFrame()));
             put("FPS (target)", String.valueOf(getFrameClock().getTargetFps()));
             put("Frame Budget", String.valueOf(1000.0 / getFrameClock().getTargetFps()));
             put("Animation", crashed ? "CRASH" :

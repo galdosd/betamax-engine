@@ -1,5 +1,8 @@
 package com.github.galdosd.betamax.sound;
 
+import com.codahale.metrics.Counter;
+import com.codahale.metrics.Timer;
+import com.github.galdosd.betamax.Global;
 import com.github.galdosd.betamax.OurTool;
 import lombok.ToString;
 import org.lwjgl.openal.AL10;
@@ -15,7 +18,6 @@ import static com.google.common.base.Preconditions.checkState;
 import static org.lwjgl.openal.AL10.alBufferData;
 import static org.lwjgl.openal.AL10.alDeleteBuffers;
 import static org.lwjgl.openal.AL10.alGenBuffers;
-import static org.lwjgl.stb.STBVorbis.stb_vorbis_decode_filename;
 import static org.lwjgl.stb.STBVorbis.stb_vorbis_decode_memory;
 
 /**
@@ -25,6 +27,8 @@ import static org.lwjgl.stb.STBVorbis.stb_vorbis_decode_memory;
     private static final org.slf4j.Logger LOG =
             LoggerFactory.getLogger(new Object(){}.getClass().getEnclosingClass());
 
+    private static final Counter ramSoundBytes = Global.metrics.counter("ramSoundBytes");
+    private static final Timer soundDecodeTimer = Global.metrics.timer("soundDecodeTimer");
     private final int channels, sampleRate;
     private final int bytes;
     private final String filename;
@@ -40,7 +44,7 @@ import static org.lwjgl.stb.STBVorbis.stb_vorbis_decode_memory;
         this.handle = handle;
         this.bytes = bytes;
         this.filename = filename;
-
+        ramSoundBytes.inc(bytes);
         LOG.debug("Loaded {}-channel {}hz sound ({} bytes) from {} (handle {})",
                 channels, sampleRate, bytes, filename, handle);
     }
@@ -49,6 +53,7 @@ import static org.lwjgl.stb.STBVorbis.stb_vorbis_decode_memory;
         SoundWorld.checkAlError();
         alDeleteBuffers(handle);
         SoundWorld.checkAlError();
+        ramSoundBytes.dec(bytes);
     }
 
     int getHandle() {
@@ -71,7 +76,9 @@ import static org.lwjgl.stb.STBVorbis.stb_vorbis_decode_memory;
             synchronized ($LOCK) {
                 channelsBuffer.position(0);
                 sampleRateBuffer.position(0);
-                rawAudioBuffer = stb_vorbis_decode_memory(soundFileBuffer, channelsBuffer, sampleRateBuffer);
+                try(Timer.Context ignored = soundDecodeTimer.time()) {
+                    rawAudioBuffer = stb_vorbis_decode_memory(soundFileBuffer, channelsBuffer, sampleRateBuffer);
+                }
                 // TODO seems like it would be some legwork to construct a stb decoder just to get the damn error code
                 checkState(null != rawAudioBuffer, "could not load " + filename);
                 channels = channelsBuffer.get();
