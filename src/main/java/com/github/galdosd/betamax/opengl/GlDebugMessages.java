@@ -1,24 +1,19 @@
 package com.github.galdosd.betamax.opengl;
 
 import lombok.RequiredArgsConstructor;
-import lombok.Value;
 import org.lwjgl.opengl.*;
 import org.lwjgl.system.APIUtil;
 import org.lwjgl.system.Callback;
-import org.slf4j.LoggerFactory;
 
 import java.io.PrintStream;
 import java.util.function.Consumer;
 
 import static org.lwjgl.opengl.AMDDebugOutput.*;
-import static org.lwjgl.opengl.AMDDebugOutput.GL_DEBUG_SEVERITY_LOW_AMD;
-import static org.lwjgl.opengl.AMDDebugOutput.GL_DEBUG_SEVERITY_MEDIUM_AMD;
 import static org.lwjgl.opengl.ARBDebugOutput.*;
 import static org.lwjgl.opengl.GL11.glEnable;
 import static org.lwjgl.opengl.GL11.glGetInteger;
 import static org.lwjgl.opengl.GL30.GL_CONTEXT_FLAGS;
 import static org.lwjgl.opengl.GL43.*;
-import static org.lwjgl.opengl.GL43.GL_DEBUG_SEVERITY_NOTIFICATION;
 import static org.lwjgl.system.APIUtil.apiLog;
 import static org.lwjgl.system.APIUtil.apiUnknownToken;
 import static org.lwjgl.system.MemoryUtil.NULL;
@@ -30,7 +25,6 @@ import static org.lwjgl.system.MemoryUtil.NULL;
  * Probably just submit a patch upstream with our improvements would be ideal
  */
 public final class GlDebugMessages {
-
     private GlDebugMessages() {/*uninstantiable*/}
 
     @RequiredArgsConstructor public static class Msg {
