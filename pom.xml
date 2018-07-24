@@ -8,9 +8,13 @@
 
         Working set features
             Performance
-                Dev console global info: Used bytes in RAM, VRAM, etc
-                Seperate thread for loading textures, cache texture-by-texture so we can stream a sprite
-                Metrics timers
+                Separate thread for loading textures, cache texture-by-texture so we can stream a sprite
+                Swap in and out of VRAM ourselves
+                    Sprite#vramMode / ramMode
+                        PERVASIVE - always keep it in
+                        REGULAR - manage our own LRU swapping
+                            During idle time, load textures for upcoming frames
+                        STREAMING - always evict immediately
                 Streaming textures
                 LZ4 & related instrumenting
                 Load screen / reset frame clock any time a synchronous load happens
