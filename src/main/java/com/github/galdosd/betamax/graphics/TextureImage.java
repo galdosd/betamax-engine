@@ -23,6 +23,7 @@ import static com.google.common.base.Preconditions.checkState;
  */
 public final class TextureImage implements  AutoCloseable {
     private static final Counter ramImageBytesCounter = Global.metrics.counter("ramImageBytes");
+    private static final Counter ramTexturesCounter = Global.metrics.counter("ramTextures");
     private static final Timer textureUploadTimer = Global.metrics.timer("textureUploadTimer");
 
     private static final org.slf4j.Logger LOG =
@@ -35,12 +36,19 @@ public final class TextureImage implements  AutoCloseable {
 
     private boolean unloaded = false;
 
+    public String toString() {
+        return String.format("TextureImage[%dx%d](%s)", width, height, filename);
+    }
+
     TextureImage(int width, int height, ByteBuffer bytePixelData, String filename) {
         this.width = width;
         this.height = height;
         this.bytePixelData = bytePixelData;
         bytePixelData.position(0);
+        checkState(bytePixelData.capacity() == bytePixelData.limit());
+        checkState(getByteCount()==width*height*TextureImages.BANDS);
         ramImageBytesCounter.inc(bytePixelData.capacity());
+        ramTexturesCounter.inc();
         this.filename = filename;
     }
 
@@ -80,6 +88,7 @@ public final class TextureImage implements  AutoCloseable {
         checkArgument(!unloaded);
         MemoryUtil.memFree(bytePixelData);
         ramImageBytesCounter.dec(bytePixelData.capacity());
+        ramTexturesCounter.dec();
         unloaded = true;
     }
 
@@ -110,5 +119,9 @@ public final class TextureImage implements  AutoCloseable {
                     GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, bytePixelData
             );
         }
+    }
+
+    public long getByteCount() {
+        return getBytePixelData().capacity();
     }
 }

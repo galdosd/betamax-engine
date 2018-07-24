@@ -58,7 +58,7 @@ public final class SpriteTemplate implements  AutoCloseable {
     }
     private void uploadTexture(int whichFrame) {
         Texture texture = textures.get(whichFrame);
-        texture.ensureUploaded();
+        texture.setVramLoaded(true);
 
     }
 

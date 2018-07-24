@@ -21,31 +21,29 @@ import static org.lwjgl.opengl.GL15.GL_STATIC_DRAW;
  */
 public final class Texture implements  AutoCloseable {
     private static final Counter vramImageBytesCounter = Global.metrics.counter("vramImageBytes");
-    private static final Counter texturesCounter = Global.metrics.counter("textures");
+    private static final Counter vramTexturesCounter = Global.metrics.counter("vramTextures");
 
     private static final org.slf4j.Logger LOG =
             LoggerFactory.getLogger(new Object(){}.getClass().getEnclosingClass());
 
-    private final int handle;
+    private int handle = -1;
+    private boolean vramLoaded = false;
     public final TextureImage textureImage;
     private int boundTarget = 0;
-    // FIXME unload from VRAM when done
 
     private Texture(@NonNull TextureImage textureImage) {
-        handle = GL11.glGenTextures();
         this.textureImage = textureImage;
-        texturesCounter.inc();
     }
 
     public static Texture simpleTexture(String filename) {
         Texture texture = new Texture(TextureImages.fromRgbaFile(filename, true, true));
-        texture.bind(GL_TEXTURE_2D);
-        texture.btSetParameters();
-        texture.btUploadTextureUnit();
+        texture.setVramLoaded(true);
         return texture;
     }
 
     private void bind(int target) {
+        checkState(getVramLoaded());
+        checkState(handle>0);
         glBindTexture(target, handle);
         boundTarget = target;
     }
@@ -73,7 +71,6 @@ public final class Texture implements  AutoCloseable {
     private void btUploadTextureUnit() {
         rebind();
         textureImage.uploadGl(boundTarget);
-        vramImageBytesCounter.inc(textureImage.getBytePixelData().capacity());
     }
 
     // because BetamaxGlProgram#loopOnce called RenderPhase#close (which calls glfwPollEvents) in the same frame
@@ -87,12 +84,16 @@ public final class Texture implements  AutoCloseable {
     }
 
     public void render() {
-        checkState(null!=vbo && null!=vao);
+        checkState(null != vbo && null != vao);
+        if (!getVramLoaded()) {
+            LOG.warn("Loading texture at rendertime: {}", textureImage);
+        }
+        setVramLoaded(true);
+        bind(GL_TEXTURE_2D);
         vao.bind();
         vbo.bind(GL_ARRAY_BUFFER);
-        bind(GL_TEXTURE_2D);
         glClear(GL_DEPTH_BUFFER_BIT);
-        glDrawArrays(GL_TRIANGLES, 0, 3*2);
+        glDrawArrays(GL_TRIANGLES, 0, 3 * 2);
     }
 
     private static VBO vbo;
@@ -125,11 +126,37 @@ public final class Texture implements  AutoCloseable {
     }
 
     @Override public void close() {
+        setVramLoaded(false);
         textureImage.close();
-        GL11.glDeleteTextures(handle);
-        texturesCounter.dec();
-        vramImageBytesCounter.dec(textureImage.getBytePixelData().capacity());
     }
 
-    public void ensureUploaded() { }
+    public void setVramLoaded(boolean vramLoaded) {
+        if(this.vramLoaded==vramLoaded) return;
+        this.vramLoaded = vramLoaded;
+        if(!vramLoaded) vramUnload();
+        if(vramLoaded) vramLoad();
+    }
+
+    private void vramLoad() {
+        checkState(handle==-1);
+        handle = GL11.glGenTextures();
+        checkState(handle>0);
+        bind(GL_TEXTURE_2D);
+        btSetParameters();
+        btUploadTextureUnit();
+        vramTexturesCounter.inc();
+        vramImageBytesCounter.inc(textureImage.getByteCount());
+    }
+
+    private void vramUnload() {
+        checkState(handle>0);
+        GL11.glDeleteTextures(handle);
+        handle = -1;
+        vramTexturesCounter.dec();
+        vramImageBytesCounter.dec(textureImage.getByteCount());
+    }
+
+    public boolean getVramLoaded() {
+        return vramLoaded;
+    }
 }
