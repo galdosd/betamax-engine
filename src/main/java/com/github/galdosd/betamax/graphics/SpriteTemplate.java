@@ -35,12 +35,12 @@ public final class SpriteTemplate implements  AutoCloseable {
     private final String templateName;
 
 
-    public SpriteTemplate(SpriteTemplateManifest manifest) {
+    public SpriteTemplate(SpriteTemplateManifest manifest, TextureRegistry textureRegistry) {
         this.templateName = manifest.getTemplateName();
-        LOG.debug("Loading {}-frame sprite {}", manifest.getSpriteFilenames().size(), templateName);
-        this.textures = manifest.getSpriteFilenames().stream().map(Texture::simpleTexture).collect(toList());
+        this.textures = manifest.getSpriteFilenames().stream().map(textureRegistry::getTexture).collect(toList());
         textureCount = textures.size();
         this.soundName = manifest.getSoundName();
+        LOG.debug("Constructed {}-frame sprite template {}", manifest.getSpriteFilenames().size(), templateName);
     }
 
     public void loadSoundBuffer(SoundRegistry soundRegistry) {
@@ -56,11 +56,17 @@ public final class SpriteTemplate implements  AutoCloseable {
         Texture texture = textures.get(whichFrame);
         texture.render();
     }
+    private void uploadTexture(int whichFrame) {
+        Texture texture = textures.get(whichFrame);
+        texture.ensureUploaded();
+
+    }
 
     public void close() {
         textures.forEach(Texture::close);
     }
 
+    // FIXME break out SpriteImpl
     /**
      * A specific instance of a particular sprite template
      * the visual data is in the template, but the sprite has the state like current frame, layer depth,
@@ -187,5 +193,10 @@ public final class SpriteTemplate implements  AutoCloseable {
         @Override public void close() {
             if(soundSource.isPresent()) soundSource.get().close();
         }
+
+        @Override public void uploadCurrentFrame() {
+            uploadTexture(getRenderedTexture());
+        }
     }
+
 }

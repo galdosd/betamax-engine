@@ -19,9 +19,11 @@ public final class SpriteTemplateRegistry implements AutoCloseable {
     private final SoundRegistry soundRegistry;
     private final Map<String,SpriteTemplate> registeredTemplates = new HashMap<>();
     private final Map<String,SpriteTemplateManifest> registeredManifests = new HashMap<>();
+    private final TextureRegistry textureRegistry;
 
-    public SpriteTemplateRegistry(SoundRegistry soundRegistry) {
+    public SpriteTemplateRegistry(SoundRegistry soundRegistry, TextureRegistry textureRegistry) {
         this.soundRegistry = soundRegistry;
+        this.textureRegistry = textureRegistry;
     }
 
     // TODO it might be nice to have some mechanism by which templates not used for a while are unloaded
@@ -32,7 +34,7 @@ public final class SpriteTemplateRegistry implements AutoCloseable {
     public SpriteTemplate getTemplate(String name) {
         SpriteTemplate template = registeredTemplates.get(name);
         if(null==template) {
-            template = new SpriteTemplate(getManifest(name));
+            template = new SpriteTemplate(getManifest(name), textureRegistry);
             // TODO this does not allow for lazy sound loading because if it is not loaded into the SpriteTemplate by
             // the time the Sprite is created the Sprite/SpriteTemplate have no soundRegistry access to load the
             // soundbuffer

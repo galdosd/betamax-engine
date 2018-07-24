@@ -31,7 +31,7 @@ public final class Texture implements  AutoCloseable {
     private int boundTarget = 0;
     // FIXME unload from VRAM when done
 
-    public Texture(@NonNull TextureImage textureImage) {
+    private Texture(@NonNull TextureImage textureImage) {
         handle = GL11.glGenTextures();
         this.textureImage = textureImage;
         texturesCounter.inc();
@@ -45,12 +45,12 @@ public final class Texture implements  AutoCloseable {
         return texture;
     }
 
-    public void bind(int target) {
+    private void bind(int target) {
         glBindTexture(target, handle);
         boundTarget = target;
     }
 
-    public void btSetParameters() {
+    private void btSetParameters() {
         rebind();
         // glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
         // glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
@@ -70,7 +70,7 @@ public final class Texture implements  AutoCloseable {
         bind(boundTarget);
     }
 
-    public void btUploadTextureUnit() {
+    private void btUploadTextureUnit() {
         rebind();
         textureImage.uploadGl(boundTarget);
         vramImageBytesCounter.inc(textureImage.getBytePixelData().capacity());
@@ -127,4 +127,6 @@ public final class Texture implements  AutoCloseable {
         texturesCounter.dec();
         vramImageBytesCounter.dec(textureImage.getBytePixelData().capacity());
     }
+
+    public void ensureUploaded() { }
 }

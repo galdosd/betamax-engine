@@ -30,4 +30,6 @@ public interface Sprite extends AutoCloseable {
     void setHidden(boolean hidden);
 
     void close();
+
+    void uploadCurrentFrame();
 }

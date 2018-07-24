@@ -4,6 +4,7 @@ package com.github.galdosd.betamax.engine;
 import com.codahale.metrics.Snapshot;
 import com.github.galdosd.betamax.Global;
 import com.github.galdosd.betamax.graphics.Texture;
+import com.github.galdosd.betamax.graphics.TextureRegistry;
 import com.github.galdosd.betamax.gui.DevConsole;
 import com.github.galdosd.betamax.opengl.*;
 import com.github.galdosd.betamax.scripting.EventType;
@@ -19,6 +20,7 @@ import org.lwjgl.glfw.GLFW;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -35,7 +37,8 @@ public class BetamaxGlProgram extends GlProgramBase {
 
     private final SoundWorld soundWorld = new SoundWorld();
     private final SoundRegistry soundRegistry = new SoundRegistry(soundWorld);
-    private final SpriteTemplateRegistry spriteTemplateRegistry = new SpriteTemplateRegistry(soundRegistry);
+    private final TextureRegistry textureRegistry = new TextureRegistry();
+    private final SpriteTemplateRegistry spriteTemplateRegistry = new SpriteTemplateRegistry(soundRegistry, textureRegistry);
     private final DevConsole devConsole = new DevConsole();
     private ScriptWorld scriptWorld;
     private SpriteRegistry spriteRegistry;
@@ -44,6 +47,7 @@ public class BetamaxGlProgram extends GlProgramBase {
     private ShaderProgram highlightShaderProgram;
     private Texture pausedTexture, loadingTexture, crashTexture;
     private boolean crashed = false;
+    private boolean loading = false;
 
     public static void main(String[] args) {
         new BetamaxGlProgram().run();
@@ -99,6 +103,7 @@ public class BetamaxGlProgram extends GlProgramBase {
         resetPitch();
     }
 
+    // FIXME remove to shaderregistry
     private void prepareShaders() {
         defaultShaderProgram = new ShaderProgram();
         defaultShaderProgram.attach(
@@ -116,6 +121,7 @@ public class BetamaxGlProgram extends GlProgramBase {
         highlightShaderProgram.link();
     }
 
+    /** FIXME move to inputhandling */
     @Override protected void keyPressEvent(int key, int mods) {
         boolean controlKeyPressed = (mods & GLFW.GLFW_MOD_CONTROL) != 0;
         // exit upon ESC key
@@ -137,8 +143,11 @@ public class BetamaxGlProgram extends GlProgramBase {
         }
         else if (key == GLFW.GLFW_KEY_PAUSE) {
             checkState(getFrameClock().getPaused() || !crashed);
+            checkState(getFrameClock().getPaused() || !loading);
             if (crashed) {
                 LOG.error("You can't unpause your way out of a crash. Use hotloading (F5 or Ctrl+F5) instead");
+            } else if(loading) {
+                LOG.warn("Cannot unpause until loading is done");
             } else {
                 getFrameClock().setPaused(!getFrameClock().getPaused());
                 if (getFrameClock().getPaused()) soundWorld.globalPause();
@@ -206,21 +215,52 @@ public class BetamaxGlProgram extends GlProgramBase {
 
     private long nextConsoleUpdate = System.currentTimeMillis();
     @Override protected void updateView() {
-        defaultShaderProgram.use();
-        glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        renderAllSprites();
-        if(getFrameClock().getPaused()) {
-            defaultShaderProgram.use();
-            Texture texture = crashed ? crashTexture : pausedTexture;
-            texture.render();
+        List<Sprite> spritesInRenderOrder = spriteRegistry.getSpritesInRenderOrder();
+
+        /** wait for up to half a frame length to load textures before we give up and use a loading screen */
+        if(textureRegistry.checkAllSpritesReadyToRender(spritesInRenderOrder, 500 / getFrameClock().getTargetFps())) {
+            checkState(getFrameClock().getPaused() || !loading);
+            if(loading) {
+                LOG.debug("exited LOADING state");
+                loading = false;
+                getFrameClock().setPaused(false);
+            }
+            clearScreen();
+            renderAllSprites(spritesInRenderOrder);
+        } else {
+            LOG.debug("entered LOADING state");
+            getFrameClock().setPaused(true);
+            loading = true;
         }
+        showPauseScreen();
         updateDevConsole();
     }
 
-    private void renderAllSprites() {
+    private void showPauseScreen() {
+        if(getFrameClock().getPaused()) {
+            defaultShaderProgram.use();
+            checkState(!crashed || !loading);
+            // FIXME three independent booleans (crashed, loading, FrameClock#getPaused) should be merged into one enum
+            // for safety
+            Texture texture = pausedTexture;
+            if(crashed) texture = crashTexture;
+            if(loading) texture = loadingTexture;
+            texture.render();
+        }
+    }
+
+    private void clearScreen() {
+        defaultShaderProgram.use();
+        glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    }
+
+    private void renderAllSprites(List<Sprite> spritesInRenderOrder) {
         Optional<SpriteName> selectedSprite = devConsole.getSelectedSprite();
-        for(Sprite sprite: spriteRegistry.getSpritesInRenderOrder()) {
+        for(Sprite sprite: spritesInRenderOrder) {
+            sprite.uploadCurrentFrame();
+        }
+        for(Sprite sprite: spritesInRenderOrder) {
             if(selectedSprite.isPresent() && sprite.getName().equals(selectedSprite.get())) {
                 highlightShaderProgram.use();
             } else {
@@ -245,11 +285,14 @@ public class BetamaxGlProgram extends GlProgramBase {
     }
 
     final static int MS_PER_NS = 1000000;
+    /* FIXME move to DevConsole */
     private Map<String, String> getDebugParameters() {
         return new HashMap<String,String>() {{
             put("FPS (target)", String.valueOf(getFrameClock().getTargetFps()));
             put("Frame Budget", String.valueOf(1000.0 / getFrameClock().getTargetFps()));
-            put("Animation", crashed ? "CRASH" : (getFrameClock().getPaused() ? "PAUSE" : "PLAY"));
+            put("Animation", crashed ? "CRASH" :
+                    (loading ? "LOADING" :
+                            (getFrameClock().getPaused() ? "PAUSE" : "PLAY")));
             Global.metrics.getCounters().entrySet().stream().forEach( entry ->
                 put(entry.getKey(), String.valueOf(entry.getValue().getCount()))
             );
@@ -267,8 +310,6 @@ public class BetamaxGlProgram extends GlProgramBase {
             Global.metrics.getGauges().entrySet().stream().forEach( entry ->
                 put(entry.getKey(), String.valueOf(entry.getValue().getValue()))
             );
-
-
         }};
     }
 
