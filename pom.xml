@@ -9,6 +9,9 @@
         Working set features
             Performance
                 Separate thread for loading textures, cache texture-by-texture so we can stream a sprite
+                    Don't require sprite texture till render time
+                    Loading thread has priority queue for loading and evicting to RAM
+                    Render thread does load/evicts into VRAM right before render phase
                 Swap in and out of VRAM ourselves
                     Sprite#vramMode / ramMode
                         PERVASIVE - always keep it in
@@ -273,6 +276,17 @@
             <artifactId>lwjgl-openal</artifactId>
             <version>${lwjgl.version}</version>
             <classifier>${lwjgl.natives}</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.lwjgl</groupId>
+            <artifactId>lwjgl-lz4</artifactId>
+            <version>${lwjgl.version}</version>
+            <classifier>${lwjgl.natives}</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.lwjgl</groupId>
+            <artifactId>lwjgl-lz4</artifactId>
+            <version>${lwjgl.version}</version>
         </dependency>
         <!-- FIXME specify versions of maven plugins! reproducible builds! -->
     </dependencies>

@@ -23,12 +23,14 @@ import static com.google.common.base.Preconditions.checkState;
 /**
  * FIXME: Document this class
  */
-public class TextureImages {
+public final class TextureImages {
     private static final org.slf4j.Logger LOG =
             LoggerFactory.getLogger(new Object(){}.getClass().getEnclosingClass());
     private static final Timer cachedImageLoadTimer = Global.metrics.timer("cachedImageLoadTimer");
-    static final String CACHE_KEY = "TextureImages#fromRgbaFile";
+    static final String CACHE_KEY = "TextureImages#fromRgbaFile;lz4";
     static final int BANDS = 4; // RGBA so 4 samples per pixel
+
+    private TextureImages(){/*uninstantiable*/}
 
     private static Optional<TextureImage> loadCached(String filename) throws IOException {
         Optional<FileChannel> optionalFileChannel = OurTool.readCached(CACHE_KEY, filename);
@@ -59,10 +61,7 @@ public class TextureImages {
         checkArgument(width > 0 && height > 0 && width < 16384 && height < 16384,
                 "bad image size %sx%s", width, height);
 
-        ByteBuffer bytePixelData = MemoryUtil.memAlloc(colorSamples);
-        int readPixelBytes = readChannel.read(bytePixelData); // TODO add metrics timer
-        bytePixelData.flip();
-        checkState(colorSamples == readPixelBytes, "read failure: cache file pixel data");
+        ByteBuffer bytePixelData = TextureCompression.decompress(readChannel, colorSamples);
 
         checkState(bytePixelData.position()==0);
         LOG.trace("Loaded from cache: {}", filename);

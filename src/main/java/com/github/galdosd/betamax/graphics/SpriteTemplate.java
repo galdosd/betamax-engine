@@ -1,7 +1,6 @@
 package com.github.galdosd.betamax.graphics;
 
 import com.github.galdosd.betamax.engine.FrameClock;
-import com.github.galdosd.betamax.Global;
 import com.github.galdosd.betamax.opengl.TextureCoordinate;
 import com.github.galdosd.betamax.sound.SoundBuffer;
 import com.github.galdosd.betamax.sound.SoundName;
@@ -10,13 +9,10 @@ import com.github.galdosd.betamax.sound.SoundSource;
 import com.github.galdosd.betamax.sprite.Sprite;
 import com.github.galdosd.betamax.sprite.SpriteName;
 import lombok.Getter;
-import org.reflections.Reflections;
-import org.reflections.scanners.ResourcesScanner;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;

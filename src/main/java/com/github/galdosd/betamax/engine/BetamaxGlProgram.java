@@ -256,8 +256,9 @@ public class BetamaxGlProgram extends GlProgramBase {
             Global.metrics.getTimers().entrySet().stream().forEach( entry -> {
                 Snapshot snapshot = entry.getValue().getSnapshot();
 
-                put(entry.getKey(), String.format("median=%.1f (min=%.1f;   max=%.1f;   95p=%.1f)",
+                put(entry.getKey(), String.format("median=%.1f;  mean=%.1f;  min=%.1f;   max=%.1f;   95p=%.1f)",
                         snapshot.getMedian()/ MS_PER_NS,
+                        snapshot.getMean()/ MS_PER_NS,
                         (double)snapshot.getMin()/ MS_PER_NS,
                         (double)snapshot.getMax()/ MS_PER_NS,
                         snapshot.get95thPercentile()/ MS_PER_NS));

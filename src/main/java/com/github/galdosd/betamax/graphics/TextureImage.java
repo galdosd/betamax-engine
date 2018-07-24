@@ -1,7 +1,6 @@
 package com.github.galdosd.betamax.graphics;
 
 import com.codahale.metrics.Counter;
-import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Timer;
 import com.github.galdosd.betamax.Global;
 import com.github.galdosd.betamax.OurTool;
@@ -15,7 +14,6 @@ import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.nio.channels.FileChannel;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
@@ -48,6 +46,8 @@ public final class TextureImage implements  AutoCloseable {
 
     ByteBuffer getBytePixelData() {
         checkState(0==bytePixelData.position(), "bytePixelData.position()!=0");
+        checkState(width*height*TextureImages.BANDS==bytePixelData.remaining(),
+                "bytePixelData.remaining()==%d", bytePixelData.remaining());
         return bytePixelData;
     }
 
@@ -63,11 +63,11 @@ public final class TextureImage implements  AutoCloseable {
             intHeader.put(width);
             intHeader.put(height);
             fileChannel.write(byteHeader);
-            ByteBuffer localBytePixelData = getBytePixelData();
-            fileChannel.write(localBytePixelData);
+            ByteBuffer compressedPixelData = TextureCompression.compress(getBytePixelData());
+            fileChannel.write(compressedPixelData);
             // FileChannel#write fucks the position up despite failing to specify that in its contract
             // what a fucking junk heap
-            localBytePixelData.position(0);
+            compressedPixelData.position(0);
             LOG.info("Saved to cache: {}", filename);
         }
     }
