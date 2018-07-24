@@ -28,4 +28,5 @@ public final class Global {
     public final static String mainScript = fromProperty("betamax.mainScript");
     public final static String textureCacheDir = fromProperty("betamax.textureCacheDir");
 
+    public static final boolean enableSound = fromProperty("betamax.enableSound", true);
 }

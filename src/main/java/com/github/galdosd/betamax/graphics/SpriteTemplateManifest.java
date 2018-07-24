@@ -42,7 +42,7 @@ import static java.util.stream.Collectors.toList;
         checkArgument(soundFilenames.size() <= 1, "Too many OGG files for sprite template %s", templateName);
         checkArgument(0 != spriteFilenames.size(), "no sprite frame files found for " + pkgName);
         Optional<SoundName> soundName;
-        if (soundFilenames.size() > 0) {
+        if (soundFilenames.size() > 0 && Global.enableSound) {
             soundName = Optional.of(new SoundName(soundFilenames.get(0)));
         } else {
             soundName = Optional.empty();
