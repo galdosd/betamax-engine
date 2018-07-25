@@ -12,6 +12,7 @@ public final class Global {
     public static final MetricRegistry metrics = new MetricRegistry();
     public static final String spriteBase = "com.github.galdosd.betamax.sprites.";
     public static final String scriptBase = "com/github/galdosd/betamax/scripts/";
+    public static final String shaderBase = "com/github/galdosd/betamax/shaders/";
     public static final String helpFile = "help.txt";
     public static final String pausedTextureFile = "paused.tif";
     public static final String loadingTextureFile = "loading.tif";

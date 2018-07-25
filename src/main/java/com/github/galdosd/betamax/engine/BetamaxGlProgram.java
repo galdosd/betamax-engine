@@ -47,8 +47,7 @@ public class BetamaxGlProgram extends GlProgramBase {
     private ScriptWorld scriptWorld;
     private SpriteRegistry spriteRegistry;
     private Optional<SpriteName> highlightedSprite = Optional.empty();
-    private ShaderProgram defaultShaderProgram;
-    private ShaderProgram highlightShaderProgram;
+    private OurShaders ourShaders;
     private Texture pausedTexture, loadingTexture, crashTexture;
     private boolean crashed = false;
     private boolean loading = false;
@@ -58,7 +57,7 @@ public class BetamaxGlProgram extends GlProgramBase {
     }
 
     @Override protected void initialize() {
-        prepareShaders();
+        ourShaders = new OurShaders();
         Texture.prepareForDrawing();
         prepareBuiltinTextures();
 
@@ -107,23 +106,6 @@ public class BetamaxGlProgram extends GlProgramBase {
         resetPitch();
     }
 
-    // FIXME remove to shaderregistry
-    private void prepareShaders() {
-        defaultShaderProgram = new ShaderProgram();
-        defaultShaderProgram.attach(
-                Shader.loadAndCompileShader("default.vert", GL_VERTEX_SHADER));
-        defaultShaderProgram.attach(
-                Shader.loadAndCompileShader("default.frag", GL_FRAGMENT_SHADER));
-
-        highlightShaderProgram = new ShaderProgram();
-        highlightShaderProgram.attach(
-                Shader.loadAndCompileShader("default.vert", GL_VERTEX_SHADER));
-        highlightShaderProgram.attach(
-                Shader.loadAndCompileShader("highlight.frag", GL_FRAGMENT_SHADER));
-
-        defaultShaderProgram.link();
-        highlightShaderProgram.link();
-    }
 
     /** FIXME move to inputhandling */
     @Override protected void keyPressEvent(int key, int mods) {
@@ -248,7 +230,7 @@ public class BetamaxGlProgram extends GlProgramBase {
 
     private void showPauseScreen() {
         if(getFrameClock().getPaused()) {
-            defaultShaderProgram.use();
+            ourShaders.DEFAULT.use();
             checkState(!crashed || !loading);
             // FIXME three independent booleans (crashed, loading, FrameClock#getPaused) should be merged into one enum
             // for safety
@@ -260,7 +242,7 @@ public class BetamaxGlProgram extends GlProgramBase {
     }
 
     private void clearScreen() {
-        defaultShaderProgram.use();
+        ourShaders.DEFAULT.use();
         glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
@@ -274,9 +256,9 @@ public class BetamaxGlProgram extends GlProgramBase {
         Optional<SpriteName> selectedSprite = devConsole.getSelectedSprite();
         for(Sprite sprite: spritesInRenderOrder) {
             if(selectedSprite.isPresent() && sprite.getName().equals(selectedSprite.get())) {
-                highlightShaderProgram.use();
+                ourShaders.HIGHLIGHT.use();
             } else {
-                defaultShaderProgram.use();
+                ourShaders.DEFAULT.use();
             }
             sprite.render();
         }

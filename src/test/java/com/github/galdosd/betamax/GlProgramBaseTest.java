@@ -23,8 +23,8 @@ public class GlProgramBaseTest {
     @Test @Ignore public void testShadersCompile() throws Exception {
         // TODO find all *.glsl in resources/, centralize them or something
         String[] shaderNames = new String[] {
-                "default.vert",
-                "default.frag",
+                "com/github/galdosd/betamax/shaders/default.vert",
+                "com/github/galdosd/betamax/shaders/default.frag",
         };
         BetamaxGlProgram program = new BetamaxGlProgram();
         for(String shaderName: shaderNames) Shader.loadAndCompileShader(shaderName, /*FIXME*/ 0);
