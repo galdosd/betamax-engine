@@ -1,7 +1,9 @@
 package com.github.galdosd.betamax.gui;
 
+import com.codahale.metrics.Snapshot;
 import com.github.galdosd.betamax.Global;
 import com.github.galdosd.betamax.OurTool;
+import com.github.galdosd.betamax.engine.FrameClock;
 import com.github.galdosd.betamax.scripting.ScriptCallback;
 import com.github.galdosd.betamax.sprite.Sprite;
 import com.github.galdosd.betamax.sprite.SpriteEvent;
@@ -12,10 +14,7 @@ import javafx.scene.control.Alert;
 import lombok.Getter;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static java.util.stream.Collectors.toList;
 
@@ -23,6 +22,7 @@ import static java.util.stream.Collectors.toList;
  * FIXME: Document this class
  */
 public final class DevConsole {
+    final static int MS_PER_NS = 1000000;
     private static final org.slf4j.Logger LOG =
             LoggerFactory.getLogger(new Object(){}.getClass().getEnclosingClass());
 
@@ -35,13 +35,42 @@ public final class DevConsole {
         LOG.info("FxWindow launched");
     }
 
+    public static Map<String, String> getDebugParameters(FrameClock frameClock, String actionState) {
+        return new HashMap<String,String>() {{
+            put("Frame#", String.valueOf(frameClock.getCurrentFrame()));
+            put("FPS (target)", String.valueOf(frameClock.getTargetFps()));
+            put("Frame Budget", String.valueOf(1000.0 / frameClock.getTargetFps()));
+            put("Action State", actionState);
+            Global.metrics.getCounters().entrySet().stream().forEach( entry ->
+                put(entry.getKey(), String.valueOf(entry.getValue().getCount()))
+            );
+            Global.metrics.getTimers().entrySet().stream().forEach( entry -> {
+                Snapshot snapshot = entry.getValue().getSnapshot();
+
+                put(entry.getKey(), String.format("median=%.1f;  mean=%.1f;  min=%.1f;   max=%.1f;   95p=%.1f)",
+                        snapshot.getMedian()/ MS_PER_NS,
+                        snapshot.getMean()/ MS_PER_NS,
+                        (double)snapshot.getMin()/ MS_PER_NS,
+                        (double)snapshot.getMax()/ MS_PER_NS,
+                        snapshot.get95thPercentile()/ MS_PER_NS));
+            });
+
+            Global.metrics.getGauges().entrySet().stream().forEach( entry ->
+                put(entry.getKey(), String.valueOf(entry.getValue().getValue()))
+            );
+        }};
+    }
+
     public void updateView(
             Collection<Sprite> sprites,
             Optional<SpriteName> highlightedSprite,
             Map<SpriteEvent,ScriptCallback> allCallbacks,
             Map<String, String> stateVariables,
-            Map<String, String> paramVariables
+            FrameClock frameClock,
+            String actionStateString
     ) {
+        Map<String, String> debugParameters = getDebugParameters(frameClock, actionStateString);
+        // TODO obviously factor out these stream/sorted/map/collects in a generic manner
         final int[] tableIndex = {0};
         tableIndex[0] = 0;
         List<FxSprite> updatedFxSprites = sprites.stream()
@@ -62,7 +91,7 @@ public final class DevConsole {
                 .collect(toList());
 
         tableIndex[0] = 0;
-        List<FxVariable> updatedParamVariables = paramVariables.entrySet().stream()
+        List<FxVariable> updatedParamVariables = debugParameters.entrySet().stream()
                 .sorted(Ordering.natural().onResultOf(entry -> entry.getKey()))
                 .map(entry -> new FxVariable(tableIndex[0]++, entry.getKey(), entry.getValue()))
                 .collect(toList());

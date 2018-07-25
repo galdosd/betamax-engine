@@ -8,6 +8,6 @@ public interface FrameClock {
     boolean getPaused();
     void setPaused(boolean newPaused);
 
-
     void resetLogicFrames();
+    int getTargetFps();
 }

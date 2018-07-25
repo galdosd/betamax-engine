@@ -1,7 +1,6 @@
 package com.github.galdosd.betamax.engine;
 
 
-import com.codahale.metrics.Snapshot;
 import com.codahale.metrics.Timer;
 import com.github.galdosd.betamax.Global;
 import com.github.galdosd.betamax.graphics.Texture;
@@ -20,14 +19,11 @@ import com.github.galdosd.betamax.graphics.SpriteTemplateRegistry;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkState;
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL20.*;
 
 /**
  * FIXME: Document this class
@@ -264,6 +260,12 @@ public class BetamaxGlProgram extends GlProgramBase {
         }
     }
 
+    String getActionStateString() {
+        return crashed ? "CRASH" :
+                        (loading ? "LOADING" :
+                                (getFrameClock().getPaused() ? "PAUSE" : "PLAY"));
+    }
+
     private void updateDevConsole() {
         if(System.currentTimeMillis() > nextConsoleUpdate) {
             devConsole.updateView(
@@ -271,41 +273,12 @@ public class BetamaxGlProgram extends GlProgramBase {
                     highlightedSprite,
                     scriptWorld.getAllCallbacks(),
                     scriptWorld.getStateVariables(),
-                    getDebugParameters()
+                    getFrameClock(),
+                    getActionStateString()
             );
             highlightedSprite = Optional.empty();
             nextConsoleUpdate = System.currentTimeMillis() + Global.devConsoleUpdateIntervalMillis;
         }
-    }
-
-    final static int MS_PER_NS = 1000000;
-    /* FIXME move to DevConsole */
-    private Map<String, String> getDebugParameters() {
-        return new HashMap<String,String>() {{
-            put("Frame#", String.valueOf(getFrameClock().getCurrentFrame()));
-            put("FPS (target)", String.valueOf(getFrameClock().getTargetFps()));
-            put("Frame Budget", String.valueOf(1000.0 / getFrameClock().getTargetFps()));
-            put("Animation", crashed ? "CRASH" :
-                    (loading ? "LOADING" :
-                            (getFrameClock().getPaused() ? "PAUSE" : "PLAY")));
-            Global.metrics.getCounters().entrySet().stream().forEach( entry ->
-                put(entry.getKey(), String.valueOf(entry.getValue().getCount()))
-            );
-            Global.metrics.getTimers().entrySet().stream().forEach( entry -> {
-                Snapshot snapshot = entry.getValue().getSnapshot();
-
-                put(entry.getKey(), String.format("median=%.1f;  mean=%.1f;  min=%.1f;   max=%.1f;   95p=%.1f)",
-                        snapshot.getMedian()/ MS_PER_NS,
-                        snapshot.getMean()/ MS_PER_NS,
-                        (double)snapshot.getMin()/ MS_PER_NS,
-                        (double)snapshot.getMax()/ MS_PER_NS,
-                        snapshot.get95thPercentile()/ MS_PER_NS));
-            });
-
-            Global.metrics.getGauges().entrySet().stream().forEach( entry ->
-                put(entry.getKey(), String.valueOf(entry.getValue().getValue()))
-            );
-        }};
     }
 
     @Override protected void updateLogic() {
