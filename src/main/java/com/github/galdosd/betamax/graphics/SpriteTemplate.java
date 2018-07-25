@@ -33,6 +33,7 @@ public final class SpriteTemplate implements  AutoCloseable {
     private final int textureCount;
     private static int nextCreationSerial = 0;
     private final String templateName;
+    private final MemoryStrategy memoryStrategy;
 
 
     public SpriteTemplate(SpriteTemplateManifest manifest, TextureRegistry textureRegistry) {
@@ -40,6 +41,7 @@ public final class SpriteTemplate implements  AutoCloseable {
         this.textures = manifest.getSpriteFilenames().stream().map(textureRegistry::getTexture).collect(toList());
         textureCount = textures.size();
         this.soundName = manifest.getSoundName();
+        this.memoryStrategy = MemoryStrategy.choose(textures.size());
         LOG.debug("Constructed {}-frame sprite template {}", manifest.getSpriteFilenames().size(), templateName);
     }
 
@@ -55,6 +57,7 @@ public final class SpriteTemplate implements  AutoCloseable {
     private void renderTemplate(int whichFrame) {
         Texture texture = textures.get(whichFrame);
         texture.render();
+        memoryStrategy.afterRender(texture);
     }
     private void uploadTexture(int whichFrame) {
         Texture texture = textures.get(whichFrame);

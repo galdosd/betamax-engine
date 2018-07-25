@@ -8,6 +8,7 @@ import java.util.List;
  * FIXME: Document this class
  */
 public class TextureRegistry {
+
     public Texture getTexture(String imageFilename) {
         return Texture.simpleTexture(imageFilename);
     }

@@ -24,9 +24,10 @@ public final class Global {
 
     public static final int targetFps = fromProperty("betamax.targetFps", 8);
     public static final  int devConsoleUpdateIntervalMillis = fromProperty("betamax.devConsoleUpdateInterval", 500);
-    public static final boolean startFullScreen = fromProperty("betamax.fullScreen", false);
+    public static final boolean startFullScreen = fromProperty("betamax.startFullScreen", false);
     public final static String mainScript = fromProperty("betamax.mainScript");
     public final static String textureCacheDir = fromProperty("betamax.textureCacheDir");
-
     public static final boolean enableSound = fromProperty("betamax.enableSound", true);
+    public static final int textureMaxFramesForResidentMemoryStrategy =
+            fromProperty( "betamax.textureMaxFramesForResidentMemoryStrategy", 10);
 }
