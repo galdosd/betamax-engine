@@ -90,7 +90,7 @@ public final class Texture implements  AutoCloseable {
     public void render() {
         checkState(null != vbo && null != vao);
         if (!getVramLoaded()) {
-            LOG.warn("Loading texture at rendertime: {}", textureImage);
+            LOG.warn("Uploading texture to VRAM at rendertime: {}", textureImage);
             rendertimeUploadsCounter.inc();
         }
         setVramLoaded(true);
