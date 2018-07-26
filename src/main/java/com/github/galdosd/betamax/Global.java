@@ -32,4 +32,8 @@ public final class Global {
     public static final boolean enableSound = fromProperty("betamax.enableSound", true);
     public static final int textureMaxFramesForResidentMemoryStrategy =
             fromProperty( "betamax.textureMaxFramesForResidentMemoryStrategy", 10);
+    public static final int texturePreloadFrameLookahead = fromProperty(
+            "betamax.texturePreloadFrameLookahead", 16
+    );
+    public static final int texturePreloadBatchSize = fromProperty("betamax.texturePreloadBatchSize", 1);
 }

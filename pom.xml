@@ -7,6 +7,7 @@
 
 
         Working set features
+            Dev Console : *Bytes counters become *Megabytes
             Performance
                 Separate thread for loading textures, cache texture-by-texture so we can stream a sprite
                     Don't require sprite texture till render time

@@ -8,10 +8,14 @@ import com.github.galdosd.betamax.opengl.TextureCoordinate;
 import static com.google.common.base.Preconditions.checkState;
 
 /** A proxy for a TextureImage that may or may not actually be loaded into RAM at any given time
+ *  Must be unloaded in the main thread! Can be loaded from any thread.
+ *
  */
 public class LazyTextureImage implements  AutoCloseable {
     private TextureImage image;
     private final TextureName name;
+    // TODO get rid of this lock
+    private final Object $LOCK = new Object();
 
     public LazyTextureImage(TextureName name) {
         this.name = name;
@@ -37,13 +41,17 @@ public class LazyTextureImage implements  AutoCloseable {
     }
 
     void setLoaded(boolean loaded) {
-        if(loaded==getLoaded()) return;
-        if(loaded) load();
-        else unload();
+        synchronized ($LOCK) {
+            if (loaded == getLoaded()) return;
+            if (loaded) load();
+            else unload();
+        }
     }
 
     boolean getLoaded() {
-        return null!=image;
+        synchronized ($LOCK) {
+            return null != image;
+        }
     }
 
     private void load() {

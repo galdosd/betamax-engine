@@ -1,5 +1,7 @@
 package com.github.galdosd.betamax.gui;
 
+import com.codahale.metrics.Counter;
+import com.codahale.metrics.Meter;
 import com.codahale.metrics.Snapshot;
 import com.github.galdosd.betamax.Global;
 import com.github.galdosd.betamax.OurTool;
@@ -43,6 +45,7 @@ public final class DevConsole {
             put("Action State", actionState);
             Global.metrics.getCounters().entrySet().stream().forEach( entry ->
                 put(entry.getKey(), String.valueOf(entry.getValue().getCount()))
+
             );
             Global.metrics.getTimers().entrySet().stream().forEach( entry -> {
                 Snapshot snapshot = entry.getValue().getSnapshot();
