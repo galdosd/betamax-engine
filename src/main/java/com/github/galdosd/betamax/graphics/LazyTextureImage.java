@@ -44,7 +44,7 @@ public class LazyTextureImage implements  AutoCloseable {
     }
 
     boolean getLoaded() {
-        return null==image;
+        return null!=image;
     }
 
     private void load() {
