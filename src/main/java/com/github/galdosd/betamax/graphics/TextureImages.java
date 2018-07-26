@@ -93,7 +93,7 @@ public final class TextureImages {
         TextureImage textureImage = fromRgbaFile(filename);
         if(writeCache) {
             try {
-                textureImage.saveToCache();
+                saveToCache(textureImage);
             } catch (IOException e) {
                 throw new RuntimeException("Failed to write fast-load cached texture", e);
             }
@@ -148,5 +148,24 @@ public final class TextureImages {
         bytePixelData.flip();
         checkState(bytePixelData.position()==0);
         return bytePixelData;
+    }
+
+    private static void saveToCache(TextureImage img) throws IOException {
+        checkState(!img.getUnloaded());
+        try(FileChannel fileChannel = OurTool.writeCached(CACHE_KEY, img.getFilename())) {
+            LOG.trace("Saving to cache: {}", img.getFilename());
+            // FIXME write original filename as a safety check
+            ByteBuffer byteHeader = ByteBuffer.allocate(Integer.BYTES * 2);
+            IntBuffer intHeader = byteHeader.asIntBuffer();
+            intHeader.put(img.getWidth());
+            intHeader.put(img.getHeight());
+            fileChannel.write(byteHeader);
+            ByteBuffer compressedPixelData = TextureCompression.compress(img.getBytePixelData());
+            fileChannel.write(compressedPixelData);
+            // FileChannel#write fucks the position up despite failing to specify that in its contract
+            // what a fucking junk heap
+            compressedPixelData.position(0);
+            LOG.info("Saved to cache: {}", img.getFilename());
+        }
     }
 }

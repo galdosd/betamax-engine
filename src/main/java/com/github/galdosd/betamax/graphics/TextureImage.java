@@ -3,7 +3,6 @@ package com.github.galdosd.betamax.graphics;
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Timer;
 import com.github.galdosd.betamax.Global;
-import com.github.galdosd.betamax.OurTool;
 import com.github.galdosd.betamax.opengl.TextureCoordinate;
 import lombok.Getter;
 import org.lwjgl.opengl.GL11;
@@ -12,8 +11,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.ByteBuffer;
-import java.nio.IntBuffer;
-import java.nio.channels.FileChannel;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
@@ -29,10 +26,9 @@ public final class TextureImage implements  AutoCloseable {
     private static final org.slf4j.Logger LOG =
             LoggerFactory.getLogger(new Object(){}.getClass().getEnclosingClass());
 
-
     private final ByteBuffer bytePixelData;
     @Getter private final int width, height;
-    private final String filename;
+    @Getter private final String filename;
 
     private boolean unloaded = false;
 
@@ -53,31 +49,11 @@ public final class TextureImage implements  AutoCloseable {
     }
 
     ByteBuffer getBytePixelData() {
+        checkState(!unloaded);
         checkState(0==bytePixelData.position(), "bytePixelData.position()!=0");
         checkState(width*height*TextureImages.BANDS==bytePixelData.remaining(),
                 "bytePixelData.remaining()==%d", bytePixelData.remaining());
         return bytePixelData;
-    }
-
-    void saveToCache() throws IOException {
-        checkArgument(!unloaded);
-        // FIXME we should only save 1 byte per sample not the damn float -- at least test this with LZ4, disadvantage
-        // is still have to convert to floats and that may be expensive? LZ4 is not dumb, it may be just fine
-        try(FileChannel fileChannel = OurTool.writeCached(TextureImages.CACHE_KEY, filename)) {
-            LOG.trace("Saving to cache: {}", filename);
-            // FIXME write original filename as a safety check
-            ByteBuffer byteHeader = ByteBuffer.allocate(Integer.BYTES * 2);
-            IntBuffer intHeader = byteHeader.asIntBuffer();
-            intHeader.put(width);
-            intHeader.put(height);
-            fileChannel.write(byteHeader);
-            ByteBuffer compressedPixelData = TextureCompression.compress(getBytePixelData());
-            fileChannel.write(compressedPixelData);
-            // FileChannel#write fucks the position up despite failing to specify that in its contract
-            // what a fucking junk heap
-            compressedPixelData.position(0);
-            LOG.info("Saved to cache: {}", filename);
-        }
     }
 
     /** for textures that don't live the whole life of the program, you must call this
@@ -123,5 +99,9 @@ public final class TextureImage implements  AutoCloseable {
 
     public long getByteCount() {
         return getBytePixelData().capacity();
+    }
+
+    boolean getUnloaded() {
+        return unloaded;
     }
 }
