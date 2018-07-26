@@ -20,7 +20,7 @@ public final class TextureCompression {
     private static final Timer memoryDecompressTimer = Global.metrics.timer("memoryDecompressTimer");
 
     private static final ByteBuffer LZ4_BUFFER = LibCStdlib.malloc(LZ4.LZ4_COMPRESSBOUND(
-            1920*1080*Byte.BYTES*TextureImages.BANDS));
+            1920*1080*Byte.BYTES* TextureImagesIO.BANDS));
 
     private TextureCompression(){/*uninstantiable*/}
 

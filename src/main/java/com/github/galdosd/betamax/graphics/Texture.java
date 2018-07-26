@@ -37,7 +37,7 @@ public final class Texture implements  AutoCloseable {
     }
 
     public static Texture simpleTexture(String filename) {
-        Texture texture = new Texture(TextureImages.fromRgbaFile(filename, true, true));
+        Texture texture = new Texture(TextureImagesIO.fromRgbaFile(filename, true, true));
         //texture.setVramLoaded(true);
         return texture;
     }

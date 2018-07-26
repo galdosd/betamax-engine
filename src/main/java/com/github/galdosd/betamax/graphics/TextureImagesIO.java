@@ -23,14 +23,14 @@ import static com.google.common.base.Preconditions.checkState;
 /**
  * FIXME: Document this class
  */
-public final class TextureImages {
+public final class TextureImagesIO {
     private static final org.slf4j.Logger LOG =
             LoggerFactory.getLogger(new Object(){}.getClass().getEnclosingClass());
     private static final Timer cachedImageLoadTimer = Global.metrics.timer("cachedImageLoadTimer");
     static final String CACHE_KEY = "TextureImages#fromRgbaFile;lz4";
     static final int BANDS = 4; // RGBA so 4 samples per pixel
 
-    private TextureImages(){/*uninstantiable*/}
+    private TextureImagesIO(){/*uninstantiable*/}
 
     private static Optional<TextureImage> loadCached(String filename) throws IOException {
         Optional<FileChannel> optionalFileChannel = OurTool.readCached(CACHE_KEY, filename);

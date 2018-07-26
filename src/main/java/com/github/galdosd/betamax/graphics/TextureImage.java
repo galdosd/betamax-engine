@@ -9,7 +9,6 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.system.MemoryUtil;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
 import java.nio.ByteBuffer;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -42,7 +41,7 @@ public final class TextureImage implements  AutoCloseable {
         this.bytePixelData = bytePixelData;
         bytePixelData.position(0);
         checkState(bytePixelData.capacity() == bytePixelData.limit());
-        checkState(getByteCount()==width*height*TextureImages.BANDS);
+        checkState(getByteCount()==width*height* TextureImagesIO.BANDS);
         ramImageBytesCounter.inc(bytePixelData.capacity());
         ramTexturesCounter.inc();
         this.filename = filename;
@@ -51,7 +50,7 @@ public final class TextureImage implements  AutoCloseable {
     ByteBuffer getBytePixelData() {
         checkState(!unloaded);
         checkState(0==bytePixelData.position(), "bytePixelData.position()!=0");
-        checkState(width*height*TextureImages.BANDS==bytePixelData.remaining(),
+        checkState(width*height* TextureImagesIO.BANDS==bytePixelData.remaining(),
                 "bytePixelData.remaining()==%d", bytePixelData.remaining());
         return bytePixelData;
     }
@@ -75,7 +74,7 @@ public final class TextureImage implements  AutoCloseable {
         int y = (int) (coordinate.getY() * (height - 1));
         checkArgument(x >= 0 && x < width);
         checkArgument(y >= 0 && y < height);
-        int offset = TextureImages.BANDS * (width * y + x);
+        int offset = TextureImagesIO.BANDS * (width * y + x);
         ColorSample colorSample = new ColorSample(
                 // these bytes have unsigned data stored on them
                 getBytePixelData().get(offset) & 0xFF,
