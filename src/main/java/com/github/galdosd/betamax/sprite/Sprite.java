@@ -32,4 +32,6 @@ public interface Sprite extends AutoCloseable {
     void close();
 
     void uploadCurrentFrame();
+
+    int getSoundPauseLevel();
 }

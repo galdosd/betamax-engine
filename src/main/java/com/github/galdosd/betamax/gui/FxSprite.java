@@ -2,6 +2,7 @@ package com.github.galdosd.betamax.gui;
 
 import com.github.galdosd.betamax.sprite.Sprite;
 import com.github.galdosd.betamax.sprite.SpriteName;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import lombok.AccessLevel;
@@ -21,6 +22,9 @@ public final class FxSprite extends FxRow<SpriteName> {
     SimpleIntegerProperty layer = new SimpleIntegerProperty();
     SimpleIntegerProperty serial = new SimpleIntegerProperty();
     SimpleIntegerProperty repetitions = new SimpleIntegerProperty();
+    SimpleBooleanProperty hidden = new SimpleBooleanProperty();
+    SimpleBooleanProperty paused = new SimpleBooleanProperty();
+    SimpleIntegerProperty soundPauseLevel = new SimpleIntegerProperty();
 
     public FxSprite(int tableIndex, Sprite sprite) {
         this.tableIndex = tableIndex;
@@ -32,6 +36,9 @@ public final class FxSprite extends FxRow<SpriteName> {
         setSerial( sprite.getCreationSerial() );
         setLayer( sprite.getLayer() );
         setRepetitions(sprite.getRepetitions());
+        setHidden(sprite.getHidden());
+        setPaused(sprite.getPaused());
+        setSoundPauseLevel(sprite.getSoundPauseLevel());
     }
 
     @Override public SpriteName getID() {
@@ -94,4 +101,24 @@ public final class FxSprite extends FxRow<SpriteName> {
         this.repetitions.set(repetitions);
     }
 
+    public boolean getHidden() {
+        return hidden.get();
+    }
+    public void setHidden(boolean hidden) {
+        this.hidden.set(hidden);
+    }
+
+    public boolean getPaused() {
+        return paused.get();
+    }
+    public void setPaused(boolean paused) {
+        this.paused.set(paused);
+    }
+
+    public int getSoundPauseLevel() {
+        return soundPauseLevel.get();
+    }
+    public void setSoundPauseLevel(int soundPauseLevel) {
+        this.soundPauseLevel.set(soundPauseLevel);
+    }
 }

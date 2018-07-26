@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import java.util.HashSet;
 import java.util.Set;
 
+import static com.google.common.base.Preconditions.checkState;
 import static org.lwjgl.openal.AL10.*;
 
 /**
@@ -62,6 +63,7 @@ import static org.lwjgl.openal.AL10.*;
 
     public void resume() {
         pauseLevel--;
+        checkState(pauseLevel>=0);
         if(pauseLevel == 0) {
             LOG.debug("Resume {}", this);
             alSourcePlay(handle);
@@ -72,6 +74,7 @@ import static org.lwjgl.openal.AL10.*;
     }
 
     public void pause() {
+        checkState(pauseLevel>=0);
         if(pauseLevel == 0) {
             LOG.debug("Pause {}", this);
             alSourcePause(handle);
@@ -98,5 +101,10 @@ import static org.lwjgl.openal.AL10.*;
 
     private void setPitch(float newPitch) {
         alSourcef(handle, AL_PITCH, newPitch);
+    }
+
+    public int getPauseLevel() {
+        checkState(pauseLevel>=0);
+        return pauseLevel;
     }
 }

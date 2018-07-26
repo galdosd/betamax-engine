@@ -200,6 +200,14 @@ public final class SpriteTemplate implements  AutoCloseable {
         @Override public void uploadCurrentFrame() {
             uploadTexture(getRenderedTexture());
         }
+
+        @Override public int getSoundPauseLevel() {
+            if(soundSource.isPresent()) {
+                return soundSource.get().getPauseLevel();
+            } else {
+                return -1;
+            }
+        }
     }
 
 }
