@@ -84,6 +84,11 @@ public class BetamaxGlProgram extends GlProgramBase {
             soundWorld.globalUnpause();
         }
         crashed = false;
+        loading = false;
+        if(loadingPhaseTimerContext!=null) {
+            loadingPhaseTimerContext.close();
+            loadingPhaseTimerContext = null;
+        }
         if(resetSprites) {
             LOG.info("Resetting sprites");
             if(null!=spriteRegistry) {

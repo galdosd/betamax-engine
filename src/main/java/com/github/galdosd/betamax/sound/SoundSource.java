@@ -17,7 +17,6 @@ import static org.lwjgl.openal.AL10.*;
     private static final org.slf4j.Logger LOG =
             LoggerFactory.getLogger(new Object(){}.getClass().getEnclosingClass());
     private final int handle;
-    private boolean playing = false;
     /** we use this like a semaphore so it can be reentrantly paused so global and per-sprite pause both work easily */
     private int pauseLevel = 0;
 
