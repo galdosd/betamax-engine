@@ -2,17 +2,21 @@ package com.github.galdosd.betamax.graphics;
 
 import com.codahale.metrics.Timer;
 import com.github.galdosd.betamax.Global;
+import com.github.galdosd.betamax.OurTool;
 import com.github.galdosd.betamax.sprite.Sprite;
+import com.github.galdosd.betamax.sprite.SpriteName;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Stream;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 
 /**
  * FIXME: Document this class
@@ -35,14 +39,23 @@ public final class TextureRegistry {
     }
 
     public Texture getTexture(TextureName imageFilename) {
-        Texture texture = Texture.simpleTexture(imageFilename, true);
+        Texture texture = Texture.simpleTexture(imageFilename, false);
         checkState(!textures.containsKey(imageFilename));
         textures.put(imageFilename, texture);
         return texture;
     }
 
     public boolean checkAllSpritesReadyToRender(List<Sprite> sprites, int waitTimeMs) {
-        return true;
+        long deadline = System.currentTimeMillis() + waitTimeMs;
+        Set<TextureName> missingTextures = sprites.stream().map(sprite -> sprite.getTextureName(0)).collect(toSet());
+        while(System.currentTimeMillis() < deadline && missingTextures.size() > 0) {
+            List<TextureName> missingTexturesCopy = new ArrayList<>(missingTextures);
+            for(TextureName textureName: missingTexturesCopy) {
+                if(isCurrentlyLoaded(textureName)) missingTextures.remove(textureName);
+            }
+            OurTool.yield();
+        }
+        return missingTextures.size() == 0;
     }
 
     public void setAdvisor(TextureLoadAdvisor advisor) {
@@ -56,11 +69,9 @@ public final class TextureRegistry {
         for(;;) {
             List<TextureName> texturesToLoad = getNeededTextures();
             if(texturesToLoad.size() == 0) {
-                try {
-                    Thread.sleep(10);
-                } catch (InterruptedException e) { }
+                OurTool.yield();
             } else {
-                LOG.debug("Loading {} textures in background: {}", texturesToLoad.size(), texturesToLoad);
+                LOG.trace("Loading {} textures in background: {}", texturesToLoad.size(), texturesToLoad);
                 texturesToLoad.forEach(this::loadTextureImage);
             }
         }

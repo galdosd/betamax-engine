@@ -226,11 +226,13 @@ public class BetamaxGlProgram extends GlProgramBase {
             clearScreen();
             renderAllSprites(spritesInRenderOrder);
         } else {
-            LOG.debug("entered LOADING state");
-            getFrameClock().setPaused(true);
-            loading = true;
-            checkState(null==loadingPhaseTimer);
-            loadingPhaseTimerContext = loadingPhaseTimer.time();
+            if(!loading) {
+                LOG.debug("entered LOADING state");
+                getFrameClock().setPaused(true);
+                loading = true;
+                checkState(null == loadingPhaseTimerContext);
+                loadingPhaseTimerContext = loadingPhaseTimer.time();
+            }
         }
         showPauseScreen();
         updateDevConsole();

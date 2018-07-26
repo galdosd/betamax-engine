@@ -35,5 +35,5 @@ public final class Global {
     public static final int texturePreloadFrameLookahead = fromProperty(
             "betamax.texturePreloadFrameLookahead", 16
     );
-    public static final int texturePreloadBatchSize = fromProperty("betamax.texturePreloadBatchSize", 1);
+    public static final int texturePreloadBatchSize = fromProperty("betamax.texturePreloadBatchSize", 2);
 }

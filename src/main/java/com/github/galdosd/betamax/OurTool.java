@@ -132,5 +132,12 @@ public final class OurTool {
             throw new RuntimeException(e);
         }
     }
+
+    public static void yield() {
+        // TODO we basically only use this in places where we should do a more proper notification :/
+        try {
+            Thread.sleep(4);
+        } catch (InterruptedException e) { }
+    }
 }
 
