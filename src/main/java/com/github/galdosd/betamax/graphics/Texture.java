@@ -149,6 +149,8 @@ public final class Texture implements  AutoCloseable {
 
     public void setVramLoaded(boolean vramLoaded) {
         if(this.vramLoaded==vramLoaded) return;
+        // TODO if an exception causes this to fail the object will be in a bad state where it can't be closed either
+        // whatever.
         this.vramLoaded = vramLoaded;
         if(!vramLoaded) vramUnload();
         if(vramLoaded) vramLoad();
