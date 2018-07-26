@@ -77,6 +77,8 @@ public abstract class GlProgramBase implements AutoCloseable {
                     } finally {
                         closeWindow();
                     }
+                } catch(Exception e) {
+                    LOG.error("Exiting due to exception", e);
                 } finally {
                     close();
                 }
