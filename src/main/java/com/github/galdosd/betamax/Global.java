@@ -1,6 +1,7 @@
 package com.github.galdosd.betamax;
 
 import com.codahale.metrics.MetricRegistry;
+import com.github.galdosd.betamax.graphics.TextureName;
 
 import static com.github.galdosd.betamax.OurTool.fromProperty;
 
@@ -14,9 +15,9 @@ public final class Global {
     public static final String scriptBase = "com/github/galdosd/betamax/scripts/";
     public static final String shaderBase = "com/github/galdosd/betamax/shaders/";
     public static final String helpFile = "help.txt";
-    public static final String pausedTextureFile = "paused.tif";
-    public static final String loadingTextureFile = "loading.tif";
-    public static final String crashTextureFile = "crash.tif";
+    public static final TextureName pausedTextureFile = new TextureName("paused.tif");
+    public static final TextureName loadingTextureFile = new TextureName("loading.tif");
+    public static final TextureName crashTextureFile = new TextureName("crash.tif");
 
     /** Optionally, you can have multiple scripts loaded in order, comma separated.
      *  This is necessary because since we load from resources so jars will work,

@@ -36,10 +36,25 @@ public final class Texture implements  AutoCloseable {
         this.textureImage = textureImage;
     }
 
-    public static Texture simpleTexture(String filename) {
-        Texture texture = new Texture(new LazyTextureImage(filename));
-        //texture.setVramLoaded(true);
+    public TextureName getName() {
+        return textureImage.getName();
+    }
+
+    public static Texture simpleTexture(TextureName textureName, boolean preloaded) {
+        Texture texture = new Texture(new LazyTextureImage(textureName));
+        if(preloaded) {
+            texture.setRamLoaded(true);
+            //texture.setVramLoaded(true);
+        }
         return texture;
+    }
+
+    void setRamLoaded(boolean ramLoaded) {
+        textureImage.setLoaded(ramLoaded);
+    }
+
+    boolean getRamLoaded() {
+        return textureImage.getLoaded();
     }
 
     private void bind(int target) {

@@ -11,11 +11,10 @@ import static com.google.common.base.Preconditions.checkState;
  */
 public class LazyTextureImage implements  AutoCloseable {
     private TextureImage image;
-    private final String filename;
+    private final TextureName name;
 
-    public LazyTextureImage(String filename) {
-        this.filename = filename;
-        setLoaded(true);
+    public LazyTextureImage(TextureName name) {
+        this.name = name;
     }
 
     public void uploadGl(int boundTarget) {
@@ -48,7 +47,7 @@ public class LazyTextureImage implements  AutoCloseable {
     }
 
     private void load() {
-        image = TextureImagesIO.fromRgbaFile(filename, true, true);
+        image = TextureImagesIO.fromRgbaFile(name, true, true);
     }
 
     private void unload() {
@@ -58,6 +57,10 @@ public class LazyTextureImage implements  AutoCloseable {
     }
 
     private void checkLoaded() {
-        checkState(getLoaded(), "Image not loaded %s", filename);
+        checkState(getLoaded(), "Image not loaded %s", name);
+    }
+
+    public TextureName getName() {
+        return name;
     }
 }

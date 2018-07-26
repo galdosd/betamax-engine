@@ -3,6 +3,7 @@ package com.github.galdosd.betamax.imageio;
 import com.codahale.metrics.Timer;
 import com.github.galdosd.betamax.Global;
 import com.github.galdosd.betamax.OurTool;
+import com.github.galdosd.betamax.graphics.TextureName;
 import org.lwjgl.system.MemoryUtil;
 import org.slf4j.LoggerFactory;
 
@@ -71,17 +72,17 @@ public final class TextureImagesIO {
      * The cache will contain a likely larger but faster to read version of the image, compressed losslessly with LZ4
      * This allows image loading during runtime to be much faster hopefully
      *
-     * @param filename Must be a file readable by ImageIO with whatever plugins you have loaded.
+     * @param textureName Must be a file readable by ImageIO with whatever plugins you have loaded.
      *                 I've only tested with some alpha tiffs we had. Must be in RGBA layout, you
      *                 will probably get bizarre results or worse otherwise. We do not explicitly verify
      *                 this, would require wasting a bunch of time figuring out SampleModel. Just watch out.
      * @param readCache If true, check the cache first
      * @param writeCache If true, write to the cache if it was empty
      */
-    public static TextureImage fromRgbaFile(String filename, boolean readCache, boolean writeCache) {
+    public static TextureImage fromRgbaFile(TextureName textureName, boolean readCache, boolean writeCache) {
         if (readCache) {
             try {
-                Optional<TextureImage> cached = loadCached(filename);
+                Optional<TextureImage> cached = loadCached(textureName.getFilename());
                 if(cached.isPresent()) {
                     return cached.get();
                 }
@@ -89,7 +90,7 @@ public final class TextureImagesIO {
                 throw new RuntimeException("Fast-load cached texture exists but loading failed or file was corrupt", e);
             }
         }
-        TextureImage textureImage = fromRgbaFile(filename);
+        TextureImage textureImage = fromRgbaFile(textureName.getFilename());
         if(writeCache) {
             try {
                 saveToCache(textureImage);

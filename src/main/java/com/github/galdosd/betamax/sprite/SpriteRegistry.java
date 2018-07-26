@@ -2,6 +2,7 @@ package com.github.galdosd.betamax.sprite;
 
 import com.github.galdosd.betamax.engine.FrameClock;
 import com.github.galdosd.betamax.graphics.SpriteTemplateRegistry;
+import com.github.galdosd.betamax.graphics.TextureLoadAdvisor;
 import com.github.galdosd.betamax.opengl.TextureCoordinate;
 import com.github.galdosd.betamax.scripting.EventType;
 import com.google.common.collect.Ordering;
@@ -10,6 +11,7 @@ import lombok.Setter;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -25,7 +27,7 @@ public class SpriteRegistry implements AutoCloseable {
 
     private final FrameClock frameClock;
 
-    private final Map<SpriteName,Sprite> registeredSprites = new HashMap<>();
+    private final Map<SpriteName,Sprite> registeredSprites = new ConcurrentHashMap<>();
     private final Queue<SpriteEvent> enqueuedSpriteEvents = new LinkedList<>();
 
     private static final Ordering<Sprite> CREATION_ORDERING = Ordering.natural().onResultOf(Sprite::getCreationSerial);
@@ -179,4 +181,5 @@ public class SpriteRegistry implements AutoCloseable {
     public int getNamedMoment(String templateName, String momentName) {
         return spriteTemplateRegistry.getNamedMoment(templateName,momentName);
     }
+
 }

@@ -4,6 +4,7 @@ package com.github.galdosd.betamax.engine;
 import com.codahale.metrics.Timer;
 import com.github.galdosd.betamax.Global;
 import com.github.galdosd.betamax.graphics.Texture;
+import com.github.galdosd.betamax.graphics.TextureLoadAdvisor;
 import com.github.galdosd.betamax.graphics.TextureRegistry;
 import com.github.galdosd.betamax.gui.DevConsole;
 import com.github.galdosd.betamax.opengl.*;
@@ -47,6 +48,7 @@ public class BetamaxGlProgram extends GlProgramBase {
     private Texture pausedTexture, loadingTexture, crashTexture;
     private boolean crashed = false;
     private boolean loading = false;
+    private TextureLoadAdvisor textureLoadAdvisor;
 
     public static void main(String[] args) {
         new BetamaxGlProgram().run();
@@ -66,9 +68,9 @@ public class BetamaxGlProgram extends GlProgramBase {
     }
 
     private void prepareBuiltinTextures() {
-        pausedTexture = Texture.simpleTexture(Global.pausedTextureFile);
-        loadingTexture = Texture.simpleTexture(Global.loadingTextureFile);
-        crashTexture = Texture.simpleTexture(Global.crashTextureFile);
+        pausedTexture = Texture.simpleTexture(Global.pausedTextureFile, true);
+        loadingTexture = Texture.simpleTexture(Global.loadingTextureFile, true);
+        crashTexture = Texture.simpleTexture(Global.crashTextureFile, true);
     }
 
     private void newWorld(boolean resetSprites) {
@@ -91,10 +93,14 @@ public class BetamaxGlProgram extends GlProgramBase {
         }
         if(resetSprites) {
             LOG.info("Resetting sprites");
+            textureRegistry.setAdvisor(null);
             if(null!=spriteRegistry) {
                 spriteRegistry.close();
             }
             spriteRegistry = new SpriteRegistry(spriteTemplateRegistry, getFrameClock());
+            textureLoadAdvisor = new TextureLoadAdvisorImpl(spriteRegistry, spriteTemplateRegistry);
+            textureRegistry.setAdvisor(textureLoadAdvisor);
+
         }
         scriptWorld = new ScriptWorld(spriteRegistry);
         String[] scriptNames = Global.mainScript.split(",");

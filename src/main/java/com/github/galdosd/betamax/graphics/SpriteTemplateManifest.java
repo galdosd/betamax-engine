@@ -28,15 +28,15 @@ import static java.util.stream.Collectors.toList;
     private static final Pattern MOMENT_PATTERN = Pattern.compile("^.*/([^/]+)\\.tif$");
     private static final Pattern MOMENT_TAG_PATTERN = Pattern.compile("^.*\\[([^\\[\\]]+)\\]$");
     String templateName;
-    List<String> spriteFilenames;
+    List<TextureName> spriteFilenames;
     Optional<SoundName> soundName;
 
     public static SpriteTemplateManifest load (String templateName) {
         String pkgName = Global.spriteBase + templateName;
 
         Reflections reflections = new Reflections(pkgName + ".", new ResourcesScanner());
-        List<String> spriteFilenames = reflections.getResources(TIF_PATTERN)
-                .stream().sorted().collect(toList());
+        List<TextureName> spriteFilenames = reflections.getResources(TIF_PATTERN)
+                .stream().sorted().map(TextureName::new).collect(toList());
         List<String> soundFilenames = reflections.getResources(OGG_PATTERN)
                 .stream().sorted().collect(toList());
         checkArgument(soundFilenames.size() <= 1, "Too many OGG files for sprite template %s", templateName);
@@ -48,15 +48,14 @@ import static java.util.stream.Collectors.toList;
             soundName = Optional.empty();
         }
         return new SpriteTemplateManifest(templateName, spriteFilenames, soundName);
-
     }
 
     public List<String> getMomentNames() {
-        return spriteFilenames.stream().map(filename -> {
-            Matcher frameNameMatcher = MOMENT_PATTERN.matcher(filename);
-            checkState(frameNameMatcher.matches(), "Malformed sprite frame filemane %s", filename);
+        return spriteFilenames.stream().map(textureName -> {
+            Matcher frameNameMatcher = MOMENT_PATTERN.matcher(textureName.getFilename());
+            checkState(frameNameMatcher.matches(), "Malformed sprite frame filemane %s", textureName);
             String frameName = frameNameMatcher.group(1);
-            checkState(frameName != null && frameName.length() > 0, "Malformed sprite frame filename %s", filename);
+            checkState(frameName != null && frameName.length() > 0, "Malformed sprite frame filename %s", textureName);
             Matcher matcher = MOMENT_TAG_PATTERN.matcher(frameName);
             if(matcher.matches()) {
                 return matcher.group(1);
