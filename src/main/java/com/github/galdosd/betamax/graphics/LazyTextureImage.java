@@ -5,27 +5,59 @@ import com.github.galdosd.betamax.imageio.TextureImage;
 import com.github.galdosd.betamax.imageio.TextureImagesIO;
 import com.github.galdosd.betamax.opengl.TextureCoordinate;
 
+import static com.google.common.base.Preconditions.checkState;
+
 /** A proxy for a TextureImage that may or may not actually be loaded into RAM at any given time
  */
 public class LazyTextureImage implements  AutoCloseable {
-    private final TextureImage image;
+    private TextureImage image;
+    private final String filename;
+
     public LazyTextureImage(String filename) {
-        image = TextureImagesIO.fromRgbaFile(filename, true, true);
+        this.filename = filename;
+        setLoaded(true);
     }
 
     public void uploadGl(int boundTarget) {
-       image.uploadGl(boundTarget);
+        checkLoaded();
+        image.uploadGl(boundTarget);
     }
 
     public ColorSample getPixel(TextureCoordinate coordinate) {
+        checkLoaded();
         return image.getPixel(coordinate);
     }
 
-    @Override public void close()  {
-        image.close();
+    public long getByteCount() {
+        checkLoaded();
+        return image.getByteCount();
     }
 
-    public long getByteCount() {
-        return image.getByteCount();
+    @Override public void close()  {
+        if(getLoaded()) unload();
+    }
+
+    void setLoaded(boolean loaded) {
+        if(loaded==getLoaded()) return;
+        if(loaded) load();
+        else unload();
+    }
+
+    boolean getLoaded() {
+        return null==image;
+    }
+
+    private void load() {
+        image = TextureImagesIO.fromRgbaFile(filename, true, true);
+    }
+
+    private void unload() {
+        checkLoaded();
+        image.close();
+        image = null;
+    }
+
+    private void checkLoaded() {
+        checkState(getLoaded(), "Image not loaded %s", filename);
     }
 }
