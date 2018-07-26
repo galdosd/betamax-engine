@@ -1,5 +1,6 @@
 package com.github.galdosd.betamax.sprite;
 
+import com.github.galdosd.betamax.graphics.TextureName;
 import com.github.galdosd.betamax.opengl.TextureCoordinate;
 
 /**
@@ -8,6 +9,9 @@ import com.github.galdosd.betamax.opengl.TextureCoordinate;
 public interface Sprite extends AutoCloseable {
     void render();
     boolean isClickableAtCoordinate(TextureCoordinate coordinate);
+
+    TextureName getTextureName(int framesAhead);
+
     /** used by scripts */
     void setClickableEverywhere(boolean clickableEverywhere);
     int getCurrentFrame();

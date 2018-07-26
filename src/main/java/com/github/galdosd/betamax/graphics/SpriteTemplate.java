@@ -132,6 +132,10 @@ public final class SpriteTemplate implements  AutoCloseable {
             return getCurrentFrame() % textureCount;
         }
 
+        @Override public TextureName getTextureName(int framesAhead) {
+            return textures.get((getCurrentFrame() + framesAhead)% textureCount).getName();
+        }
+
         @Override public void setClickableEverywhere(boolean clickableEverywhere) {
             LOG.debug("{}.setClickableEverywhere({})", this, clickableEverywhere);
             this.clickableEverywhere = clickableEverywhere;

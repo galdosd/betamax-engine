@@ -35,7 +35,10 @@ public final class TextureRegistry {
     }
 
     public Texture getTexture(TextureName imageFilename) {
-        return Texture.simpleTexture(imageFilename, true);
+        Texture texture = Texture.simpleTexture(imageFilename, true);
+        checkState(!textures.containsKey(imageFilename));
+        textures.put(imageFilename, texture);
+        return texture;
     }
 
     public boolean checkAllSpritesReadyToRender(List<Sprite> sprites, int waitTimeMs) {
