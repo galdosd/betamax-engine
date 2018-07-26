@@ -93,7 +93,11 @@ public abstract class GlProgramBase implements AutoCloseable {
             double x = xMousePosBuffer.get(0);
             double y = yMousePosBuffer.get(0);
             TextureCoordinate coord = mainWindow.windowToTextureCoord(x,y);
-            mouseClickEvent(coord, button);
+            if(coord.isValid()) {
+                mouseClickEvent(coord, button);
+            } else {
+                LOG.debug("Out of bounds {} due to excessively delayed handling of mouse click");
+            }
         }
     }
 

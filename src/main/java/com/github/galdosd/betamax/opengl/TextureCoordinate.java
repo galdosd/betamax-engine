@@ -13,4 +13,8 @@ import lombok.Value;
  */
 @Value public final class TextureCoordinate {
     double x, y;
+
+    public boolean isValid() {
+        return x >= 0.0 && x <= 1.0 && y >= 0.0 && y <= 1.0;
+    }
 }
