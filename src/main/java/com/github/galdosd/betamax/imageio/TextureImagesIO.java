@@ -1,4 +1,4 @@
-package com.github.galdosd.betamax.graphics;
+package com.github.galdosd.betamax.imageio;
 
 import com.codahale.metrics.Timer;
 import com.github.galdosd.betamax.Global;
@@ -12,7 +12,6 @@ import java.awt.image.Raster;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
-import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Optional;

@@ -1,4 +1,4 @@
-package com.github.galdosd.betamax.graphics;
+package com.github.galdosd.betamax.imageio;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Timer;
@@ -86,7 +86,7 @@ public final class TextureImage implements  AutoCloseable {
         return colorSample;
     }
 
-    void uploadGl(int boundTarget) {
+    public void uploadGl(int boundTarget) {
         checkArgument(!unloaded);
         try (Timer.Context _unused_context = textureUploadTimer.time()) {
             GL11.glTexImage2D( // TODO add a metrics timer here

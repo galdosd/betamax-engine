@@ -2,6 +2,9 @@ package com.github.galdosd.betamax.graphics;
 
 import com.codahale.metrics.Counter;
 import com.github.galdosd.betamax.Global;
+import com.github.galdosd.betamax.imageio.ColorSample;
+import com.github.galdosd.betamax.imageio.TextureImage;
+import com.github.galdosd.betamax.imageio.TextureImagesIO;
 import com.github.galdosd.betamax.opengl.TextureCoordinate;
 import com.github.galdosd.betamax.opengl.VAO;
 import com.github.galdosd.betamax.opengl.VBO;

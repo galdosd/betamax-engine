@@ -1,4 +1,4 @@
-package com.github.galdosd.betamax.graphics;
+package com.github.galdosd.betamax.imageio;
 
 import com.codahale.metrics.Timer;
 import com.github.galdosd.betamax.Global;
