@@ -96,7 +96,7 @@ public abstract class GlProgramBase implements AutoCloseable {
             if(coord.isValid()) {
                 mouseClickEvent(coord, button);
             } else {
-                LOG.debug("Out of bounds {} due to excessively delayed handling of mouse click");
+                LOG.warn("Out of bounds {} due to excessively delayed handling of mouse click");
             }
         }
     }
