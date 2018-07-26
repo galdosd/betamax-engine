@@ -54,20 +54,26 @@ public final class TextureRegistry {
     public void loadingThread() {
         LOG.debug("started loading thread");
         for(;;) {
-            List<TextureName> texturesToLoad;
-            try(Timer.Context ignored = texturePreloadAdvisingTimer.time()) {
-                texturesToLoad = getMostNeededTextures().stream()
-                        .filter(name -> !isCurrentlyLoaded(name))
-                        .limit(Global.texturePreloadBatchSize)
-                        .collect(toList());
-            }
+            List<TextureName> texturesToLoad = getNeededTextures();
             if(texturesToLoad.size() == 0) {
                 try {
                     Thread.sleep(10);
                 } catch (InterruptedException e) { }
             } else {
-                LOG.debug("Loading {} textures in background", texturesToLoad.size());
+                LOG.debug("Loading {} textures in background: {}", texturesToLoad.size(), texturesToLoad);
                 texturesToLoad.forEach(this::loadTextureImage);
+            }
+        }
+    }
+
+    private List<TextureName> getNeededTextures() {
+        try (Timer.Context ignored = texturePreloadAdvisingTimer.time()) {
+            synchronized (LOCK$advisor) {
+                if (null == advisor) return new ArrayList<>();
+                return advisor.getMostNeededTextures(Global.texturePreloadFrameLookahead).stream()
+                        .filter(name -> !isCurrentlyLoaded(name))
+                        .limit(Global.texturePreloadBatchSize)
+                        .collect(toList());
             }
         }
     }
@@ -82,12 +88,5 @@ public final class TextureRegistry {
         Texture texture = textures.get(name);
         checkState(null!=texture);
         texture.setRamLoaded(true);
-    }
-
-    private List<TextureName> getMostNeededTextures() {
-       synchronized (LOCK$advisor) {
-           if(null==advisor) return new ArrayList<>();
-           else return advisor.getMostNeededTextures(Global.texturePreloadFrameLookahead);
-       }
     }
 }

@@ -120,6 +120,7 @@ public class BetamaxGlProgram extends GlProgramBase {
         // exit upon ESC key
         if (key == GLFW.GLFW_KEY_ESCAPE) {
             closeWindow();
+            textureRegistry.setAdvisor(null); // we will get a flurry of silly loading otherwise
             LOG.info("Exiting");
         }
         else if(key == GLFW.GLFW_KEY_F1) {
