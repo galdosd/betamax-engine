@@ -3,8 +3,6 @@ package com.github.galdosd.betamax.graphics;
 import com.codahale.metrics.Counter;
 import com.github.galdosd.betamax.Global;
 import com.github.galdosd.betamax.imageio.ColorSample;
-import com.github.galdosd.betamax.imageio.TextureImage;
-import com.github.galdosd.betamax.imageio.TextureImagesIO;
 import com.github.galdosd.betamax.opengl.TextureCoordinate;
 import com.github.galdosd.betamax.opengl.VAO;
 import com.github.galdosd.betamax.opengl.VBO;
@@ -18,8 +16,7 @@ import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL15.GL_ARRAY_BUFFER;
 import static org.lwjgl.opengl.GL15.GL_STATIC_DRAW;
 
-/**
- * FIXME: Document this class
+/** A texture stored in opengl. But it can load and unload itself into and out of VRAM on demand transparently
  * For methods beginning with name of "bt" bind() must be called first
  */
 public final class Texture implements  AutoCloseable {
@@ -32,15 +29,15 @@ public final class Texture implements  AutoCloseable {
 
     private int handle = -1;
     private boolean vramLoaded = false;
-    public final TextureImage textureImage;
+    public final LazyTextureImage textureImage;
     private int boundTarget = 0;
 
-    private Texture(@NonNull TextureImage textureImage) {
+    private Texture(@NonNull LazyTextureImage textureImage) {
         this.textureImage = textureImage;
     }
 
     public static Texture simpleTexture(String filename) {
-        Texture texture = new Texture(TextureImagesIO.fromRgbaFile(filename, true, true));
+        Texture texture = new Texture(new LazyTextureImage(filename));
         //texture.setVramLoaded(true);
         return texture;
     }
