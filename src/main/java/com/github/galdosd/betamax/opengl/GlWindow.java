@@ -152,8 +152,13 @@ public final class GlWindow implements AutoCloseable {
     public GlWindow.RenderPhase renderPhase() {
         checkState(!isDestroyed);
         glfwMakeContextCurrent(windowHandle);
-        glfwPollEvents();
         checkGlError();
         return new RenderPhase();
+    }
+
+    public void pollEvents() {
+        checkState(!isDestroyed);
+        glfwPollEvents();
+        checkGlError();
     }
 }

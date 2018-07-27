@@ -213,7 +213,13 @@ public class BetamaxGlProgram extends GlProgramBase {
         List<Sprite> spritesInRenderOrder = spriteRegistry.getSpritesInRenderOrder();
 
         /** wait for up to half a frame length to load textures before we give up and use a loading screen */
-        if(textureRegistry.checkAllSpritesReadyToRender(spritesInRenderOrder, 500 / getFrameClock().getTargetFps())) {
+        boolean readyToRender = textureRegistry.checkAllSpritesReadyToRender(
+                spritesInRenderOrder,
+                10 * Global.textureLoadGracePeriodFramePercent / getFrameClock().getTargetFps());
+        // we do this after waiting for sprites to (likely) be in RAM but before rendering because rendering
+        // will evict MemoryStrategy.STREAMING sprite frames, and we need that frame to do mouse click collisions
+        pollEvents();
+        if(readyToRender) {
             checkState(getFrameClock().getPaused() || !loading);
             if(loading) {
                 LOG.debug("exited LOADING state");

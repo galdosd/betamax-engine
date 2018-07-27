@@ -37,4 +37,8 @@ public final class Global {
     );
     public static final int texturePreloadBatchSize = fromProperty("betamax.texturePreloadBatchSize", 2);
     public static final int devConsoleScreen = fromProperty("betamax.devConsoleScreen", 1);
+    /** Wait, eg 50% of a frame length before giving up and using a loading screen if not all textures are loaded into
+     * RAM needed for rendering that frame yet
+     */
+    public static int textureLoadGracePeriodFramePercent = fromProperty("textureLoadGracePeriodFramePercent", 50);
 }

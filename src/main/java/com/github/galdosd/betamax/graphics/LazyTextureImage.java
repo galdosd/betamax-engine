@@ -49,6 +49,10 @@ public class LazyTextureImage implements  AutoCloseable {
     }
 
     boolean getLoaded() {
+        // FIXME this will cause a block if another thread is partly done with loading.
+        // also unloading but that's not a big deal because unloading is very fast
+        // this also means our timers to catch late loads won't be accurate because the
+        // late loading is hidden inside the getLoaded call
         synchronized ($LOCK) {
             return null != image;
         }

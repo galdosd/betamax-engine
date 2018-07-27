@@ -142,6 +142,10 @@ public abstract class GlProgramBase implements AutoCloseable {
         }
     }
 
+    protected final void pollEvents() {
+        mainWindow.pollEvents();
+    }
+
 
     // TODO composition instead of inheritance, turn the below into an interface
     protected abstract void initialize();

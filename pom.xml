@@ -5,12 +5,13 @@
     TODO
         Working set features
             Evict some textures from RAM
+                Need to fix busy loop in TextureRegistry, it's not just perf, it also reloads them before we can
+                    increment the frame
+                LazyTextureImage#getRamLoaded needs to have a non synchronized advisory version
             Texture compiler
                 Put all manifests in a single package
             Auto preload all tiny sprites at boot time
-            Performance
-                TAB key and resetLogicFrames does not respect music position
-                Swap texture in and out of VRAM / Click bitmaps
+            TAB key and resetLogicFrames does not respect music position
             Managed state (JSON)
                 Proper hotloading including preserving state
                 Save/load state
@@ -19,6 +20,7 @@
             David sound bugs
             Sound performance :(
             Fancy mouse cursor
+            Initial loading screen
 
         Backlog features
             Fancy framebuffer CRT style post effects
@@ -28,6 +30,7 @@
             Worry about texturePreloadAdvisingTimer
 
         Junk features
+            Click bitmaps
             Rewind
                 Efficient preloading for rewind
                 Single step backward
