@@ -36,4 +36,5 @@ public final class Global {
             "betamax.texturePreloadFrameLookahead", 16
     );
     public static final int texturePreloadBatchSize = fromProperty("betamax.texturePreloadBatchSize", 2);
+    public static final int devConsoleScreen = fromProperty("betamax.devConsoleScreen", 1);
 }

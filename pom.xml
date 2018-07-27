@@ -8,6 +8,7 @@
 
         Working set features
             Evict some textures from RAM
+            David sound bugs
             Texture compiler
                 Put all manifests in a single package
             Auto preload all tiny sprites at boot time

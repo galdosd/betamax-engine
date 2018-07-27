@@ -1,7 +1,5 @@
 package com.github.galdosd.betamax.gui;
 
-import com.codahale.metrics.Counter;
-import com.codahale.metrics.Meter;
 import com.codahale.metrics.Snapshot;
 import com.github.galdosd.betamax.Global;
 import com.github.galdosd.betamax.OurTool;
@@ -17,6 +15,7 @@ import lombok.Getter;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -102,16 +101,24 @@ public final class DevConsole {
                 .collect(toList());
 
         tableIndex[0] = 0;
-        List<FxVariable> updatedParamVariables = debugParameters.entrySet().stream()
+        List<FxVariable> updatedMetricsVariables = debugParameters.entrySet().stream()
                 .sorted(Ordering.natural().onResultOf(entry -> entry.getKey()))
                 .map(entry -> new FxVariable(tableIndex[0]++, entry.getKey(), entry.getValue()))
                 .collect(toList());
+
+        tableIndex[0] = 0;
+        List<FxVariable> updatedSystemProperties = System.getProperties().stringPropertyNames().stream()
+                .sorted(Ordering.natural())
+                .map(propertyName -> new FxVariable(tableIndex[0]++, propertyName, System.getProperty(propertyName)))
+                .collect(toList());
+
 
         Platform.runLater( () -> {
             window.getSpriteTable().updateRowData(updatedFxSprites);
             window.getCallbackTable().updateRowData(updatedCallbacks);
             window.getStateTable().updateRowData(updatedStateVariables);
-            window.getParamTable().updateRowData(updatedParamVariables);
+            window.getMetricsTable().updateRowData(updatedMetricsVariables);
+            window.getPropertyTable().updateRowData(updatedSystemProperties);
             if(highlightedSprite.isPresent()) {
                 window.getSpriteTable().setSelectedSprite(highlightedSprite.get());
             }

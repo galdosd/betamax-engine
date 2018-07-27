@@ -16,9 +16,9 @@ import java.util.Arrays;
 public abstract class FxRow<T_id> {
     @Getter @FxRow.IgnoreColumn protected int tableIndex;
 
-    private static TableColumn tableColumn(String columnName) {
+    private static TableColumn tableColumn(String columnName, ColumnWidth widthAnnotation) {
         TableColumn tableColumn = new TableColumn(columnName);
-        tableColumn.setMinWidth(10*columnName.length() + 20);
+        tableColumn.setMinWidth(widthAnnotation==null ? 10*columnName.length() + 20 : widthAnnotation.value());
         tableColumn.setPrefWidth(Control.USE_COMPUTED_SIZE);
         tableColumn.setSortable(false);
         tableColumn.setCellValueFactory(
@@ -33,13 +33,18 @@ public abstract class FxRow<T_id> {
     static TableColumn[] columns(Class<?> clazz) {
         return Arrays.stream(clazz.getDeclaredFields())
                 .filter(f -> f.getAnnotationsByType(IgnoreColumn.class).length == 0)
-                .map(Field::getName)
-                .map(FxRow::tableColumn)
+                .map(f -> tableColumn(f.getName(), f.getAnnotation(ColumnWidth.class)))
                 .toArray(TableColumn[]::new);
     }
+
 
     public abstract T_id getID();
 
     @Retention(RetentionPolicy.RUNTIME)
     public @interface IgnoreColumn { }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface ColumnWidth {
+        int value();
+    }
 }

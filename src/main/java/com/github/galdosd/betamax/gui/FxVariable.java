@@ -9,7 +9,9 @@ import lombok.experimental.FieldDefaults;
  */
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class FxVariable extends FxRow<String> {
+    @FxRow.ColumnWidth(200)
     SimpleStringProperty key = new SimpleStringProperty();
+    @FxRow.ColumnWidth(1000)
     SimpleStringProperty value = new SimpleStringProperty();
 
     public FxVariable(int tableIndex, String key, String value) {

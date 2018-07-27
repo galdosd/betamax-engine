@@ -1,13 +1,16 @@
 package com.github.galdosd.betamax.gui;
 
+import com.github.galdosd.betamax.Global;
 import com.github.galdosd.betamax.sprite.SpriteEvent;
 import com.github.galdosd.betamax.sprite.SpriteName;
 import com.google.common.base.Preconditions;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.Pane;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import lombok.Getter;
 import org.slf4j.LoggerFactory;
@@ -30,7 +33,8 @@ public final class FxWindow extends Application {
     @Getter private FxTable<FxSprite,SpriteName> spriteTable;
     @Getter private FxTable<FxCallback,SpriteEvent> callbackTable;
     @Getter private FxTable<FxVariable,String> stateTable;
-    @Getter private FxTable<FxVariable,String> paramTable;
+    @Getter private FxTable<FxVariable,String> metricsTable;
+    @Getter private FxTable<FxVariable,String> propertyTable;
 
     public static FxWindow singleton() {
         new Thread( () -> {
@@ -60,11 +64,26 @@ public final class FxWindow extends Application {
         Scene scene = new Scene(sceneRoot);
         stage.setScene(scene);
         stage.setTitle("Betamax Developer Console");
-        stage.setWidth(1000);
-        stage.setHeight(640);
+        stage.setWidth(1300);
+        stage.setHeight(900);
+        moveWindowToScreen(stage);
+
+
         stage.show();
         stage.setOnCloseRequest( x -> { x.consume(); LOG.info("Closing developer console forbidden"); } );
         completeSingleton();
+    }
+
+    private void moveWindowToScreen(Stage stage) {
+        // move dev console window to appropriate screen
+        int devConsoleScreen = Global.devConsoleScreen;
+        if(devConsoleScreen < Screen.getScreens().size()) {
+            Rectangle2D visualBounds = Screen.getScreens().get(devConsoleScreen).getBounds();
+            stage.setX(100 + visualBounds.getMinX());
+            stage.setY(100 + visualBounds.getMinY());
+        } else {
+            LOG.info("Not enough screens to move dev console to window {}", Global.devConsoleScreen);
+        }
     }
 
     private void addTabs(Pane sceneRoot, TabPane tabPane) {
@@ -77,8 +96,11 @@ public final class FxWindow extends Application {
         stateTable = new FxTable<>();
         tabPane.getTabs().addAll(stateTable.start(sceneRoot, FxVariable.class, "State"));
 
-        paramTable = new FxTable<>();
-        tabPane.getTabs().addAll(paramTable.start(sceneRoot, FxVariable.class, "Parameters"));
+        metricsTable = new FxTable<>();
+        tabPane.getTabs().addAll(metricsTable.start(sceneRoot, FxVariable.class, "Metrics"));
+
+        propertyTable = new FxTable<>();
+        tabPane.getTabs().addAll(propertyTable.start(sceneRoot, FxVariable.class, "Config"));
     }
 
     private void completeSingleton() {
