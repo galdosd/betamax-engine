@@ -35,6 +35,7 @@ public final class FxWindow extends Application {
     @Getter private FxTable<FxVariable,String> stateTable;
     @Getter private FxTable<FxVariable,String> metricsTable;
     @Getter private FxTable<FxVariable,String> propertyTable;
+    @Getter private FxTable<FxTimer,String> timersTable;
 
     public static FxWindow singleton() {
         new Thread( () -> {
@@ -101,6 +102,9 @@ public final class FxWindow extends Application {
 
         propertyTable = new FxTable<>();
         tabPane.getTabs().addAll(propertyTable.start(sceneRoot, FxVariable.class, "Config"));
+
+        timersTable = new FxTable<>();
+        tabPane.getTabs().addAll(timersTable.start(sceneRoot, FxTimer.class, "Timers"));
     }
 
     private void completeSingleton() {

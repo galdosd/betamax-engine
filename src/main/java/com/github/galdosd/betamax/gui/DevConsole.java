@@ -23,7 +23,6 @@ import static java.util.stream.Collectors.toList;
  * FIXME: Document this class
  */
 public final class DevConsole {
-    final static int MS_PER_NS = 1000000;
     private static final org.slf4j.Logger LOG =
             LoggerFactory.getLogger(new Object(){}.getClass().getEnclosingClass());
 
@@ -51,20 +50,6 @@ public final class DevConsole {
                 }
                 put(key, String.valueOf(count));
             });
-            Global.metrics.getTimers().entrySet().stream().forEach( entry -> {
-                Snapshot snapshot = entry.getValue().getSnapshot();
-
-                put(entry.getKey(), String.format(
-                        "count=%d \trate1m=%.1f \tmedian=%.1f \tmean=%.1f \tmin=%.1f \tmax=%.1f \t95p=%.1f",
-                        entry.getValue().getCount(),
-                        entry.getValue().getOneMinuteRate(),
-                        snapshot.getMedian()/ MS_PER_NS,
-                        snapshot.getMean()/ MS_PER_NS,
-                        (double)snapshot.getMin()/ MS_PER_NS,
-                        (double)snapshot.getMax()/ MS_PER_NS,
-                        snapshot.get95thPercentile()/ MS_PER_NS));
-            });
-
             Global.metrics.getGauges().entrySet().stream().forEach( entry ->
                 put(entry.getKey(), String.valueOf(entry.getValue().getValue()))
             );
@@ -112,6 +97,11 @@ public final class DevConsole {
                 .map(propertyName -> new FxVariable(tableIndex[0]++, propertyName, System.getProperty(propertyName)))
                 .collect(toList());
 
+        tableIndex[0] = 0;
+        List<FxTimer> updatedTimers = Global.metrics.getTimers().entrySet().stream()
+                .sorted(Ordering.natural().onResultOf(entry -> entry.getKey()))
+                .map(entry -> new FxTimer(tableIndex[0]++, entry.getKey(), entry.getValue()))
+                .collect(toList());
 
         Platform.runLater( () -> {
             window.getSpriteTable().updateRowData(updatedFxSprites);
@@ -119,6 +109,7 @@ public final class DevConsole {
             window.getStateTable().updateRowData(updatedStateVariables);
             window.getMetricsTable().updateRowData(updatedMetricsVariables);
             window.getPropertyTable().updateRowData(updatedSystemProperties);
+            window.getTimersTable().updateRowData(updatedTimers);
             if(highlightedSprite.isPresent()) {
                 window.getSpriteTable().setSelectedSprite(highlightedSprite.get());
             }
