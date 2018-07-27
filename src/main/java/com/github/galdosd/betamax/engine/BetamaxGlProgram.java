@@ -3,11 +3,12 @@ package com.github.galdosd.betamax.engine;
 
 import com.codahale.metrics.Timer;
 import com.github.galdosd.betamax.Global;
+import com.github.galdosd.betamax.graphics.SpriteTemplateRegistry;
 import com.github.galdosd.betamax.graphics.Texture;
 import com.github.galdosd.betamax.graphics.TextureLoadAdvisor;
 import com.github.galdosd.betamax.graphics.TextureRegistry;
 import com.github.galdosd.betamax.gui.DevConsole;
-import com.github.galdosd.betamax.opengl.*;
+import com.github.galdosd.betamax.opengl.TextureCoordinate;
 import com.github.galdosd.betamax.scripting.EventType;
 import com.github.galdosd.betamax.scripting.ScriptWorld;
 import com.github.galdosd.betamax.sound.SoundRegistry;
@@ -16,7 +17,6 @@ import com.github.galdosd.betamax.sprite.Sprite;
 import com.github.galdosd.betamax.sprite.SpriteEvent;
 import com.github.galdosd.betamax.sprite.SpriteName;
 import com.github.galdosd.betamax.sprite.SpriteRegistry;
-import com.github.galdosd.betamax.graphics.SpriteTemplateRegistry;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.LoggerFactory;
 

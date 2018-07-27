@@ -43,14 +43,22 @@ public final class DevConsole {
             put("FPS (target)", String.valueOf(frameClock.getTargetFps()));
             put("Frame Budget", String.valueOf(1000.0 / frameClock.getTargetFps()));
             put("Action State", actionState);
-            Global.metrics.getCounters().entrySet().stream().forEach( entry ->
-                put(entry.getKey(), String.valueOf(entry.getValue().getCount()))
-
-            );
+            Global.metrics.getCounters().entrySet().stream().forEach(entry -> {
+                String key = entry.getKey();
+                long count = entry.getValue().getCount();
+                if(key.endsWith("Bytes")) {
+                    count = count / 1024 / 1024;
+                    key = key.replace("Bytes", "Megabytes");
+                }
+                put(key, String.valueOf(count));
+            });
             Global.metrics.getTimers().entrySet().stream().forEach( entry -> {
                 Snapshot snapshot = entry.getValue().getSnapshot();
 
-                put(entry.getKey(), String.format("median=%.1f;  mean=%.1f;  min=%.1f;   max=%.1f;   95p=%.1f)",
+                put(entry.getKey(), String.format(
+                        "count=%d \trate1m=%.1f \tmedian=%.1f \tmean=%.1f \tmin=%.1f \tmax=%.1f \t95p=%.1f",
+                        entry.getValue().getCount(),
+                        entry.getValue().getOneMinuteRate(),
                         snapshot.getMedian()/ MS_PER_NS,
                         snapshot.getMean()/ MS_PER_NS,
                         (double)snapshot.getMin()/ MS_PER_NS,

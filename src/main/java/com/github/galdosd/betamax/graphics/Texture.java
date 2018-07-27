@@ -23,6 +23,7 @@ public final class Texture implements  AutoCloseable {
     private static final Counter rendertimeUploadsCounter = Global.metrics.counter("rendertimeUploads");
     private static final Counter vramImageBytesCounter = Global.metrics.counter("vramImageBytes");
     private static final Counter vramTexturesCounter = Global.metrics.counter("vramTextures");
+    private static final Counter virtualTexturesCounter = Global.metrics.counter("virtualTextures");
 
     private static final org.slf4j.Logger LOG =
             LoggerFactory.getLogger(new Object(){}.getClass().getEnclosingClass());
@@ -34,6 +35,7 @@ public final class Texture implements  AutoCloseable {
 
     private Texture(@NonNull LazyTextureImage textureImage) {
         this.textureImage = textureImage;
+        virtualTexturesCounter.inc();
     }
 
     public TextureName getName() {
@@ -145,6 +147,7 @@ public final class Texture implements  AutoCloseable {
     @Override public void close() {
         setVramLoaded(false);
         textureImage.close();
+        virtualTexturesCounter.dec();
     }
 
     public void setVramLoaded(boolean vramLoaded) {

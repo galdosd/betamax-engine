@@ -7,26 +7,13 @@
 
 
         Working set features
-            Worry about texturePreloadAdvisingTimer
-            Add loadingEvents counter
-            Dev Console : *Bytes counters become *Megabytes
+            Evict some textures from RAM
+            Texture compiler
+                Put all manifests in a single package
+            Auto preload all tiny sprites at boot time
             Performance
-                Separate thread for loading textures, cache texture-by-texture so we can stream a sprite
-                    Don't require sprite texture till render time
-                    Loading thread has priority queue for loading and evicting to RAM
-                    Render thread does load/evicts into VRAM right before render phase
-                Swap in and out of VRAM ourselves
-                    Sprite#vramMode / ramMode
-                        PERVASIVE - always keep it in
-                        REGULAR - manage our own LRU swapping
-                            During idle time, load textures for upcoming frames
-                        STREAMING - always evict immediately
-                Streaming textures
-                LZ4 & related instrumenting
-                Load screen / reset frame clock any time a synchronous load happens
-                    TAB key and resetLogicFrames does not respect music position
+                TAB key and resetLogicFrames does not respect music position
                 Swap texture in and out of VRAM / Click bitmaps
-                Compute rendered FPS
                 Sound performance :(
             Managed state (JSON)
                 Proper hotloading including preserving state
@@ -40,6 +27,7 @@
             basic steam support
             steam achievements
             osx support
+            Worry about texturePreloadAdvisingTimer
 
         Junk features
             Rewind
