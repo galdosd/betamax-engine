@@ -36,8 +36,8 @@ public final class TextureLoadAdvisorImpl implements TextureLoadAdvisor {
         return needed;
     }
 
-    @Override public List<TextureName> getLeastNeededTextures(
-            int frameLookahead, int maxVictims, List<TextureName> candidates) {
-        throw new UnsupportedOperationException();
-    }
+//    @Override public List<TextureName> getLeastNeededTextures(
+//            int frameLookahead, int maxVictims, List<TextureName> candidates) {
+//        throw new UnsupportedOperationException();
+//    }
 }

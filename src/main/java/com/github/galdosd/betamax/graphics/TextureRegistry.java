@@ -20,6 +20,13 @@ import static java.util.stream.Collectors.toSet;
 
 /**
  * FIXME: Document this class
+ * Couple performance improvement that could be made:
+ *   - we dumbly use a sort of wait/sleep loop to wait for loaded sprites in checkAllSpritesReadyToRender from
+ *     main thread waiting for loader thread. we should instead wait to be notified by the loader thread
+ *   - since loader thread actively calls TextureLoadAdvisor instead of TextureLoadAdvisor pushing changes once per
+ *     frame, we also use a stupid ineffecient wait/sleep loop there, and loader thread should wait to be notified by
+ *     main thread. that said it's nice the advisory work is mostly done in the loader thread, it can take a few dozen
+ *     ms and should not hold up a render, so it should just be a notify once per frame
  */
 public final class TextureRegistry {
     private static final org.slf4j.Logger LOG =

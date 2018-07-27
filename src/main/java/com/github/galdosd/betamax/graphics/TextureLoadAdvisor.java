@@ -20,5 +20,5 @@ public interface TextureLoadAdvisor {
      * @param candidates Restrict yourself to these candidates.
      * @return
      */
-    List<TextureName> getLeastNeededTextures(int frameLookahead, int maxVictims, List<TextureName> candidates);
+//    List<TextureName> getLeastNeededTextures(int frameLookahead, int maxVictims, List<TextureName> candidates);
 }

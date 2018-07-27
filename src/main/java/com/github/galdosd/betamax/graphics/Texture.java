@@ -1,6 +1,7 @@
 package com.github.galdosd.betamax.graphics;
 
 import com.codahale.metrics.Counter;
+import com.codahale.metrics.Timer;
 import com.github.galdosd.betamax.Global;
 import com.github.galdosd.betamax.imageio.ColorSample;
 import com.github.galdosd.betamax.opengl.TextureCoordinate;
@@ -21,6 +22,7 @@ import static org.lwjgl.opengl.GL15.GL_STATIC_DRAW;
  */
 public final class Texture implements  AutoCloseable {
     private static final Counter rendertimeUploadsCounter = Global.metrics.counter("rendertimeUploads");
+    private static final Timer jitMouseTextureLoadTimer = Global.metrics.timer("jitMousetextureLoadTimer");
     private static final Counter vramImageBytesCounter = Global.metrics.counter("vramImageBytes");
     private static final Counter vramTexturesCounter = Global.metrics.counter("vramTextures");
     private static final Counter virtualTexturesCounter = Global.metrics.counter("virtualTextures");
@@ -95,6 +97,12 @@ public final class Texture implements  AutoCloseable {
     // this should check against the same frame textures we JUST rendered, so we should
     // never end up JIT loading just for a damn collision check
     public boolean isTransparentAtCoordinate(TextureCoordinate coordinate) {
+        if(!textureImage.getLoaded()) {
+            try(Timer.Context ignored = jitMouseTextureLoadTimer.time()) {
+                LOG.warn("Had to load texture just to process mouse click check: {}", this);
+                textureImage.setLoaded(true);
+            }
+        }
         ColorSample color = textureImage.getPixel(coordinate);
         boolean transparentEnough = color.isTransparentEnough();
         LOG.trace("{}.isTransparentEnough() == {}", color, transparentEnough);

@@ -3,24 +3,21 @@
     NOTES
        sync; echo 3 | sudo tee /proc/sys/vm/drop_caches
     TODO
-        Bugs
-
-
         Working set features
             Evict some textures from RAM
-            David sound bugs
             Texture compiler
                 Put all manifests in a single package
             Auto preload all tiny sprites at boot time
             Performance
                 TAB key and resetLogicFrames does not respect music position
                 Swap texture in and out of VRAM / Click bitmaps
-                Sound performance :(
             Managed state (JSON)
                 Proper hotloading including preserving state
                 Save/load state
                 Dev console state & history
             Sprite positions/sizes
+            David sound bugs
+            Sound performance :(
             Fancy mouse cursor
 
         Backlog features

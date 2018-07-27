@@ -19,6 +19,7 @@ public enum MemoryStrategy {
     STREAMING {
         public void afterRender(Texture texture) {
             texture.setVramLoaded(false);
+            texture.setRamLoaded(false);
         }
     };
 
