@@ -8,13 +8,11 @@ import lombok.NonNull;
 import org.lwjgl.system.MemoryUtil;
 
 import java.io.*;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
 
@@ -37,10 +35,6 @@ public final class OurTool {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-    public static File fileResource(String filename) throws URISyntaxException {
-        return Paths.get(OurTool.class.getResource("/" + filename).toURI()).toFile();
-
     }
     public static InputStream streamResource(String filename) {
         InputStream resourceAsStream = OurTool.class.getResourceAsStream("/" + filename);
@@ -115,7 +109,7 @@ public final class OurTool {
         }
     }
 
-    public static File cachedFilename(String[] key) {
+    private static File cachedFilename(String[] key) {
        StringBuilder strings = new StringBuilder();
        for(String str: key) {
            strings.append(str);
