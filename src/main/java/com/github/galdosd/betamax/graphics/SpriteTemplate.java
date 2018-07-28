@@ -1,6 +1,7 @@
 package com.github.galdosd.betamax.graphics;
 
 import com.github.galdosd.betamax.engine.FrameClock;
+import com.github.galdosd.betamax.imageio.SpriteTemplateManifest;
 import com.github.galdosd.betamax.opengl.TextureCoordinate;
 import com.github.galdosd.betamax.sound.SoundBuffer;
 import com.github.galdosd.betamax.sound.SoundName;

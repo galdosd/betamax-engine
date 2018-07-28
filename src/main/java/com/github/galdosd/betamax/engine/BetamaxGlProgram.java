@@ -55,6 +55,10 @@ public class BetamaxGlProgram extends GlProgramBase {
     }
 
     @Override protected void initialize() {
+        if(Global.mainScript == null) {
+            LOG.error("No main logic script defined (-Dbetamax.mainScript), exiting");
+            throw new IllegalArgumentException("No main logic script defined");
+        }
         ourShaders = new OurShaders();
         Texture.prepareForDrawing();
         prepareBuiltinTextures();

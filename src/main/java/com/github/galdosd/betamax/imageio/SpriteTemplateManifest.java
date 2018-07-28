@@ -1,6 +1,7 @@
-package com.github.galdosd.betamax.graphics;
+package com.github.galdosd.betamax.imageio;
 
 import com.github.galdosd.betamax.Global;
+import com.github.galdosd.betamax.graphics.TextureName;
 import com.github.galdosd.betamax.sound.SoundName;
 import lombok.Value;
 import org.reflections.Reflections;
@@ -23,7 +24,7 @@ import static java.util.stream.Collectors.toList;
 @Value public class SpriteTemplateManifest {
     private static final org.slf4j.Logger LOG =
             LoggerFactory.getLogger(new Object(){}.getClass().getEnclosingClass());
-    private static final Pattern TIF_PATTERN = Pattern.compile("^.*\\.tif$");
+    public static final Pattern TIF_PATTERN = Pattern.compile("^.*\\.tif$");
     private static final Pattern OGG_PATTERN = Pattern.compile("^.*\\.ogg$");
     private static final Pattern MOMENT_PATTERN = Pattern.compile("^.*/([^/]+)\\.tif$");
     private static final Pattern MOMENT_TAG_PATTERN = Pattern.compile("^.*\\[([^\\[\\]]+)\\]$");

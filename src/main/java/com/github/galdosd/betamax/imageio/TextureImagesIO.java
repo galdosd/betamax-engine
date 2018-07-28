@@ -32,6 +32,7 @@ public final class TextureImagesIO {
 
     private TextureImagesIO(){/*uninstantiable*/}
 
+
     private static Optional<TextureImage> loadCached(String filename) throws IOException {
         Optional<FileChannel> optionalFileChannel = OurTool.readCached(CACHE_KEY, filename);
         if(optionalFileChannel.isPresent()) {
@@ -93,7 +94,7 @@ public final class TextureImagesIO {
         TextureImage textureImage = fromRgbaFile(textureName.getFilename());
         if(writeCache) {
             try {
-                saveToCache(textureImage);
+                saveToCache(false, textureImage);
             } catch (IOException e) {
                 throw new RuntimeException("Failed to write fast-load cached texture", e);
             }
@@ -101,7 +102,7 @@ public final class TextureImagesIO {
         return textureImage;
     }
 
-    private static TextureImage fromRgbaFile(String filename) {
+    static TextureImage fromRgbaFile(String filename) {
         BufferedImage image;
         try (InputStream inputStream = OurTool.streamResource(filename)){
             image = ImageIO.read(inputStream);
@@ -150,9 +151,9 @@ public final class TextureImagesIO {
         return bytePixelData;
     }
 
-    private static void saveToCache(TextureImage img) throws IOException {
+    static void saveToCache(boolean overwrite, TextureImage img) throws IOException {
         checkState(!img.getUnloaded());
-        try(FileChannel fileChannel = OurTool.writeCached(CACHE_KEY, img.getFilename())) {
+        try(FileChannel fileChannel = OurTool.writeCached(overwrite, CACHE_KEY, img.getFilename())) {
             LOG.trace("Saving to cache: {}", img.getFilename());
             // FIXME write original filename as a safety check
             ByteBuffer byteHeader = ByteBuffer.allocate(Integer.BYTES * 2);

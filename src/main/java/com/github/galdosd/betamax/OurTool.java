@@ -18,9 +18,7 @@ import java.util.*;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
-import static java.nio.file.StandardOpenOption.CREATE_NEW;
-import static java.nio.file.StandardOpenOption.READ;
-import static java.nio.file.StandardOpenOption.WRITE;
+import static java.nio.file.StandardOpenOption.*;
 import static org.lwjgl.opengl.GL11.glGetError;
 
 /** miscellaneous utilities */
@@ -102,9 +100,10 @@ public final class OurTool {
     }
 
 
-    public static FileChannel writeCached(String... key) {
+    public static FileChannel writeCached(boolean overwrite, String... key) {
         try {
-            return FileChannel.open(cachedFilename(key).toPath(), CREATE_NEW, WRITE);
+            if(overwrite) return FileChannel.open(cachedFilename(key).toPath(), CREATE, TRUNCATE_EXISTING, WRITE);
+            else return FileChannel.open(cachedFilename(key).toPath(), CREATE_NEW, WRITE);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
