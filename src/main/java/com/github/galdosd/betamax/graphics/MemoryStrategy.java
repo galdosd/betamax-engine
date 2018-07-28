@@ -8,18 +8,19 @@ import com.github.galdosd.betamax.Global;
 public enum MemoryStrategy {
     /** always keep resident as much as possible */
     RESIDENT {
-        public void afterRender(Texture texture) { /* always resident */ }
+        @Override public void afterRender(TextureRegistry textureRegistry, Texture texture) { /* always resident */ }
 
     },
     /** let TextureRegistry manage it based on its LRU strategy or whatever */
     MANAGED {
-        public void afterRender(Texture texture) { /* FIXME give this to TextureRegistry */ }
+        @Override public void afterRender(TextureRegistry textureRegistry, Texture texture) {
+            /* FIXME give this to TextureRegistry to manage*/ }
     },
     /** always evict each frame after it is rendered */
     STREAMING {
-        public void afterRender(Texture texture) {
+        @Override public void afterRender(TextureRegistry textureRegistry, Texture texture) {
             texture.setVramLoaded(false);
-            texture.setRamLoaded(false);
+            textureRegistry.queueForRamUnload(texture);
         }
     };
 
@@ -31,5 +32,5 @@ public enum MemoryStrategy {
         }
     }
 
-    public abstract void afterRender(Texture texture);
+    public abstract void afterRender(TextureRegistry textureRegistry, Texture texture);
 }

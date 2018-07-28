@@ -7,10 +7,7 @@ import com.github.galdosd.betamax.sprite.Sprite;
 import com.github.galdosd.betamax.sprite.SpriteName;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -106,5 +103,20 @@ public final class TextureRegistry {
         Texture texture = textures.get(name);
         checkState(null!=texture);
         texture.setRamLoaded(true);
+    }
+
+    public void afterRender(MemoryStrategy memoryStrategy, Texture texture) {
+        memoryStrategy.afterRender(this, texture);
+    }
+
+    private final Queue<Texture> queuedForRamUnload = new LinkedList<>();
+    public void queueForRamUnload(Texture texture) {
+        queuedForRamUnload.add(texture);
+    }
+
+    public void processRamUnloadQueue() {
+        while(queuedForRamUnload.size()>0) {
+            queuedForRamUnload.remove().setRamLoaded(false);
+        }
     }
 }

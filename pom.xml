@@ -7,6 +7,7 @@
             Evict some textures from RAM
                 Need to fix busy loop in TextureRegistry, it's not just perf, it also reloads them before we can
                     increment the frame
+                Also, what if we're already working on loading it when it gets unloaded... (in batch list)
                 LazyTextureImage#getRamLoaded needs to have a non synchronized advisory version
             Texture compiler
                 Put all manifests in a single package
