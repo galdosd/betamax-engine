@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -149,6 +150,10 @@ public final class TextureImagesIO {
         bytePixelData.flip();
         checkState(bytePixelData.position()==0);
         return bytePixelData;
+    }
+
+    static File cachedFilename(TextureName textureName) {
+        return OurTool.cachedFilename(new String[] {CACHE_KEY, textureName.getFilename()});
     }
 
     static void saveToCache(boolean overwrite, TextureImage img) throws IOException {
