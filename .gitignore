@@ -4,3 +4,5 @@ target/
 hs_err_*.log
 *.tif
 *.ogg
+*.psd
+*.png
