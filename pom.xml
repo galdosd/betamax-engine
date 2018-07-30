@@ -4,7 +4,6 @@
        sync; echo 3 | sudo tee /proc/sys/vm/drop_caches
     TODO
         Working set features
-            Sprite positions/sizes
             Sound performance :(
             TAB key and resetLogicFrames does not respect music position
             Fancy mouse cursor
@@ -28,7 +27,8 @@
             Put all manifests in a single package
             Auto preload all tiny sprites at boot time
 
-        Junk features
+        Parking lot features
+            Sprite sizes
             Click bitmaps
             Rewind
                 Efficient preloading for rewind
