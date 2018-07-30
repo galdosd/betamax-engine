@@ -6,7 +6,6 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import lombok.AccessLevel;
-import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 
 /**
@@ -21,10 +20,11 @@ public final class FxSprite extends FxRow<SpriteName> {
     SimpleIntegerProperty age = new SimpleIntegerProperty();
     SimpleIntegerProperty layer = new SimpleIntegerProperty();
     SimpleIntegerProperty serial = new SimpleIntegerProperty();
-    SimpleIntegerProperty repetitions = new SimpleIntegerProperty();
+    SimpleIntegerProperty reps = new SimpleIntegerProperty();
     SimpleBooleanProperty hidden = new SimpleBooleanProperty();
     SimpleBooleanProperty paused = new SimpleBooleanProperty();
-    SimpleIntegerProperty soundPauseLevel = new SimpleIntegerProperty();
+    SimpleIntegerProperty sndLvl = new SimpleIntegerProperty();
+    SimpleStringProperty location = new SimpleStringProperty();
 
     public FxSprite(int tableIndex, Sprite sprite) {
         this.tableIndex = tableIndex;
@@ -35,15 +35,19 @@ public final class FxSprite extends FxRow<SpriteName> {
         setAge( sprite.getAge() );
         setSerial( sprite.getCreationSerial() );
         setLayer( sprite.getLayer() );
-        setRepetitions(sprite.getRepetitions());
+        setReps(sprite.getRepetitions());
         setHidden(sprite.getHidden());
         setPaused(sprite.getPaused());
-        setSoundPauseLevel(sprite.getSoundPauseLevel());
+        setSndLvl(sprite.getSoundPauseLevel());
+        setLocation(sprite.getLocation().toShortString());
     }
 
     @Override public SpriteName getID() {
         return new SpriteName(getSpriteName());
     }
+
+    public String getLocation() { return location.get(); }
+    public void setLocation(String location) { this.location.set(location); }
 
     public String getSpriteName() {
         return spriteName.get();
@@ -94,11 +98,11 @@ public final class FxSprite extends FxRow<SpriteName> {
         this.serial.set(serial);
     }
 
-    public int getRepetitions() {
-        return repetitions.get();
+    public int getReps() {
+        return reps.get();
     }
-    public void setRepetitions(int repetitions) {
-        this.repetitions.set(repetitions);
+    public void setReps(int reps) {
+        this.reps.set(reps);
     }
 
     public boolean getHidden() {
@@ -115,10 +119,10 @@ public final class FxSprite extends FxRow<SpriteName> {
         this.paused.set(paused);
     }
 
-    public int getSoundPauseLevel() {
-        return soundPauseLevel.get();
+    public int getSndLvl() {
+        return sndLvl.get();
     }
-    public void setSoundPauseLevel(int soundPauseLevel) {
-        this.soundPauseLevel.set(soundPauseLevel);
+    public void setSndLvl(int sndLvl) {
+        this.sndLvl.set(sndLvl);
     }
 }
