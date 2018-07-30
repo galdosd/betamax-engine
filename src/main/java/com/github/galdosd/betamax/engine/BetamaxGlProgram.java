@@ -269,7 +269,7 @@ public class BetamaxGlProgram extends GlProgramBase {
             Texture texture = pausedTexture;
             if(crashed) texture = crashTexture;
             if(loading) texture = loadingTexture;
-            texture.render(TextureCoordinate.ORIGIN);
+            texture.render(TextureCoordinate.CENTER);
         }
     }
 

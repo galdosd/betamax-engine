@@ -4,6 +4,7 @@ import com.codahale.metrics.Counter;
 import com.codahale.metrics.Timer;
 import com.github.galdosd.betamax.Global;
 import com.github.galdosd.betamax.imageio.ColorSample;
+import com.github.galdosd.betamax.opengl.FramebufferCoordinate;
 import com.github.galdosd.betamax.opengl.TextureCoordinate;
 import com.github.galdosd.betamax.opengl.VAO;
 import com.github.galdosd.betamax.opengl.VBO;
@@ -118,20 +119,24 @@ public final class Texture implements  AutoCloseable {
         setVramLoaded(true);
         bind(GL_TEXTURE_2D);
         vao.bind();
+        FramebufferCoordinate fbCoord = location.toFramebufferCoordinate();
+
+        float ox = fbCoord.getX();
+        float oy = fbCoord.getY();
         vbo.bindAndLoad(GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW, new float[]{
             // two right triangles that cover the full screen
             // all our sprites are fullscreen! wow!
                //xpos   ypos      xtex  ytex
-                -1.0f,  1.0f,     0.0f, 1.0f,
-                 1.0f,  1.0f,     1.0f, 1.0f,
-                -1.0f, -1.0f,     0.0f, 0.0f,
+                -1.0f+ox,  1.0f+oy,     0.0f, 1.0f,
+                 1.0f+ox,  1.0f+oy,     1.0f, 1.0f,
+                -1.0f+ox, -1.0f+oy,     0.0f, 0.0f,
 
-                 1.0f,  1.0f,     1.0f, 1.0f,
-                 1.0f, -1.0f,     1.0f, 0.0f,
-                -1.0f, -1.0f,     0.0f, 0.0f,
+                 1.0f+ox,  1.0f+oy,     1.0f, 1.0f,
+                 1.0f+ox, -1.0f+oy,     1.0f, 0.0f,
+                -1.0f+ox, -1.0f+oy,     0.0f, 0.0f,
         });
         glClear(GL_DEPTH_BUFFER_BIT);
-        glDrawArrays(GL_TRIANGLES, 0, 3 * 2);
+        glDrawArrays(GL_TRIANGLES, 0, 3 /*three points in a triangle */ * 2 /* two triangles */);
     }
 
     private static VBO vbo;

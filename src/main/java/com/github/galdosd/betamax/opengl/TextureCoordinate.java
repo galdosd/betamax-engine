@@ -12,10 +12,17 @@ import lombok.Value;
  *              GlProgramBase's mouse callback which immediately converts to a TextureCoordinate
  */
 @Value public final class TextureCoordinate {
-    public static final TextureCoordinate ORIGIN = new TextureCoordinate(0.0,0.0);
+    public static final TextureCoordinate CENTER = new TextureCoordinate(0.5,0.5);
     double x, y;
 
     public boolean isValid() {
         return x >= 0.0 && x <= 1.0 && y >= 0.0 && y <= 1.0;
+    }
+
+    public FramebufferCoordinate toFramebufferCoordinate() {
+        return new FramebufferCoordinate(
+                (float)(getX() * 2.0f - 1.0f),
+                (float)(getY() * 2.0f - 1.0f)
+        );
     }
 }

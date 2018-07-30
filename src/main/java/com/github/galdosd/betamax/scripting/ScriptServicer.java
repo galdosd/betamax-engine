@@ -1,5 +1,6 @@
 package com.github.galdosd.betamax.scripting;
 
+import com.github.galdosd.betamax.opengl.TextureCoordinate;
 import com.github.galdosd.betamax.sprite.Sprite;
 import com.github.galdosd.betamax.sprite.SpriteEvent;
 import com.github.galdosd.betamax.sprite.SpriteName;
@@ -94,6 +95,12 @@ public final class ScriptServicer {
 
     public SpriteName newSpriteName(String name) {
         return new SpriteName(name);
+    }
+
+    public TextureCoordinate newTextureCoord(double x, double y) {
+        TextureCoordinate coord = new TextureCoordinate(x,y);
+        checkArgument(coord.isValid(), "Out of bounds %s", coord);
+        return coord;
     }
 
     public void registerGlobalCallback(@NonNull EventType eventType, ScriptCallback callback){

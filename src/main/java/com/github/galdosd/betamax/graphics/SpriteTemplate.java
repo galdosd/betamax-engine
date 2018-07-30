@@ -99,7 +99,7 @@ public final class SpriteTemplate implements  AutoCloseable {
         private boolean hidden = false;
         private int pausedFrame = 0;
         private final Optional<SoundSource> soundSource;
-        private TextureCoordinate location = TextureCoordinate.ORIGIN;
+        private TextureCoordinate location = TextureCoordinate.CENTER;
 
         private SpriteImpl(SpriteName name, FrameClock frameClock){
             this.frameClock = frameClock;
@@ -230,6 +230,7 @@ public final class SpriteTemplate implements  AutoCloseable {
         }
 
         @Override public void setLocation(TextureCoordinate location) {
+            checkArgument(location.isValid(), "Out of bounds location %s", location);
             this.location = location;
         }
     }
