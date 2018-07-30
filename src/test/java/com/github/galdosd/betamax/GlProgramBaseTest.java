@@ -58,6 +58,9 @@ public class GlProgramBaseTest {
             @Override protected int getWindowWidth() { return 100; }
             @Override protected boolean getDebugMode() { return false; }
 
+            @Override protected void showInitialLoadingScreen() { }
+            @Override protected void expensiveInitialize() { }
+
             @Override public void close() { }
         }.run();
     }

@@ -69,7 +69,16 @@ public class BetamaxGlProgram extends GlProgramBase {
         glEnable(GL_BLEND);
         glEnable(GL_DEPTH_TEST);
         glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    }
 
+    @Override protected void showInitialLoadingScreen() {
+        // this crap should go into GlProgramBase
+        // i still don't get what the difference between GlProgramBase and BetamaxGlProgram is tho.
+        ourShaders.DEFAULT.use();
+        loadingTexture.render(TextureCoordinate.CENTER);
+    }
+
+    @Override protected void expensiveInitialize() {
         newWorld(true);
     }
 
@@ -336,6 +345,7 @@ public class BetamaxGlProgram extends GlProgramBase {
     @Override protected int getWindowHeight() { return 540; }
     @Override protected int getWindowWidth() { return 960; }
     @Override protected boolean getDebugMode() { return true; }
+
 
     @Override public void close() {
         if(null!=spriteRegistry) {

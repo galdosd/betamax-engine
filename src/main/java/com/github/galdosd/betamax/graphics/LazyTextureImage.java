@@ -21,6 +21,10 @@ public class LazyTextureImage implements  AutoCloseable {
         this.name = name;
     }
 
+    public String toString() {
+        return "LazyTextureImage=" + name.getFilename();
+    }
+
     public void uploadGl(int boundTarget) {
         checkLoaded();
         image.uploadGl(boundTarget);

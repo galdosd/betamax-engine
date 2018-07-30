@@ -4,6 +4,7 @@
        sync; echo 3 | sudo tee /proc/sys/vm/drop_caches
     TODO
         Working set features
+            Load all templates at boot time
             Sound performance :(
             TAB key and resetLogicFrames does not respect music position
             Fancy mouse cursor

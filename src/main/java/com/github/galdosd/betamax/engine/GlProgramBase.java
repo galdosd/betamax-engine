@@ -67,6 +67,12 @@ public abstract class GlProgramBase implements AutoCloseable {
                     try (Timer.Context _unused_context = userInitTimer.time()) {
                         initialize();
                         checkGlError();
+                        try (GlWindow.RenderPhase __unused_context = mainWindow.renderPhase()) {
+                            showInitialLoadingScreen();
+                        }
+                        checkGlError();
+                        expensiveInitialize();
+                        checkGlError();
                         LOG.debug("User initialization done");
                     }
                     frameClock.resetLogicFrames();
@@ -88,6 +94,7 @@ public abstract class GlProgramBase implements AutoCloseable {
             Platform.exit();
         }
     }
+
 
     private void mouseButtonCallback(long window, int button, int action, int mods){
         if(action == GLFW.GLFW_PRESS) {
@@ -159,6 +166,8 @@ public abstract class GlProgramBase implements AutoCloseable {
     protected abstract int getWindowHeight();
     protected abstract int getWindowWidth();
     protected abstract boolean getDebugMode(); //TODO get from cmd line property
+    protected abstract void showInitialLoadingScreen();
+    protected abstract void expensiveInitialize();
     public abstract void close();
 
 }
