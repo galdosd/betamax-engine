@@ -39,5 +39,6 @@ public final class Global {
     /** Wait, eg 50% of a frame length before giving up and using a loading screen if not all textures are loaded into
      * RAM needed for rendering that frame yet
      */
-    public static int textureLoadGracePeriodFramePercent = fromProperty("textureLoadGracePeriodFramePercent", 50);
+    public static int textureLoadGracePeriodFramePercent = fromProperty("betamax.textureLoadGracePeriodFramePercent", 50);
+    public static final boolean debugMode = fromProperty("betamax.debugMode", true);
 }

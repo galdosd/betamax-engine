@@ -26,7 +26,7 @@ public class GlProgramBaseTest {
                 "com/github/galdosd/betamax/shaders/default.vert",
                 "com/github/galdosd/betamax/shaders/default.frag",
         };
-        BetamaxGlProgram program = new BetamaxGlProgram();
+        //BetamaxGlProgram program = new BetamaxGlProgram();
         for(String shaderName: shaderNames) Shader.loadAndCompileShader(shaderName, /*FIXME*/ 0);
     }
 

@@ -42,7 +42,7 @@ public class BetamaxGlProgram extends GlProgramBase {
     private final SoundRegistry soundRegistry = new SoundRegistry(soundWorld);
     private final TextureRegistry textureRegistry = new TextureRegistry();
     private final SpriteTemplateRegistry spriteTemplateRegistry = new SpriteTemplateRegistry(soundRegistry, textureRegistry);
-    private final DevConsole devConsole = new DevConsole();
+    private final DevConsole devConsole;
     private ScriptWorld scriptWorld;
     private SpriteRegistry spriteRegistry;
     private Optional<SpriteName> highlightedSprite = Optional.empty();
@@ -50,7 +50,10 @@ public class BetamaxGlProgram extends GlProgramBase {
     private Texture pausedTexture, loadingTexture, crashTexture;
     private boolean crashed = false;
     private boolean loading = false;
-    private TextureLoadAdvisor textureLoadAdvisor;
+
+    private BetamaxGlProgram() {
+        devConsole = getDebugMode() ? new DevConsole() : null;
+    }
 
     public static void main(String[] args) {
         new BetamaxGlProgram().run();
@@ -113,9 +116,8 @@ public class BetamaxGlProgram extends GlProgramBase {
                 spriteRegistry.close();
             }
             spriteRegistry = new SpriteRegistry(spriteTemplateRegistry, getFrameClock());
-            textureLoadAdvisor = new TextureLoadAdvisorImpl(spriteRegistry, spriteTemplateRegistry);
+            TextureLoadAdvisor textureLoadAdvisor = new TextureLoadAdvisorImpl(spriteRegistry, spriteTemplateRegistry);
             textureRegistry.setAdvisor(textureLoadAdvisor);
-
         }
         scriptWorld = new ScriptWorld(spriteRegistry);
         String[] scriptNames = Global.mainScript.split(",");
@@ -138,14 +140,14 @@ public class BetamaxGlProgram extends GlProgramBase {
             textureRegistry.setAdvisor(null); // we will get a flurry of silly loading otherwise
             LOG.info("Exiting");
         }
-        else if(key == GLFW.GLFW_KEY_F1) {
+        else if(key == GLFW.GLFW_KEY_F1 && getDebugMode()) {
             devConsole.helpWindow();
         }
         // show FPS metrics upon pause/break key
         else if(key == GLFW.GLFW_KEY_PRINT_SCREEN) {
             reportMetrics();
         }
-        else if(key == GLFW.GLFW_KEY_TAB && getFrameClock().getPaused()) {
+        else if(key == GLFW.GLFW_KEY_TAB && getFrameClock().getPaused() && getDebugMode()) {
             // FIXME this does not advance sound!
             getFrameClock().stepFrame();
             updateLogic();
@@ -165,13 +167,13 @@ public class BetamaxGlProgram extends GlProgramBase {
             // FIXME this will fuck up the metrics,we need a cooked Clock for Metrics to ignore
             // the passage of time during pause
             // page up/down to change target FPS
-        } else if (key == GLFW.GLFW_KEY_PAGE_UP) {
+        } else if (key == GLFW.GLFW_KEY_PAGE_UP && getDebugMode()) {
             if(controlKeyPressed) {
                 updateFps(getFrameClock().getTargetFps() * 2);
             } else {
                 updateFps(getFrameClock().getTargetFps() + 1);
             }
-        } else if (key == GLFW.GLFW_KEY_PAGE_DOWN) {
+        } else if (key == GLFW.GLFW_KEY_PAGE_DOWN && getDebugMode()) {
             if(controlKeyPressed) {
                 updateFps(getFrameClock().getTargetFps() / 2);
             } else {
@@ -182,7 +184,9 @@ public class BetamaxGlProgram extends GlProgramBase {
             // just reload scripts without affecting sprite state if just F5 is pressed
             // FIXME: right now state is managed in-python so the state will still be dropped
             // once we manage state in-engine we'll be fine
-            newWorld(controlKeyPressed);
+            // if debug mode is off, this always just restarts the world and place-in-time script reloading is
+            // prevented
+            newWorld(controlKeyPressed || !getDebugMode());
         }
     }
 
@@ -212,7 +216,7 @@ public class BetamaxGlProgram extends GlProgramBase {
         LOG.debug("Clicked on {} button {}", spriteName, button);
         if(button == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
             spriteRegistry.enqueueSpriteEvent(new SpriteEvent(EventType.SPRITE_CLICK, spriteName, 0));
-        } else if (button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) {
+        } else if (button == GLFW.GLFW_MOUSE_BUTTON_RIGHT && getDebugMode()) {
             Optional<SpriteName> selectedSprite = devConsole.getSelectedSprite();
             if(selectedSprite.isPresent() && spriteName.equals(selectedSprite.get())) {
                 devConsole.clearHighlightedSprite();
@@ -294,9 +298,10 @@ public class BetamaxGlProgram extends GlProgramBase {
                 sprite.uploadCurrentFrame();
             }
         }
-        Optional<SpriteName> selectedSprite = devConsole.getSelectedSprite();
+        Optional<SpriteName> selectedSprite = Optional.empty();
+        if(getDebugMode()) selectedSprite = devConsole.getSelectedSprite();
         for(Sprite sprite: spritesInRenderOrder) {
-            if(selectedSprite.isPresent() && sprite.getName().equals(selectedSprite.get())) {
+            if(getDebugMode() && selectedSprite.isPresent() && sprite.getName().equals(selectedSprite.get())) {
                 ourShaders.HIGHLIGHT.use();
             } else {
                 ourShaders.DEFAULT.use();
@@ -312,7 +317,7 @@ public class BetamaxGlProgram extends GlProgramBase {
     }
 
     private void updateDevConsole() {
-        if(System.currentTimeMillis() > nextConsoleUpdate) {
+        if(getDebugMode() && System.currentTimeMillis() > nextConsoleUpdate) {
             devConsole.updateView(
                     spriteRegistry.getSpritesInRenderOrder(),
                     highlightedSprite,
@@ -344,7 +349,7 @@ public class BetamaxGlProgram extends GlProgramBase {
     @Override protected String getWindowTitle() { return "BETAMAX DEMO"; }
     @Override protected int getWindowHeight() { return 540; }
     @Override protected int getWindowWidth() { return 960; }
-    @Override protected boolean getDebugMode() { return true; }
+    @Override protected boolean getDebugMode() { return Global.debugMode; }
 
 
     @Override public void close() {
