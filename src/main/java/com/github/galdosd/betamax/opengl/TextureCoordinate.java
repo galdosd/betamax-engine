@@ -12,6 +12,7 @@ import lombok.Value;
  *              GlProgramBase's mouse callback which immediately converts to a TextureCoordinate
  */
 @Value public final class TextureCoordinate {
+    public static final TextureCoordinate ORIGIN = new TextureCoordinate(0.0,0.0);
     double x, y;
 
     public boolean isValid() {

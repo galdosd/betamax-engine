@@ -15,7 +15,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL15.GL_ARRAY_BUFFER;
-import static org.lwjgl.opengl.GL15.GL_STATIC_DRAW;
+import static org.lwjgl.opengl.GL15.GL_DYNAMIC_DRAW;
 
 /** A texture stored in opengl. But it can load and unload itself into and out of VRAM on demand transparently
  * For methods beginning with name of "bt" bind() must be called first
@@ -109,7 +109,7 @@ public final class Texture implements  AutoCloseable {
         return transparentEnough;
     }
 
-    public void render() {
+    public void render(TextureCoordinate location) {
         checkState(null != vbo && null != vao);
         if (!getVramLoaded()) {
             LOG.warn("Uploading texture to VRAM at rendertime: {}", textureImage);
@@ -118,20 +118,7 @@ public final class Texture implements  AutoCloseable {
         setVramLoaded(true);
         bind(GL_TEXTURE_2D);
         vao.bind();
-        vbo.bind(GL_ARRAY_BUFFER);
-        glClear(GL_DEPTH_BUFFER_BIT);
-        glDrawArrays(GL_TRIANGLES, 0, 3 * 2);
-    }
-
-    private static VBO vbo;
-    private static VAO vao;
-
-    // FIXME this should be paired with SpriteTemplate#renderTemplate, there is indirect dependency between them
-    // via opengl VBO/VAO handles
-    public static void prepareForDrawing() {
-        // load our triangle vertices
-        vbo = new VBO();
-        vbo.bindAndLoad(GL_ARRAY_BUFFER, GL_STATIC_DRAW, new float[]{
+        vbo.bindAndLoad(GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW, new float[]{
             // two right triangles that cover the full screen
             // all our sprites are fullscreen! wow!
                //xpos   ypos      xtex  ytex
@@ -143,8 +130,15 @@ public final class Texture implements  AutoCloseable {
                  1.0f, -1.0f,     1.0f, 0.0f,
                 -1.0f, -1.0f,     0.0f, 0.0f,
         });
+        glClear(GL_DEPTH_BUFFER_BIT);
+        glDrawArrays(GL_TRIANGLES, 0, 3 * 2);
+    }
 
-        // prepare vao
+    private static VBO vbo;
+    private static VAO vao;
+
+    public static void prepareForDrawing() {
+        vbo = new VBO();
         vao = new VAO();
         vao.bind();
         vbo.bind(GL_ARRAY_BUFFER);

@@ -4,16 +4,15 @@
        sync; echo 3 | sudo tee /proc/sys/vm/drop_caches
     TODO
         Working set features
-            LazyTextureImage#getRamLoaded needs to have a non synchronized advisory version
-            Texture compiler
+            Sprite positions/sizes
+            Sound performance :(
             TAB key and resetLogicFrames does not respect music position
+            Fancy mouse cursor
             Managed state (JSON)
                 Proper hotloading including preserving state
                 Save/load state
                 Dev console state & history
-            Sprite positions/sizes
-            Sound performance :(
-            Fancy mouse cursor
+            LazyTextureImage#getRamLoaded needs to have a non synchronized advisory version
 
         Backlog features
             Initial loading screen

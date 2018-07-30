@@ -35,6 +35,8 @@ public class BetamaxGlProgram extends GlProgramBase {
 
     private final Timer lateTextureUploadPhaseTimer = Global.metrics.timer("lateTextureUploadPhaseTimer");
     private final Timer loadingPhaseTimer = Global.metrics.timer("loadingPhaseTimer");
+    private final Timer allSpritesRenderTimer = Global.metrics.timer("allSpritesRenderTimer");
+    private final Timer checkAllSpritesReadyTimer = Global.metrics.timer("checkAllSpritesReadyTimer");
 
     private final SoundWorld soundWorld = new SoundWorld();
     private final SoundRegistry soundRegistry = new SoundRegistry(soundWorld);
@@ -216,10 +218,13 @@ public class BetamaxGlProgram extends GlProgramBase {
     @Override protected void updateView() {
         List<Sprite> spritesInRenderOrder = spriteRegistry.getSpritesInRenderOrder();
 
-        /** wait for up to half a frame length to load textures before we give up and use a loading screen */
-        boolean readyToRender = textureRegistry.checkAllSpritesReadyToRender(
-                spritesInRenderOrder,
-                10 * Global.textureLoadGracePeriodFramePercent / getFrameClock().getTargetFps());
+        boolean readyToRender;
+        try(Timer.Context ignored = checkAllSpritesReadyTimer.time()) {
+            /** wait for up to half a frame length to load textures before we give up and use a loading screen */
+            readyToRender = textureRegistry.checkAllSpritesReadyToRender(
+                    spritesInRenderOrder,
+                    10 * Global.textureLoadGracePeriodFramePercent / getFrameClock().getTargetFps());
+        }
         // we do this after waiting for sprites to (likely) be in RAM but before rendering because rendering
         // will evict MemoryStrategy.STREAMING sprite frames, and we need that frame to do mouse click collisions
         pollEvents();
@@ -236,8 +241,12 @@ public class BetamaxGlProgram extends GlProgramBase {
             clearScreen();
             // FIXME this is a hack TBQH but there's no time for the more principled way right now
             textureRegistry.processRamUnloadQueue();
-            // would be nice to render the previous frame but (FIXME) we just unloaded it, whoops
-            if(!getFrameClock().getPaused()) renderAllSprites(spritesInRenderOrder);
+            if (!getFrameClock().getPaused()) {
+                // FIXME would be nice to render the previous frame even if paused but we just unloaded it, whoops
+                try (Timer.Context ignored = allSpritesRenderTimer.time()) {
+                    renderAllSprites(spritesInRenderOrder);
+                }
+            }
         } else {
             if(!loading) {
                 LOG.debug("entered LOADING state");
@@ -260,7 +269,7 @@ public class BetamaxGlProgram extends GlProgramBase {
             Texture texture = pausedTexture;
             if(crashed) texture = crashTexture;
             if(loading) texture = loadingTexture;
-            texture.render();
+            texture.render(TextureCoordinate.ORIGIN);
         }
     }
 

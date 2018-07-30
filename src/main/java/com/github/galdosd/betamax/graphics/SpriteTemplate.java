@@ -1,5 +1,7 @@
 package com.github.galdosd.betamax.graphics;
 
+import com.codahale.metrics.Timer;
+import com.github.galdosd.betamax.Global;
 import com.github.galdosd.betamax.engine.FrameClock;
 import com.github.galdosd.betamax.imageio.SpriteTemplateManifest;
 import com.github.galdosd.betamax.opengl.TextureCoordinate;
@@ -28,6 +30,8 @@ public final class SpriteTemplate implements  AutoCloseable {
     // TODO Textures and SoundBuffers should be unloaded, implement AutoCloseable down the line
     private static final org.slf4j.Logger LOG =
             LoggerFactory.getLogger(new Object(){}.getClass().getEnclosingClass());
+    private static final Timer textureRenderTimer = Global.metrics.timer("textureRenderTimer");
+    private static final Timer textureAfterRenderTimer = Global.metrics.timer("textureAfterRenderTimer");
     private final List<Texture> textures;
     private Optional<SoundName> soundName;
     private Optional<SoundBuffer> soundBuffer = Optional.empty();
@@ -57,10 +61,14 @@ public final class SpriteTemplate implements  AutoCloseable {
         return new SpriteImpl(name, frameClock);
     }
 
-    private void renderTemplate(int whichFrame) {
+    private void renderTemplate(int whichFrame, TextureCoordinate location) {
         Texture texture = textures.get(whichFrame);
-        texture.render();
-        textureRegistry.afterRender(memoryStrategy, texture);
+        try(Timer.Context ignored = textureRenderTimer.time()) {
+            texture.render(location);
+        }
+        try(Timer.Context ignored = textureAfterRenderTimer.time()) {
+            textureRegistry.afterRender(memoryStrategy, texture);
+        }
     }
     private void uploadTexture(int whichFrame) {
         Texture texture = textures.get(whichFrame);
@@ -91,6 +99,7 @@ public final class SpriteTemplate implements  AutoCloseable {
         private boolean hidden = false;
         private int pausedFrame = 0;
         private final Optional<SoundSource> soundSource;
+        private TextureCoordinate location = TextureCoordinate.ORIGIN;
 
         private SpriteImpl(SpriteName name, FrameClock frameClock){
             this.frameClock = frameClock;
@@ -107,7 +116,7 @@ public final class SpriteTemplate implements  AutoCloseable {
         }
 
         @Override public void render() {
-            if(!getHidden()) renderTemplate(getRenderedTexture());
+            if(!getHidden()) renderTemplate(getRenderedTexture(), location);
         }
 
         @Override public int getCurrentFrame() {
@@ -214,6 +223,14 @@ public final class SpriteTemplate implements  AutoCloseable {
             } else {
                 return -1;
             }
+        }
+
+        @Override public TextureCoordinate getLocation() {
+            return location;
+        }
+
+        @Override public void setLocation(TextureCoordinate location) {
+            this.location = location;
         }
     }
 

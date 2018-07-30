@@ -38,4 +38,7 @@ public interface Sprite extends AutoCloseable {
     void uploadCurrentFrame();
 
     int getSoundPauseLevel();
+
+    TextureCoordinate getLocation();
+    void setLocation(TextureCoordinate location);
 }
