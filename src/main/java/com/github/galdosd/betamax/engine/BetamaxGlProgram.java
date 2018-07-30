@@ -236,7 +236,8 @@ public class BetamaxGlProgram extends GlProgramBase {
             clearScreen();
             // FIXME this is a hack TBQH but there's no time for the more principled way right now
             textureRegistry.processRamUnloadQueue();
-            renderAllSprites(spritesInRenderOrder);
+            // would be nice to render the previous frame but (FIXME) we just unloaded it, whoops
+            if(!getFrameClock().getPaused()) renderAllSprites(spritesInRenderOrder);
         } else {
             if(!loading) {
                 LOG.debug("entered LOADING state");

@@ -59,9 +59,10 @@ public final class OurTool {
     public static void sleepUntilPrecisely(long targetTime) {
         // if we are more than 5 ms out, Thread.sleep is good enough
         // only sleep for a third of the time we have left to conservatively account for inaccuracy
-        while(targetTime - System.currentTimeMillis() > 5) {
+        long targetSleep;
+        while((targetSleep = targetTime - System.currentTimeMillis()) > 5) {
             try {
-                Thread.sleep((targetTime - System.currentTimeMillis()) / 3);
+                Thread.sleep(targetSleep / 3);
             } catch (InterruptedException e) {/* doesn't matter, we'll keep trying */}
         }
         // now that we're pretty close to it, busy loop
