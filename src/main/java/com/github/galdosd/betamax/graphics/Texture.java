@@ -4,12 +4,10 @@ import com.codahale.metrics.Counter;
 import com.codahale.metrics.Timer;
 import com.github.galdosd.betamax.Global;
 import com.github.galdosd.betamax.imageio.ColorSample;
-import com.github.galdosd.betamax.opengl.FramebufferCoordinate;
-import com.github.galdosd.betamax.opengl.TextureCoordinate;
-import com.github.galdosd.betamax.opengl.VAO;
-import com.github.galdosd.betamax.opengl.VBO;
+import com.github.galdosd.betamax.opengl.*;
 import lombok.NonNull;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL20;
 import org.slf4j.LoggerFactory;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -110,7 +108,7 @@ public final class Texture implements  AutoCloseable {
         return transparentEnough;
     }
 
-    public void render(TextureCoordinate location) {
+    public void render(TextureCoordinate location, ShaderProgram shaderProgram) {
         checkState(null != vbo && null != vao);
         if (!getVramLoaded()) {
             LOG.warn("Uploading texture to VRAM at rendertime: {}", textureImage);
@@ -119,42 +117,34 @@ public final class Texture implements  AutoCloseable {
         setVramLoaded(true);
         bind(GL_TEXTURE_2D);
         vao.bind();
+
+        shaderProgram.use();
         FramebufferCoordinate fbCoord = location.toFramebufferCoordinate();
+        GL20.glUniform2f(shaderProgram.getUniformLocation("translatePosition"), fbCoord.getX(),fbCoord.getY());
 
-        float ox = fbCoord.getX();
-        float oy = fbCoord.getY();
-        // FIXME now we log like crazy through GlDebugMessages because of the below bindAndLoad
-        // or wait maybe it is the vao.bind()
-        // and it only happens on windows i think or maybe it is something else in the mute big sprite asset set
-        // FIXME we should be doing glBufferSubData or better yet (I think) uniforms and vertex shader
-        // instead of allocating a new buffer every time. also it's possible our occasional high render times
-        // are due to this? or due to the fact we only have one buffer (gl documentation notes that using multiple
-        // buffers is good if you change them since changing them while they are being used in the render pipeline
-        // can force the whole pipeline to stall)
-        vbo.bindAndLoad(GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW, new float[]{
-            // two right triangles that cover the full screen
-            // all our sprites are fullscreen! wow!
-               //xpos   ypos      xtex  ytex
-                -1.0f+ox,  1.0f+oy,     0.0f, 1.0f,
-                 1.0f+ox,  1.0f+oy,     1.0f, 1.0f,
-                -1.0f+ox, -1.0f+oy,     0.0f, 0.0f,
-
-                 1.0f+ox,  1.0f+oy,     1.0f, 1.0f,
-                 1.0f+ox, -1.0f+oy,     1.0f, 0.0f,
-                -1.0f+ox, -1.0f+oy,     0.0f, 0.0f,
-        });
+        vbo.bind(GL_ARRAY_BUFFER);
         glClear(GL_DEPTH_BUFFER_BIT);
         glDrawArrays(GL_TRIANGLES, 0, 3 /*three points in a triangle */ * 2 /* two triangles */);
     }
 
     private static VBO vbo;
     private static VAO vao;
-
     public static void prepareForDrawing() {
         vbo = new VBO();
         vao = new VAO();
         vao.bind();
-        vbo.bind(GL_ARRAY_BUFFER);
+        vbo.bindAndLoad(GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW, new float[]{
+            // two right triangles that cover the full screen
+            // all our sprites are fullscreen! wow!
+               //xpos   ypos      xtex  ytex
+                -1.0f,  1.0f,     0.0f, 1.0f,
+                 1.0f,  1.0f,     1.0f, 1.0f,
+                -1.0f, -1.0f,     0.0f, 0.0f,
+
+                 1.0f,  1.0f,     1.0f, 1.0f,
+                 1.0f, -1.0f,     1.0f, 0.0f,
+                -1.0f, -1.0f,     0.0f, 0.0f,
+        });
         VAO.vertexAttribPointer(0, 2, GL_FLOAT, false, 4 * Float.BYTES, 0);
         VAO.vertexAttribPointer(1, 2, GL_FLOAT, false, 4 * Float.BYTES, 2 * Float.BYTES);
     }

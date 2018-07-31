@@ -4,6 +4,7 @@ import com.codahale.metrics.Timer;
 import com.github.galdosd.betamax.Global;
 import com.github.galdosd.betamax.engine.FrameClock;
 import com.github.galdosd.betamax.imageio.SpriteTemplateManifest;
+import com.github.galdosd.betamax.opengl.ShaderProgram;
 import com.github.galdosd.betamax.opengl.TextureCoordinate;
 import com.github.galdosd.betamax.sound.SoundBuffer;
 import com.github.galdosd.betamax.sound.SoundName;
@@ -61,10 +62,10 @@ public final class SpriteTemplate implements  AutoCloseable {
         return new SpriteImpl(name, frameClock);
     }
 
-    private void renderTemplate(int whichFrame, TextureCoordinate location) {
+    private void renderTemplate(int whichFrame, TextureCoordinate location, ShaderProgram shaderProgram) {
         Texture texture = textures.get(whichFrame);
         try(Timer.Context ignored = textureRenderTimer.time()) {
-            texture.render(location);
+            texture.render(location, shaderProgram);
         }
         try(Timer.Context ignored = textureAfterRenderTimer.time()) {
             textureRegistry.afterRender(memoryStrategy, texture);
@@ -115,8 +116,8 @@ public final class SpriteTemplate implements  AutoCloseable {
             creationSerial = nextCreationSerial++;
         }
 
-        @Override public void render() {
-            if(!getHidden()) renderTemplate(getRenderedTexture(), location);
+        @Override public void render(ShaderProgram shaderProgram) {
+            if(!getHidden()) renderTemplate(getRenderedTexture(), location, shaderProgram);
         }
 
         @Override public int getCurrentFrame() {

@@ -77,8 +77,7 @@ public class BetamaxGlProgram extends GlProgramBase {
     @Override protected void showInitialLoadingScreen() {
         // this crap should go into GlProgramBase
         // i still don't get what the difference between GlProgramBase and BetamaxGlProgram is tho.
-        ourShaders.DEFAULT.use();
-        loadingTexture.render(TextureCoordinate.CENTER);
+        loadingTexture.render(TextureCoordinate.CENTER, ourShaders.DEFAULT);
     }
 
     @Override protected void expensiveInitialize() {
@@ -280,14 +279,13 @@ public class BetamaxGlProgram extends GlProgramBase {
 
     private void showPauseScreen() {
         if(getFrameClock().getPaused()) {
-            ourShaders.DEFAULT.use();
             checkState(!crashed || !loading);
             // FIXME three independent booleans (crashed, loading, FrameClock#getPaused) should be merged into one enum
             // for safety
             Texture texture = pausedTexture;
             if(crashed) texture = crashTexture;
             if(loading) texture = loadingTexture;
-            texture.render(TextureCoordinate.CENTER);
+            texture.render(TextureCoordinate.CENTER, ourShaders.DEFAULT);
         }
     }
 
@@ -306,12 +304,10 @@ public class BetamaxGlProgram extends GlProgramBase {
         Optional<SpriteName> selectedSprite = Optional.empty();
         if(getDebugMode()) selectedSprite = devConsole.getSelectedSprite();
         for(Sprite sprite: spritesInRenderOrder) {
-            if(getDebugMode() && selectedSprite.isPresent() && sprite.getName().equals(selectedSprite.get())) {
-                ourShaders.HIGHLIGHT.use();
-            } else {
-                ourShaders.DEFAULT.use();
-            }
-            sprite.render();
+            boolean highlightSprite = getDebugMode()
+                            && selectedSprite.isPresent()
+                            && sprite.getName().equals(selectedSprite.get());
+            sprite.render(highlightSprite ? ourShaders.HIGHLIGHT : ourShaders.DEFAULT);
         }
     }
 

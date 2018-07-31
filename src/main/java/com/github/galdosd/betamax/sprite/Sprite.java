@@ -1,13 +1,14 @@
 package com.github.galdosd.betamax.sprite;
 
 import com.github.galdosd.betamax.graphics.TextureName;
+import com.github.galdosd.betamax.opengl.ShaderProgram;
 import com.github.galdosd.betamax.opengl.TextureCoordinate;
 
 /**
- * FIXME: Document this class
+ * FIXME separate into two interfaces, one for scripts and one for internal engine rendering etc
  */
 public interface Sprite extends AutoCloseable {
-    void render();
+    void render(ShaderProgram shaderProgram);
     boolean isClickableAtCoordinate(TextureCoordinate coordinate);
 
     TextureName getTextureName(int framesAhead);
