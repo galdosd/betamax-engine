@@ -96,6 +96,7 @@ public final class SpriteTemplate implements  AutoCloseable {
         private boolean clickableEverywhere = false;
         @Getter private int layer = 0;
         @Getter private int repetitions = 1;
+        private boolean pinnedToCursor = false;
         private boolean paused = false;
         private boolean hidden = false;
         private int pausedFrame = 0;
@@ -227,6 +228,14 @@ public final class SpriteTemplate implements  AutoCloseable {
             } else {
                 return -1;
             }
+        }
+
+        @Override public boolean getPinnedToCursor() {
+            return pinnedToCursor;
+        }
+
+        @Override public void setPinnedToCursor(boolean pinnedToCursor) {
+            this.pinnedToCursor = pinnedToCursor;
         }
 
         @Override public TextureCoordinate getLocation() {

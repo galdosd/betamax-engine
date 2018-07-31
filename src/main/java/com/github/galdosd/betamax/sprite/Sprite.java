@@ -40,6 +40,9 @@ public interface Sprite extends AutoCloseable {
 
     int getSoundPauseLevel();
 
+    boolean getPinnedToCursor();
+    void setPinnedToCursor(boolean pinnedToCursor);
+
     TextureCoordinate getLocation();
     void setLocation(TextureCoordinate location);
 }

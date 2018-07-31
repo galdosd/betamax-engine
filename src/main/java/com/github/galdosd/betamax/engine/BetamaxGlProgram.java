@@ -323,7 +323,17 @@ public class BetamaxGlProgram extends GlProgramBase {
             boolean highlightSprite = getDebugMode()
                             && selectedSprite.isPresent()
                             && sprite.getName().equals(selectedSprite.get());
+            updatePinnedToCursorSprite(sprite);
             sprite.render(highlightSprite ? ourShaders.HIGHLIGHT : ourShaders.DEFAULT);
+        }
+    }
+
+    private void updatePinnedToCursorSprite(Sprite sprite) {
+        if(sprite.getPinnedToCursor()) {
+            TextureCoordinate cursorPosition = getCursorPosition();
+            if(cursorPosition.isValid()) {
+                sprite.setLocation(cursorPosition);
+            }
         }
     }
 

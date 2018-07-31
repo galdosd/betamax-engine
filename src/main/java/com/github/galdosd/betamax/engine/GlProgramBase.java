@@ -31,10 +31,6 @@ public abstract class GlProgramBase implements AutoCloseable {
     private GlWindow mainWindow;
     private final GameLoopFrameClock frameClock = new GameLoopFrameClock();
 
-    // input management
-    private final DoubleBuffer xMousePosBuffer = BufferUtils.createDoubleBuffer(1);
-    private final DoubleBuffer yMousePosBuffer = BufferUtils.createDoubleBuffer(1);
-
     // FPS performance metrics
     private final Timer userInitTimer = Global.metrics.timer("userInitTimer");
     private final Timer renderTimer = Global.metrics.timer("renderTimer");
@@ -97,16 +93,17 @@ public abstract class GlProgramBase implements AutoCloseable {
 
     private void mouseButtonCallback(long window, int button, int action, int mods){
         if(action == GLFW.GLFW_PRESS) {
-            glfwGetCursorPos(window, xMousePosBuffer, yMousePosBuffer);
-            double x = xMousePosBuffer.get(0);
-            double y = yMousePosBuffer.get(0);
-            TextureCoordinate coord = mainWindow.windowToTextureCoord(x,y);
+            TextureCoordinate coord = mainWindow.getCursorPosition();
             if(coord.isValid()) {
                 mouseClickEvent(coord, button);
             } else {
                 LOG.warn("Out of bounds {} due to excessively delayed handling of mouse click");
             }
         }
+    }
+
+    protected final TextureCoordinate getCursorPosition() {
+        return mainWindow.getCursorPosition();
     }
 
     private void keyCallback(long window, int key, int scancode, int action, int mods) {

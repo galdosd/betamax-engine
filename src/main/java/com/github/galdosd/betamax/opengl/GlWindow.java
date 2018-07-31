@@ -1,9 +1,12 @@
 package com.github.galdosd.betamax.opengl;
 
+import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.system.Configuration;
 import org.slf4j.LoggerFactory;
+
+import java.nio.DoubleBuffer;
 
 import static com.github.galdosd.betamax.OurTool.checkGlError;
 import static com.google.common.base.Preconditions.checkState;
@@ -138,6 +141,15 @@ public final class GlWindow implements AutoCloseable {
             fieldHeight = windowHeight;
         }
         return new TextureCoordinate(x / fieldWidth, 1.0 - y / fieldHeight);
+    }
+
+    private final DoubleBuffer xMousePosBuffer = BufferUtils.createDoubleBuffer(1);
+    private final DoubleBuffer yMousePosBuffer = BufferUtils.createDoubleBuffer(1);
+    public TextureCoordinate getCursorPosition() {
+        glfwGetCursorPos(windowHandle, xMousePosBuffer, yMousePosBuffer);
+        double x = xMousePosBuffer.get(0);
+        double y = yMousePosBuffer.get(0);
+        return windowToTextureCoord(x,y);
     }
 
     public final class RenderPhase implements AutoCloseable {
