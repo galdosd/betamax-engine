@@ -1,9 +1,11 @@
 package com.github.galdosd.betamax.graphics;
 
+import com.github.galdosd.betamax.Global;
 import com.github.galdosd.betamax.imageio.ColorSample;
 import com.github.galdosd.betamax.imageio.TextureImage;
 import com.github.galdosd.betamax.imageio.TextureImagesIO;
 import com.github.galdosd.betamax.opengl.TextureCoordinate;
+import org.slf4j.LoggerFactory;
 
 import static com.google.common.base.Preconditions.checkState;
 
@@ -12,6 +14,9 @@ import static com.google.common.base.Preconditions.checkState;
  *
  */
 public class LazyTextureImage implements  AutoCloseable {
+    private static final org.slf4j.Logger LOG =
+            LoggerFactory.getLogger(new Object(){}.getClass().getEnclosingClass());
+
     private TextureImage image;
     private final TextureName name;
     // TODO get rid of this lock
@@ -73,7 +78,12 @@ public class LazyTextureImage implements  AutoCloseable {
     }
 
     private void checkLoaded() {
-        checkState(getLoaded(), "Image not loaded %s", name);
+        if(Global.debugMode) {
+            checkState(getLoaded(), "Runtime RAM load: %s", getName());
+        } else {
+            if(!getLoaded()) LOG.error("Runtime RAM load: {}", getName());
+            setLoaded(true);
+        }
     }
 
     public TextureName getName() {
