@@ -1,5 +1,6 @@
 package com.github.galdosd.betamax.scripting;
 
+import com.codahale.metrics.Timer;
 import com.github.galdosd.betamax.Global;
 import com.github.galdosd.betamax.OurTool;
 import com.github.galdosd.betamax.sprite.LogicHandler;
@@ -28,6 +29,8 @@ public class ScriptWorld implements LogicHandler {
     private static final org.slf4j.Logger LOG =
             LoggerFactory.getLogger(new Object(){}.getClass().getEnclosingClass());
 
+    private static final Timer invokeSpriteCallbackTimer = Global.metrics.timer("invokeSpriteCallbackTimer");
+
     private final SpriteRegistry spriteRegistry;
     private final PythonInterpreter pythonInterpreter;
     private final ScriptServicer servicer;
@@ -48,7 +51,9 @@ public class ScriptWorld implements LogicHandler {
         }
         if(null!=callback) {
             LOG.debug("Handling {}\nvia {}", event, callback);
-            callback.invoke();
+            try(Timer.Context ignored = invokeSpriteCallbackTimer.time()) {
+                callback.invoke();
+            }
         }
     }
 

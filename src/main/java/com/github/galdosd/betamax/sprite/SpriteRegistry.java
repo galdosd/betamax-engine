@@ -1,8 +1,9 @@
 package com.github.galdosd.betamax.sprite;
 
+import com.codahale.metrics.Timer;
+import com.github.galdosd.betamax.Global;
 import com.github.galdosd.betamax.engine.FrameClock;
 import com.github.galdosd.betamax.graphics.SpriteTemplateRegistry;
-import com.github.galdosd.betamax.graphics.TextureLoadAdvisor;
 import com.github.galdosd.betamax.opengl.TextureCoordinate;
 import com.github.galdosd.betamax.scripting.EventType;
 import com.google.common.collect.Ordering;
@@ -14,7 +15,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.stream.Collectors.toList;
 
@@ -25,6 +25,7 @@ public class SpriteRegistry implements AutoCloseable {
     private static final org.slf4j.Logger LOG =
             LoggerFactory.getLogger(new Object(){}.getClass().getEnclosingClass());
 
+    private static final Timer handleSingleEventTimer = Global.metrics.timer("handleSingleEventTimer");
     private final FrameClock frameClock;
 
     private final Map<SpriteName,Sprite> registeredSprites = new ConcurrentHashMap<>();
@@ -147,7 +148,9 @@ public class SpriteRegistry implements AutoCloseable {
 
     private void dispatchSingleSpriteEvent(LogicHandler logicHandler, SpriteEvent event) {
         if(spriteExists(event.spriteName) || event.eventType == EventType.SPRITE_DESTROY) {
-            logicHandler.onSpriteEvent(event);
+            try(Timer.Context ignored = handleSingleEventTimer.time()) {
+                logicHandler.onSpriteEvent(event);
+            }
         }
     }
 
