@@ -82,6 +82,7 @@ public class BetamaxGlProgram extends GlProgramBase {
     }
 
     @Override protected void expensiveInitialize() {
+        spriteTemplateRegistry.preloadEverything();
         newWorld(true);
     }
 
@@ -115,13 +116,17 @@ public class BetamaxGlProgram extends GlProgramBase {
             if(null!=spriteRegistry) {
                 spriteRegistry.close();
             }
+            LOG.info("Creating sprite registry");
             spriteRegistry = new SpriteRegistry(spriteTemplateRegistry, getFrameClock());
+            LOG.info("Setting texture load advisor");
             TextureLoadAdvisor textureLoadAdvisor = new TextureLoadAdvisorImpl(spriteRegistry, spriteTemplateRegistry);
             textureRegistry.setAdvisor(textureLoadAdvisor);
         }
+        LOG.debug("Creating script world");
         scriptWorld = new ScriptWorld(spriteRegistry);
         String[] scriptNames = Global.mainScript.split(",");
         try {
+            LOG.info("Loading scripts: {}", Global.mainScript);
             scriptWorld.loadScripts(scriptNames);
         } catch(Exception e) {
             handleCrash(e);

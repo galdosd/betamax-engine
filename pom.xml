@@ -4,8 +4,6 @@
        sync; echo 3 | sudo tee /proc/sys/vm/drop_caches
     TODO
         Working set features
-            Load all templates at boot time
-            Sound performance :(
             TAB key and resetLogicFrames does not respect music position
             Fancy mouse cursor
             Managed state (JSON)
@@ -15,7 +13,6 @@
             LazyTextureImage#getRamLoaded needs to have a non synchronized advisory version
 
         Backlog features
-            Initial loading screen
             Fancy framebuffer CRT style post effects
             basic steam support
             steam achievements

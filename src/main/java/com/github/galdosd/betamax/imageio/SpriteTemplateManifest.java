@@ -8,14 +8,14 @@ import org.reflections.Reflections;
 import org.reflections.scanners.ResourcesScanner;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 
 /** The indirection between SpriteTemplateManifest/SpriteTemplate is here so we can find out all the constituent
  * files early before doing the expensive work of loading the textures, so we can use the data for other purposes,
@@ -31,6 +31,22 @@ import static java.util.stream.Collectors.toList;
     String templateName;
     List<TextureName> spriteFilenames;
     Optional<SoundName> soundName;
+
+
+    public static Map<String,SpriteTemplateManifest> preloadEverything() {
+        Reflections reflections = new Reflections(Global.spriteBase, new ResourcesScanner());
+        Set<String> templateNames = reflections.getResources(TIF_PATTERN).stream()
+                .map(tifFilename -> {
+                    String directory = tifFilename.substring(0, tifFilename.lastIndexOf("/"));
+                    return directory.substring(1+directory.lastIndexOf("/"));
+                }).collect(toSet());
+        LOG.info("Preloading {} sprite template manifests", templateNames.size());
+        Map<String,SpriteTemplateManifest> allTemplates = new HashMap<>();
+        for(String templateName: templateNames) {
+            allTemplates.put(templateName, load(templateName));
+        }
+        return allTemplates;
+    }
 
     public static SpriteTemplateManifest load (String templateName) {
         String pkgName = Global.spriteBase + templateName;
