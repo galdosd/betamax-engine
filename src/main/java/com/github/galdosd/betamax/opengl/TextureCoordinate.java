@@ -25,6 +25,9 @@ import lombok.Value;
                 (float)(getY() * 2.0f - 1.0f)
         );
     }
+    public TextureCoordinate minus(TextureCoordinate o) {
+        return new TextureCoordinate(getX() - o.getX(), getY() - o.getY());
+    }
 
     public String toShortString() {
         return String.format("%.3f t %.3f", getX(), getY());

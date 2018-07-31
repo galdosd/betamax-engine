@@ -136,7 +136,10 @@ public final class SpriteTemplate implements  AutoCloseable {
             if(clickableEverywhere) {
                 return true;
             }
-            boolean transparentAtCoordinate = textures.get(getRenderedTexture()).isTransparentAtCoordinate(coord);
+            Texture texture = textures.get(getRenderedTexture());
+            TextureCoordinate translatedCoord = coord.minus(location.minus(TextureCoordinate.CENTER));
+            boolean transparentAtCoordinate =
+                    !translatedCoord.isValid() || texture.isTransparentAtCoordinate(translatedCoord);
             LOG.trace("{}.isClickableAtCoordinate({}) == {}", this, coord, !transparentAtCoordinate);
             return !transparentAtCoordinate;
         }
