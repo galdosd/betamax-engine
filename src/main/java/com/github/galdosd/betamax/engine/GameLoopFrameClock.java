@@ -66,8 +66,8 @@ class GameLoopFrameClock implements FrameClock {
         }
     }
 
-    public void sleepTillNextLogicFrame() {
-        OurTool.sleepUntilPrecisely(nextLogicFrameTime - 1);
+    public boolean sleepTillNextLogicFrame() {
+        return OurTool.sleepUntilPrecisely(nextLogicFrameTime - 1);
     }
 
     public boolean moreLogicFramesNeeded() {

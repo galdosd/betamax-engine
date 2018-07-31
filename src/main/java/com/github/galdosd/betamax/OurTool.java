@@ -56,17 +56,24 @@ public final class OurTool {
         checkState(0 == err, "glGetError == " + err);
     }
 
-    public static void sleepUntilPrecisely(long targetTime) {
+    /** Sleep precisely, accounting for Thread.sleep idiosyncracies by using it conservatively and then busy looping
+     *  for the last 5 or so ms
+     */
+    public static boolean sleepUntilPrecisely(long targetTime) {
         // if we are more than 5 ms out, Thread.sleep is good enough
         // only sleep for a third of the time we have left to conservatively account for inaccuracy
         long targetSleep;
+        boolean slept = false;
         while((targetSleep = targetTime - System.currentTimeMillis()) > 5) {
             try {
+                slept = true;
                 Thread.sleep(targetSleep / 3);
             } catch (InterruptedException e) {/* doesn't matter, we'll keep trying */}
         }
         // now that we're pretty close to it, busy loop
+        if(System.currentTimeMillis() < targetTime) slept = true;
         while(System.currentTimeMillis() < targetTime);
+        return slept;
     }
 
     public static boolean fromProperty(String propertyName, boolean defaultValue) {

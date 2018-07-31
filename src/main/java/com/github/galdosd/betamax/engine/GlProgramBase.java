@@ -1,9 +1,6 @@
 package com.github.galdosd.betamax.engine;
 
-import com.codahale.metrics.ConsoleReporter;
-import com.codahale.metrics.Gauge;
-import com.codahale.metrics.SlidingTimeWindowReservoir;
-import com.codahale.metrics.Timer;
+import com.codahale.metrics.*;
 import com.github.galdosd.betamax.Global;
 import com.github.galdosd.betamax.opengl.GlWindow;
 import com.github.galdosd.betamax.opengl.TextureCoordinate;
@@ -46,6 +43,8 @@ public abstract class GlProgramBase implements AutoCloseable {
     private final Timer idleTimer = Global.metrics.timer("idleTimer");
     private final Timer idleTimer5s = Global.metrics.timer("idleTimer5s", () ->
             new Timer(new SlidingTimeWindowReservoir(5, TimeUnit.SECONDS)));
+    private final Counter skippedFramesByLogicCounter = Global.metrics.counter("skippedFramesByLogic");
+    private final Counter skippedFramesByRenderCounter = Global.metrics.counter("skippedFramesByRender");
 
     private final ConsoleReporter reporter = ConsoleReporter.forRegistry(Global.metrics)
             .convertRatesTo(TimeUnit.SECONDS)
@@ -127,11 +126,13 @@ public abstract class GlProgramBase implements AutoCloseable {
     private void loopOnce() {
         try (Timer.Context _unused_context = idleTimer.time()) {
             try (Timer.Context _unused_context_2 = idleTimer5s.time()) {
-                frameClock.sleepTillNextLogicFrame();
+                if(!frameClock.sleepTillNextLogicFrame()) skippedFramesByRenderCounter.inc();
             }
         }
         try (Timer.Context _unused_context = fullLogicTimer.time()) {
+            boolean skippingFrames = false;
             do {
+                if(skippingFrames) skippedFramesByLogicCounter.inc();
                 try (Timer.Context _unused_context_2 = logicTimer.time()) {
                     // the pause function continues logic updates because logic updates should be idempotent in the absence
                     // of user input, which can be useful. The frame clock should be checked and if duplicate frames are
@@ -140,6 +141,7 @@ public abstract class GlProgramBase implements AutoCloseable {
                     frameClock.beginLogicFrame();
                     updateLogic();
                 }
+                skippingFrames = true;
             } while (frameClock.moreLogicFramesNeeded());
         }
         try (Timer.Context _unused_context = renderTimer.time()) {
