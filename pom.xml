@@ -4,27 +4,26 @@
        sync; echo 3 | sudo tee /proc/sys/vm/drop_caches
     TODO
         Working set features
-            Fancy mouse cursor
             Managed state (JSON)
                 Proper hotloading including preserving state
                 Save/load state
                 Dev console state & history
             TAB key and resetLogicFrames does not respect music position
+            Fancy framebuffer CRT style post effects
 
         Backlog features
-            Fancy framebuffer CRT style post effects
             basic steam support
             steam achievements
             osx support
-            David sound bugs
+            David sound bugs?
             Worry about texturePreloadAdvisingTimer
                 Need to fix busy loop in TextureRegistry, it's not just perf, it also reloads them before we can
                     increment the frame
                 Also, what if we're already working on loading it when it gets unloaded... (in batch list)
-            Put all manifests in a single package
-            Auto preload all tiny sprites at boot time
 
         Parking lot features
+            Put all manifests in a single package
+            Auto preload all tiny sprites at boot time
             Better "monitoring/alerting" based on metrics values
                 Point out when a specific logic or render frame blows the frame time budget
             Sprite sizes
