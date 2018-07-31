@@ -4,15 +4,13 @@
        sync; echo 3 | sudo tee /proc/sys/vm/drop_caches
     TODO
         Working set features
-            Compile Manifests
-            Don't log like crazy opengl
-            In prod mode recover from not finding RAM textures
-            TAB key and resetLogicFrames does not respect music position
+            Location mouse clicking
             Fancy mouse cursor
             Managed state (JSON)
                 Proper hotloading including preserving state
                 Save/load state
                 Dev console state & history
+            TAB key and resetLogicFrames does not respect music position
             LazyTextureImage#getRamLoaded needs to have a non synchronized advisory version
 
         Backlog features
@@ -29,6 +27,8 @@
             Auto preload all tiny sprites at boot time
 
         Parking lot features
+            Better "monitoring/alerting" based on metrics values
+                Point out when a specific logic or render frame blows the frame time budget
             Sprite sizes
             Click bitmaps
             Rewind
