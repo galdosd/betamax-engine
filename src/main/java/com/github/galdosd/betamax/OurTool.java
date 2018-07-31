@@ -145,5 +145,10 @@ public final class OurTool {
             Thread.sleep(4);
         } catch (InterruptedException e) { }
     }
+
+    public static void unimplemented() {
+        throw new UnsupportedOperationException("FIX"+"ME: This is not yet implemented. This should never be called "+
+                "in release code! Search for all accesses of OurTool#unimplemented before a release.");
+    }
 }
 

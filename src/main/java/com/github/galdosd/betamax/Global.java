@@ -11,7 +11,8 @@ import static com.github.galdosd.betamax.OurTool.fromProperty;
 // that and i've put off making unit tests lol. jeez.
 public final class Global {
     public static final MetricRegistry metrics = new MetricRegistry();
-    public static final String spriteBase = "com.github.galdosd.betamax.sprites.";
+    public static final String spritePackageBase = "com.github.galdosd.betamax.sprites.";
+    public static final String spritePathBase = "com/github/galdosd/betamax/sprites/";
     public static final String scriptBase = "com/github/galdosd/betamax/scripts/";
     public static final String shaderBase = "com/github/galdosd/betamax/shaders/";
     public static final String helpFile = "help.txt";

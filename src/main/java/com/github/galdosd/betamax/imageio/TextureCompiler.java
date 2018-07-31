@@ -23,7 +23,7 @@ public final class TextureCompiler {
 
     public static void main(String[] args) throws IOException, URISyntaxException {
         LOG.info("Collecting filenames");
-        Reflections reflections = new Reflections(Global.spriteBase, new ResourcesScanner());
+        Reflections reflections = new Reflections(Global.spritePackageBase, new ResourcesScanner());
         List<TextureName> textureNames = reflections.getResources(SpriteTemplateManifest.TIF_PATTERN)
                 .stream().sorted().map(TextureName::new).collect(toList());
         List<TextureName> necessaryTextureNames = textureNames.stream()
