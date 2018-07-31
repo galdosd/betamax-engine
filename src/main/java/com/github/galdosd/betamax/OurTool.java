@@ -63,17 +63,19 @@ public final class OurTool {
         // if we are more than 5 ms out, Thread.sleep is good enough
         // only sleep for a third of the time we have left to conservatively account for inaccuracy
         long targetSleep;
-        boolean slept = false;
+        if (System.currentTimeMillis() >= targetTime) return false;
         while((targetSleep = targetTime - System.currentTimeMillis()) > 5) {
             try {
-                slept = true;
                 Thread.sleep(targetSleep / 3);
             } catch (InterruptedException e) {/* doesn't matter, we'll keep trying */}
         }
         // now that we're pretty close to it, busy loop
-        if(System.currentTimeMillis() < targetTime) slept = true;
+        // FIXME currentTimeMillis probably makes a system call, possibly increasing chance of being unscheduled
+        // it would be worth researching whether this is actually how modern schedulers on linux and windows work
+        // or not, and if so, use a self calibrated busy loop to reduce our system calls
+        // or like i dunno, something.
         while(System.currentTimeMillis() < targetTime);
-        return slept;
+        return true;
     }
 
     public static boolean fromProperty(String propertyName, boolean defaultValue) {

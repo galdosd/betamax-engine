@@ -37,6 +37,9 @@ public class BetamaxGlProgram extends GlProgramBase {
     private final Timer loadingPhaseTimer = Global.metrics.timer("loadingPhaseTimer");
     private final Timer allSpritesRenderTimer = Global.metrics.timer("allSpritesRenderTimer");
     private final Timer checkAllSpritesReadyTimer = Global.metrics.timer("checkAllSpritesReadyTimer");
+    private final Timer pollEventsTimer = Global.metrics.timer("pollEventsTimer");
+    private final Timer updateDevConsoleTimer = Global.metrics.timer("updateDevConsoleTimer");
+    private final Timer processRamUnloadQueueTimer = Global.metrics.timer("processRamUnloadQueueTimer");
 
     private final SoundWorld soundWorld = new SoundWorld();
     private final SoundRegistry soundRegistry = new SoundRegistry(soundWorld);
@@ -244,20 +247,16 @@ public class BetamaxGlProgram extends GlProgramBase {
         }
         // we do this after waiting for sprites to (likely) be in RAM but before rendering because rendering
         // will evict MemoryStrategy.STREAMING sprite frames, and we need that frame to do mouse click collisions
-        pollEvents();
+        try(Timer.Context ignored = pollEventsTimer.time()) {
+            pollEvents();
+        }
         if(readyToRender) {
-            checkState(getFrameClock().getPaused() || !loading);
-            if(loading) {
-                LOG.debug("exited LOADING state");
-                loading = false;
-                getFrameClock().setPaused(false);
-                checkState(null!=loadingPhaseTimerContext);
-                loadingPhaseTimerContext.close();
-                loadingPhaseTimerContext = null;
-            }
+            exitLoadingMode();
             clearScreen();
             // FIXME this is a hack TBQH but there's no time for the more principled way right now
-            textureRegistry.processRamUnloadQueue();
+            try(Timer.Context ignored = processRamUnloadQueueTimer.time()) {
+                textureRegistry.processRamUnloadQueue();
+            }
             if (!getFrameClock().getPaused()) {
                 // FIXME would be nice to render the previous frame even if paused but we just unloaded it, whoops
                 try (Timer.Context ignored = allSpritesRenderTimer.time()) {
@@ -265,16 +264,33 @@ public class BetamaxGlProgram extends GlProgramBase {
                 }
             }
         } else {
-            if(!loading) {
-                LOG.debug("entered LOADING state");
-                getFrameClock().setPaused(true);
-                loading = true;
-                checkState(null == loadingPhaseTimerContext);
-                loadingPhaseTimerContext = loadingPhaseTimer.time();
-            }
+            enterLoadingMode();
         }
         showPauseScreen();
-        updateDevConsole();
+        try(Timer.Context ignored = updateDevConsoleTimer.time()) {
+            updateDevConsole();
+        }
+    }
+    private void enterLoadingMode() {
+        if(!loading) {
+            LOG.debug("entered LOADING state");
+            getFrameClock().setPaused(true);
+            loading = true;
+            checkState(null == loadingPhaseTimerContext);
+            loadingPhaseTimerContext = loadingPhaseTimer.time();
+        }
+    }
+
+    private void exitLoadingMode() {
+        checkState(getFrameClock().getPaused() || !loading);
+        if(loading) {
+            LOG.debug("exited LOADING state");
+            loading = false;
+            getFrameClock().setPaused(false);
+            checkState(null!=loadingPhaseTimerContext);
+            loadingPhaseTimerContext.close();
+            loadingPhaseTimerContext = null;
+        }
     }
 
     private void showPauseScreen() {

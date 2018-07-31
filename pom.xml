@@ -4,7 +4,6 @@
        sync; echo 3 | sudo tee /proc/sys/vm/drop_caches
     TODO
         Working set features
-            Location mouse clicking
             Fancy mouse cursor
             Managed state (JSON)
                 Proper hotloading including preserving state
