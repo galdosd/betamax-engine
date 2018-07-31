@@ -4,6 +4,9 @@
        sync; echo 3 | sudo tee /proc/sys/vm/drop_caches
     TODO
         Working set features
+            Compile Manifests
+            Don't log like crazy opengl
+            In prod mode recover from not finding RAM textures
             TAB key and resetLogicFrames does not respect music position
             Fancy mouse cursor
             Managed state (JSON)

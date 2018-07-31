@@ -95,10 +95,10 @@ public final class GlDebugMessages {
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
         return setupDebugMessageCallback( msg -> {
             // common case
-            if(!logger.isDebugEnabled() && "NOTIFICATION".equals(msg.severity)) return;
+            if(!logger.isTraceEnabled() && "NOTIFICATION".equals(msg.severity)) return;
 
             if("NOTIFICATION".equals(msg.severity)) {
-                logger.debug(msg.getLogMsg());
+                logger.trace(msg.getLogMsg());
             } else if("LOW".equals(msg.severity)) {
                 logger.warn(msg.getLogMsg());
             } else if("MEDIUM".equals(msg.severity)) {
