@@ -126,6 +126,11 @@ public final class Texture implements  AutoCloseable {
         // FIXME now we log like crazy through GlDebugMessages because of the below bindAndLoad
         // or wait maybe it is the vao.bind()
         // and it only happens on windows i think or maybe it is something else in the mute big sprite asset set
+        // FIXME we should be doing glBufferSubData or better yet (I think) uniforms and vertex shader
+        // instead of allocating a new buffer every time. also it's possible our occasional high render times
+        // are due to this? or due to the fact we only have one buffer (gl documentation notes that using multiple
+        // buffers is good if you change them since changing them while they are being used in the render pipeline
+        // can force the whole pipeline to stall)
         vbo.bindAndLoad(GL_ARRAY_BUFFER, GL_DYNAMIC_DRAW, new float[]{
             // two right triangles that cover the full screen
             // all our sprites are fullscreen! wow!
