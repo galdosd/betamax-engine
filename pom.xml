@@ -11,7 +11,6 @@
                 Save/load state
                 Dev console state & history
             TAB key and resetLogicFrames does not respect music position
-            LazyTextureImage#getRamLoaded needs to have a non synchronized advisory version
 
         Backlog features
             Fancy framebuffer CRT style post effects

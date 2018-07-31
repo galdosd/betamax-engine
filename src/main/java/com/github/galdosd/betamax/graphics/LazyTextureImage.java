@@ -46,15 +46,13 @@ public class LazyTextureImage implements  AutoCloseable {
     }
 
     @Override public void close()  {
-        if(getLoaded()) unload();
+        unload();
     }
 
     void setLoaded(boolean loaded) {
-        synchronized ($LOCK) {
-            if (loaded == getLoaded()) return;
-            if (loaded) load();
-            else unload();
-        }
+        if (loaded == getLoaded()) return;
+        if (loaded) load();
+        else unload();
     }
 
     boolean getLoaded() {
@@ -68,13 +66,23 @@ public class LazyTextureImage implements  AutoCloseable {
     }
 
     private void load() {
-        image = TextureImagesIO.fromRgbaFile(name, true, true);
+        TextureImage newImage = TextureImagesIO.fromRgbaFile(name, true, true);
+        synchronized ($LOCK) {
+            // prevent leaks due to double load
+            // this should never happen or at least be rare enough that doing the extra pointless load work
+            // is not a major deal, certainly not worth holding the lock the whole time and slowing checkLoaded
+            if(null!=image) newImage.close();
+            else image = newImage;
+        }
     }
 
     private void unload() {
-        checkLoaded();
-        image.close();
-        image = null;
+        synchronized ($LOCK) {
+            if(getLoaded()) {
+                image.close();
+                image = null;
+            }
+        }
     }
 
     private void checkLoaded() {
