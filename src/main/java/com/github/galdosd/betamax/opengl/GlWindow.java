@@ -1,5 +1,6 @@
 package com.github.galdosd.betamax.opengl;
 
+import com.github.galdosd.betamax.Global;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.GL;
@@ -89,6 +90,10 @@ public final class GlWindow implements AutoCloseable {
         if(!fullScreen) {
             centerWindow(createdWindowHandle);
         }
+
+        if(!Global.showSystemCursor) glfwSetInputMode(createdWindowHandle, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+
+
 
         glfwMakeContextCurrent(createdWindowHandle);
         glfwShowWindow(createdWindowHandle); // this has to be done before GL.createCapabilities()

@@ -42,4 +42,5 @@ public final class Global {
      */
     public static int textureLoadGracePeriodFramePercent = fromProperty("betamax.textureLoadGracePeriodFramePercent", 50);
     public static final boolean debugMode = fromProperty("betamax.debugMode", true);
+    public static final boolean showSystemCursor = fromProperty("betamax.showSystemCursor", true);
 }
