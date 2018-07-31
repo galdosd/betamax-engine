@@ -31,18 +31,24 @@ public class LazyTextureImage implements  AutoCloseable {
     }
 
     public void uploadGl(int boundTarget) {
-        checkLoaded();
-        image.uploadGl(boundTarget);
+        synchronized ($LOCK) {
+            checkLoaded();
+            image.uploadGl(boundTarget);
+        }
     }
 
     public ColorSample getPixel(TextureCoordinate coordinate) {
-        checkLoaded();
-        return image.getPixel(coordinate);
+        synchronized ($LOCK) {
+            checkLoaded();
+            return image.getPixel(coordinate);
+        }
     }
 
     public long getByteCount() {
-        checkLoaded();
-        return image.getByteCount();
+        synchronized ($LOCK) {
+            checkLoaded();
+            return image.getByteCount();
+        }
     }
 
     @Override public void close()  {
