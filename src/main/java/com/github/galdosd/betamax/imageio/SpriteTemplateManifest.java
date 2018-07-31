@@ -50,6 +50,7 @@ import static java.util.stream.Collectors.toSet;
 
     public static SpriteTemplateManifest load (String templateName) {
         String pkgName = Global.spriteBase + templateName;
+        //FIXME using a new Reflections instance for every template is slow as hell on windows
 
         Reflections reflections = new Reflections(pkgName + ".", new ResourcesScanner());
         List<TextureName> spriteFilenames = reflections.getResources(TIF_PATTERN)
