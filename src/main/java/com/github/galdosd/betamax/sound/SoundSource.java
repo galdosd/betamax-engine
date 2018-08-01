@@ -196,6 +196,6 @@ import static org.lwjgl.openal.AL10.*;
      * of silence but that openal thinks of our sound as going into a silent AL_STOPPED state when it finishes
      */
     public void resync(float expectedPositionInSeconds) {
-        OurTool.unimplemented();
+        seek(expectedPositionInSeconds);
     }
 }

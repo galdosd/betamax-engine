@@ -4,13 +4,14 @@ Main Screen keys
     ESC - End program
     F1 - show this help file
     Print Screen (or Ctrl+Print Screen on some platforms) - Print out performance metrics to console log
-    Tab - When paused, step ahead one frame at a time. THIS WILL NOT ADVANCE MUSIC AND SOUND! (FIXME)
+    Tab - When paused, step ahead one frame at a time.
     Ctrl + Page Up - Increase framerate by one
     Page Up - Double the framerate
     Page Down - Decrease framerate by one
     Ctrl + Page Down - Halve the framerate
     F5 - Reload python scripts (You must Build > Build Project in IntelliJ first)
     Ctrl+F5 - Reload python scripts and also restart game history
+    Ctrl+Home - Manually force a resync of sound position to animation position
     Right click on sprite - Highlight sprite
     Right click on sprite already highlighted - Unhighlight sprite
 

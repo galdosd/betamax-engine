@@ -17,11 +17,11 @@ import com.github.galdosd.betamax.sprite.Sprite;
 import com.github.galdosd.betamax.sprite.SpriteEvent;
 import com.github.galdosd.betamax.sprite.SpriteName;
 import com.github.galdosd.betamax.sprite.SpriteRegistry;
+import lombok.Value;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static com.google.common.base.Preconditions.checkState;
 import static org.lwjgl.opengl.GL11.*;
@@ -48,6 +48,7 @@ public class BetamaxGlProgram extends GlProgramBase {
     private final TextureRegistry textureRegistry = new TextureRegistry();
     private final SpriteTemplateRegistry spriteTemplateRegistry = new SpriteTemplateRegistry(soundRegistry, textureRegistry);
     private final DevConsole devConsole;
+    private final SoundSyncer soundSyncer = new SoundSyncer();
     private ScriptWorld scriptWorld;
     private SpriteRegistry spriteRegistry;
     private Optional<SpriteName> highlightedSprite = Optional.empty();
@@ -136,12 +137,29 @@ public class BetamaxGlProgram extends GlProgramBase {
             handleCrash(e);
         }
         getFrameClock().resetLogicFrames();
+        soundSyncer.reset();
+        soundSyncer.needResync();
         resetPitch();
     }
 
 
+    // XXX dirty hack
+    @Value private static final class KeyPressEvent {
+        int key, mods;
+    }
+    Queue<KeyPressEvent> enqueuedKeyPressEvents = new LinkedList<>();
     /** FIXME move to inputhandling */
     @Override protected void keyPressEvent(int key, int mods) {
+       enqueuedKeyPressEvents.add(new KeyPressEvent(key,mods));
+    }
+    private void processKeyEvents() {
+        KeyPressEvent keyPressEvent;
+        while(null!=(keyPressEvent=enqueuedKeyPressEvents.poll())){
+           doKeyPressEvent(keyPressEvent.getKey(), keyPressEvent.getMods());
+        }
+    }
+
+    private void doKeyPressEvent(int key, int mods) {
         boolean controlKeyPressed = (mods & GLFW.GLFW_MOD_CONTROL) != 0;
         // exit upon ESC key
         if (key == GLFW.GLFW_KEY_ESCAPE) {
@@ -157,9 +175,11 @@ public class BetamaxGlProgram extends GlProgramBase {
             reportMetrics();
         }
         else if(key == GLFW.GLFW_KEY_TAB && getFrameClock().getPaused() && getDebugMode()) {
-            // FIXME this does not advance sound!
             getFrameClock().stepFrame();
             updateLogic();
+        }
+        else if (key == GLFW.GLFW_KEY_HOME && controlKeyPressed) {
+            soundSyncer.needResync();
         }
         else if (key == GLFW.GLFW_KEY_PAUSE) {
             checkState(getFrameClock().getPaused() || !crashed);
@@ -170,8 +190,13 @@ public class BetamaxGlProgram extends GlProgramBase {
                 LOG.warn("Cannot unpause until loading is done");
             } else {
                 getFrameClock().setPaused(!getFrameClock().getPaused());
-                if (getFrameClock().getPaused()) soundWorld.globalPause();
-                else soundWorld.globalUnpause();
+                if (getFrameClock().getPaused()) {
+                    soundWorld.globalPause();
+                }
+                else {
+                    soundWorld.globalUnpause();
+                    soundSyncer.needResync();
+                }
             }
             // FIXME this will fuck up the metrics,we need a cooked Clock for Metrics to ignore
             // the passage of time during pause
@@ -264,14 +289,14 @@ public class BetamaxGlProgram extends GlProgramBase {
                 try (Timer.Context ignored = allSpritesRenderTimer.time()) {
                     renderAllSprites(spritesInRenderOrder);
                 }
+                soundSyncer.resyncIfNeeded(spritesInRenderOrder);
             }
         } else {
             enterLoadingMode();
         }
         showPauseScreen();
-        try(Timer.Context ignored = updateDevConsoleTimer.time()) {
-            updateDevConsole();
-        }
+        updateDevConsole();
+        processKeyEvents();
     }
     private void enterLoadingMode() {
         if(!loading) {
@@ -289,6 +314,7 @@ public class BetamaxGlProgram extends GlProgramBase {
             LOG.debug("exited LOADING state");
             loading = false;
             getFrameClock().setPaused(false);
+            soundSyncer.needResync();
             checkState(null!=loadingPhaseTimerContext);
             loadingPhaseTimerContext.close();
             loadingPhaseTimerContext = null;
@@ -347,16 +373,18 @@ public class BetamaxGlProgram extends GlProgramBase {
 
     private void updateDevConsole() {
         if(getDebugMode() && System.currentTimeMillis() > nextConsoleUpdate) {
-            devConsole.updateView(
-                    spriteRegistry.getSpritesInRenderOrder(),
-                    highlightedSprite,
-                    scriptWorld.getAllCallbacks(),
-                    scriptWorld.getStateVariables(),
-                    getFrameClock(),
-                    getActionStateString()
-            );
-            highlightedSprite = Optional.empty();
-            nextConsoleUpdate = System.currentTimeMillis() + Global.devConsoleUpdateIntervalMillis;
+            try(Timer.Context ignored = updateDevConsoleTimer.time()) {
+                devConsole.updateView(
+                        spriteRegistry.getSpritesInRenderOrder(),
+                        highlightedSprite,
+                        scriptWorld.getAllCallbacks(),
+                        scriptWorld.getStateVariables(),
+                        getFrameClock(),
+                        getActionStateString()
+                );
+                highlightedSprite = Optional.empty();
+                nextConsoleUpdate = System.currentTimeMillis() + Global.devConsoleUpdateIntervalMillis;
+            }
         }
     }
 
