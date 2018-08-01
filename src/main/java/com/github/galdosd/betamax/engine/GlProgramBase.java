@@ -39,6 +39,7 @@ public abstract class GlProgramBase implements AutoCloseable {
     private final Timer idleTimer = Global.metrics.timer("idleTimer");
     private final Timer idleTimer5s = Global.metrics.timer("idleTimer5s", () ->
             new Timer(new SlidingTimeWindowReservoir(5, TimeUnit.SECONDS)));
+    private final Timer videoFrameDriftTimer = Global.metrics.timer("videoFrameDriftTimer");
     private final Counter skippedFramesByLogicCounter = Global.metrics.counter("skippedFramesByLogic");
     private final Counter skippedFramesByRenderCounter = Global.metrics.counter("skippedFramesByRender");
 
@@ -126,24 +127,33 @@ public abstract class GlProgramBase implements AutoCloseable {
                 if(!frameClock.sleepTillNextLogicFrame()) skippedFramesByRenderCounter.inc();
             }
         }
-        try (Timer.Context _unused_context = fullLogicTimer.time()) {
-            boolean skippingFrames = false;
-            do {
-                if(skippingFrames) skippedFramesByLogicCounter.inc();
-                try (Timer.Context _unused_context_2 = logicTimer.time()) {
-                    // the pause function continues logic updates because logic updates should be idempotent in the absence
-                    // of user input, which can be useful. The frame clock should be checked and if duplicate frames are
-                    // received, no new time-triggered events should happen. This is the responsibility of the updateLogic
-                    // implementation.
-                    frameClock.beginLogicFrame();
-                    updateLogic();
+        try(Timer.Context ignored = videoFrameDriftTimer.time()) {
+            // careful moving videoFrameDriftTimer. It should start exactly when frameClock increments in its
+            // beginLogicFrame and exactly when glfwSwapBuffers is called at the end of RenderPhase#close.
+            // That said we are double buffered I guess so I'm not accounting for the time between the glfwSwapBuffers
+            // call and the actual screen update. We don't exactly enclose those points here but it's fine because
+            // and only as long as the other operations in between are of negligible time. I did check those BTW
+            // to verify that and you should too if you change this code region, or else suck it up and manually
+            // mark the videoFrameDriftTimer
+            try (Timer.Context _unused_context = fullLogicTimer.time()) {
+                boolean skippingFrames = false;
+                do {
+                    if (skippingFrames) skippedFramesByLogicCounter.inc();
+                    try (Timer.Context _unused_context_2 = logicTimer.time()) {
+                        // the pause function continues logic updates because logic updates should be idempotent in the absence
+                        // of user input, which can be useful. The frame clock should be checked and if duplicate frames are
+                        // received, no new time-triggered events should happen. This is the responsibility of the updateLogic
+                        // implementation.
+                        frameClock.beginLogicFrame();
+                        updateLogic();
+                    }
+                    skippingFrames = true;
+                } while (frameClock.moreLogicFramesNeeded());
+            }
+            try (Timer.Context _unused_context = renderTimer.time()) {
+                try (GlWindow.RenderPhase __unused_context = mainWindow.renderPhase()) {
+                    updateView();
                 }
-                skippingFrames = true;
-            } while (frameClock.moreLogicFramesNeeded());
-        }
-        try (Timer.Context _unused_context = renderTimer.time()) {
-            try (GlWindow.RenderPhase __unused_context = mainWindow.renderPhase()) {
-                updateView();
             }
         }
     }

@@ -43,4 +43,20 @@ public final class Global {
     public static int textureLoadGracePeriodFramePercent = fromProperty("betamax.textureLoadGracePeriodFramePercent", 50);
     public static final boolean debugMode = fromProperty("betamax.debugMode", true);
     public static final boolean showSystemCursor = fromProperty("betamax.showSystemCursor", true);
+    /** How much we let audio and video fall out of sync.
+     *   See https://en.wikipedia.org/wiki/Audio-to-video_synchronization for thoughts on determining this value
+     *   FIXME: We should consider exactly where in the frame pipeline we set this, because ultimately the sync
+     *   point should be when glfwSwapBuffers is called. In fact we should measure that with a timer (the average
+     *   time between frameclock incrementing and the next glfwSwapBuffers call) and skew this value by that much,
+     *   and do the drift correction at the frameclock increment point. We don't do much of that right now (well maybe
+     *   just the measurement) but hopefully we'll still keep total drift under control to prevent perceptible lip flap
+     *
+     *   On my machine 10ms is median (20ms is 95pth percentile) for video frame drift, and the above wikipedia article
+     *   shows professional film groups recommending around 45ms maximum, so 45 - 10 = 35ms seems like a reasonable
+     *   maximum value for us that hopefully won't cause too much resyncing.
+     *
+     *   We're still not factoring in the actual double buffering / V sync / monitor refresh time though. I think it's
+     *   a wash for us though
+     */
+    public static final int maxSoundDriftInMs = fromProperty("betamax.maxSoundDriftInMs", 35);
 }
