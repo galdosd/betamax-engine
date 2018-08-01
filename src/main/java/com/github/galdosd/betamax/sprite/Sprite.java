@@ -49,4 +49,6 @@ public interface Sprite extends AutoCloseable {
     String getSoundRemarks();
     /** Number of seconds that the playing source is ahead of where it should be (or negative if behind) */
     float getSoundDrift();
+
+    void resyncSound();
 }

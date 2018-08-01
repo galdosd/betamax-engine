@@ -26,9 +26,11 @@ import java.util.Optional;
 import static com.google.common.base.Preconditions.checkState;
 import static org.lwjgl.opengl.GL11.*;
 
-/**
- * FIXME: Document this class
+/** Main entry point of BETAMAX game engine
  */
+// FIXME this class is growing unwieldy, break it up. And I don't really understand what if any my principled
+// division of duties between it and its parent GlProgramBase are. Whatever they should be if any, I also don't like
+// the inheritance
 public class BetamaxGlProgram extends GlProgramBase {
     private static final org.slf4j.Logger LOG =
             LoggerFactory.getLogger(new Object(){}.getClass().getEnclosingClass());

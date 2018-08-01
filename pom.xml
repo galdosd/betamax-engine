@@ -13,7 +13,7 @@
                 X Include soundInitialFrame
                 X Seeking mechanism
                 X Fix unpause-after-ended bug
-                - Show sound position and AL source state in dev console
+                X Show sound position and AL source state in dev console
                     use initialSoundFrame for age display
                 - reSeekAll static in BetamaxGlProgram
                 - checkedReSeekAll static in BetamaxGlProgram
@@ -21,7 +21,9 @@
                     - periodically
                     - after tab key
                     - after unpause?
-
+            Always load a RAM frame on the fly if needed instead of crashing. It's really very rare. Set a metric
+                and log it instead, even in debug mode. I want this code exercised but I don't want to leave debug
+                mode because it's so nice!
 
             Fancy framebuffer CRT style post effects
 
@@ -36,6 +38,19 @@
                 Also, what if we're already working on loading it when it gets unloaded... (in batch list)
 
         Parking lot features
+            Choreography problems!
+                Now that pollEvents happens halfway through render just as a hack so that getPixel will use the frames
+                before they get unloaded (TextureRegistry#processRamUnloadQueue), we have a couple of choreography
+                hiccups.
+                    Ctrl+F5 calls newWorld, and TAB calls updateLogic. Each respectively should not happen in the
+                    middle of a render frame because sprites might be AutoCloseable#close'd for one, other stuff
+                    might happen we don't intend. Frankly I don't recall what unstated choreography invariants we
+                    have here but we should try to state and enforce them as well as state and enforce the overall
+                    order that we do logic, then rendering, not mixing one or the other, and if one affects the other,
+                    actions should be queued and played at the necessary time. While we're at it I'd like to have
+                    logic in a seperate thread so we can catch python if it hangs and to make it easier to keep updating
+                    and keep the application minimally responsive if a logic frame script callback takes a long time
+                    This would all be managed with event sourcing for the IPC. Ah yes, the grand old Second System.
             Put all manifests in a single package
             Auto preload all tiny sprites at boot time
             Better "monitoring/alerting" based on metrics values

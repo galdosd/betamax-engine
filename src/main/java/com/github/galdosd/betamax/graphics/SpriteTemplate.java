@@ -2,6 +2,7 @@ package com.github.galdosd.betamax.graphics;
 
 import com.codahale.metrics.Timer;
 import com.github.galdosd.betamax.Global;
+import com.github.galdosd.betamax.OurTool;
 import com.github.galdosd.betamax.engine.FrameClock;
 import com.github.galdosd.betamax.imageio.SpriteTemplateManifest;
 import com.github.galdosd.betamax.opengl.ShaderProgram;
@@ -27,6 +28,7 @@ import static java.util.stream.Collectors.toList;
  * a single SpriteTemplate can be used to have several sprites on the screen at once or at different times
  * each of which can be at different points in time in their animation (see Sprite interface)
  */
+// FIXME this class is growing unwieldy, break it up
 public final class SpriteTemplate implements  AutoCloseable {
     // TODO Textures and SoundBuffers should be unloaded, implement AutoCloseable down the line
     private static final org.slf4j.Logger LOG =
@@ -179,7 +181,7 @@ public final class SpriteTemplate implements  AutoCloseable {
         }
 
         @Override public int getAge() {
-            return frameClock.getCurrentFrame() - initialFrame;
+            return frameClock.getCurrentFrame() - initialSoundFrame;
         }
 
         @Override public boolean getPaused() {
@@ -257,6 +259,11 @@ public final class SpriteTemplate implements  AutoCloseable {
             float expectedPositionInSeconds = (float)expectedPositionInFrames / (float)Global.targetFps;
             return soundSource.isPresent() ? soundSource.get().getDrift(expectedPositionInSeconds) : 0.0f;
         }
+
+        @Override public void resyncSound() {
+            OurTool.unimplemented();
+        }
+
     }
 
 }
