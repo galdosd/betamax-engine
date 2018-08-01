@@ -114,4 +114,12 @@ import static org.lwjgl.stb.STBVorbis.stb_vorbis_decode_memory;
         return soundSource;
     }
 
+    public int secondsToSamples(float seconds) {
+        // XXX should this be multipled by channels too? what does openal think of as samples?
+        return (int)(seconds * sampleRate);
+    }
+
+    public int totalSamples () {
+        return bytes / channels / sampleRate / Short.BYTES;
+    }
 }

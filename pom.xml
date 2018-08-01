@@ -5,10 +5,23 @@
     TODO
         Working set features
             Managed state (JSON)
-                Proper hotloading including preserving state
                 Save/load state
                 Dev console state & history
+                call checkedReSeekAll after load state
+                Proper hotloading including preserving state?
             TAB key and resetLogicFrames does not respect music position
+                X Include soundInitialFrame
+                X Seeking mechanism
+                X Fix unpause-after-ended bug
+                - Show sound position and AL source state in dev console
+                - reSeekAll static in BetamaxGlProgram
+                - checkedReSeekAll static in BetamaxGlProgram
+                - call checkedReSeekAll
+                    - periodically
+                    - after tab key
+                    - after unpause?
+
+
             Fancy framebuffer CRT style post effects
 
         Backlog features

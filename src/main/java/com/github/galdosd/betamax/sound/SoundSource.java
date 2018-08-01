@@ -2,6 +2,7 @@ package com.github.galdosd.betamax.sound;
 
 import lombok.ToString;
 import org.lwjgl.openal.AL10;
+import org.lwjgl.openal.AL11;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
@@ -19,6 +20,7 @@ import static org.lwjgl.openal.AL10.*;
     private final int handle;
     /** we use this like a semaphore so it can be reentrantly paused so global and per-sprite pause both work easily */
     private int pauseLevel = 0;
+    private SoundBuffer buffer;
 
     private static final Set<SoundSource> allSoundSources = new HashSet<>();
     private static final Object LOCK$allSoundSources = new Object();
@@ -42,12 +44,35 @@ import static org.lwjgl.openal.AL10.*;
     }
 
     public void playSound(SoundBuffer soundBuffer){
-        LOG.debug("Playing {} on {}", soundBuffer, this);
+        buffer = soundBuffer;
+        LOG.debug("Playing {}", this);
         alSourcei(handle, AL10.AL_BUFFER, soundBuffer.getHandle());
         SoundWorld.checkAlError();
         alSourcePlay(handle);
         setPitch(currentGlobalPitch);
         SoundWorld.checkAlError();
+    }
+
+    public void seek(float seconds) {
+        int samples = buffer.secondsToSamples(seconds);
+        boolean requestingEnd = samples >= buffer.totalSamples() - 1;
+        if(requestingEnd) {
+            LOG.debug("Seeked to end and stopped {}", this);
+            alSourceStop(handle);
+        } else {
+            if(AL_STOPPED==getSourceState()) {
+                alSourcePlay(handle);
+                if(pauseLevel > 0) {
+                    alSourcePause(handle);
+                    LOG.debug("Seeked to {} and paused after having finished {}", seconds, this);
+                } else {
+                    LOG.debug("Seeked to {} after having finished {}", seconds, this);
+                }
+            } else {
+                LOG.debug("Seeked playing source to {}: {}", seconds, this);
+            }
+            alSourcef(handle, AL11.AL_SAMPLE_OFFSET, samples);
+        }
     }
 
     @Override public void close() {
@@ -64,12 +89,23 @@ import static org.lwjgl.openal.AL10.*;
         pauseLevel--;
         checkState(pauseLevel>=0);
         if(pauseLevel == 0) {
-            LOG.debug("Resume {}", this);
-            alSourcePlay(handle);
-            SoundWorld.checkAlError();
+            if(AL_PAUSED == getSourceState()) {
+                LOG.debug("Resume {}", this);
+                alSourcePlay(handle);
+                SoundWorld.checkAlError();
+            } else {
+                LOG.debug("Resume {} (suppressed, already complete)", this);
+
+            }
         } else {
             LOG.debug("Pause {} level {}", this, pauseLevel);
         }
+    }
+
+    private int getSourceState() {
+        int sourceState = alGetSourcei(handle, AL_SOURCE_STATE);
+        SoundWorld.checkAlError();
+        return sourceState;
     }
 
     public void pause() {

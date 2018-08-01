@@ -93,6 +93,7 @@ public final class SpriteTemplate implements  AutoCloseable {
         private final FrameClock frameClock;
         @Getter private final int creationSerial;
         private int initialFrame;
+        private final int initialSoundFrame;
         private boolean clickableEverywhere = false;
         @Getter private int layer = 0;
         @Getter private int repetitions = 1;
@@ -113,7 +114,7 @@ public final class SpriteTemplate implements  AutoCloseable {
                 checkState(!soundName.isPresent(), "Sound was not loaded!");
                 soundSource = Optional.empty();
             }
-            initialFrame = frameClock.getCurrentFrame();
+            initialFrame = initialSoundFrame = frameClock.getCurrentFrame();
             creationSerial = nextCreationSerial++;
         }
 
