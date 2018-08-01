@@ -264,6 +264,7 @@ public class BetamaxGlProgram extends GlProgramBase {
     private long nextConsoleUpdate = System.currentTimeMillis();
     @Override protected void updateView() {
         List<Sprite> spritesInRenderOrder = spriteRegistry.getSpritesInRenderOrder();
+        soundSyncer.resyncIfNeeded(spritesInRenderOrder);
 
         boolean readyToRender;
         try(Timer.Context ignored = checkAllSpritesReadyTimer.time()) {
@@ -289,7 +290,6 @@ public class BetamaxGlProgram extends GlProgramBase {
                 try (Timer.Context ignored = allSpritesRenderTimer.time()) {
                     renderAllSprites(spritesInRenderOrder);
                 }
-                soundSyncer.resyncIfNeeded(spritesInRenderOrder);
             }
         } else {
             enterLoadingMode();
