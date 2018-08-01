@@ -1,5 +1,6 @@
 package com.github.galdosd.betamax.sound;
 
+import com.github.galdosd.betamax.OurTool;
 import lombok.ToString;
 import org.lwjgl.openal.AL10;
 import org.lwjgl.openal.AL11;
@@ -188,5 +189,13 @@ import static org.lwjgl.openal.AL10.*;
         } else {
             return getSecOffset() - expectedPositionInSeconds;
         }
+    }
+
+    /** Companion to getDrift, think of it as setDrift(0), make sound seek to the appropriate position,
+     * taking into account our notional model that the sound plays once and then continues for an infinite amount
+     * of silence but that openal thinks of our sound as going into a silent AL_STOPPED state when it finishes
+     */
+    public void resync(float expectedPositionInSeconds) {
+        OurTool.unimplemented();
     }
 }

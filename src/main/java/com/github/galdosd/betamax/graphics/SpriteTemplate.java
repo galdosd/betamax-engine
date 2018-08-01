@@ -255,15 +255,20 @@ public final class SpriteTemplate implements  AutoCloseable {
         }
 
         @Override public float getSoundDrift() {
+            return soundSource.isPresent()
+                    ? soundSource.get().getDrift(getExpectedSoundPositionInSeconds())
+                    : 0.0f;
+        }
+
+        private float getExpectedSoundPositionInSeconds() {
             int expectedPositionInFrames = frameClock.getCurrentFrame() - initialSoundFrame;
-            float expectedPositionInSeconds = (float)expectedPositionInFrames / (float)Global.targetFps;
-            return soundSource.isPresent() ? soundSource.get().getDrift(expectedPositionInSeconds) : 0.0f;
+            return (float)expectedPositionInFrames / (float) Global.targetFps;
         }
 
         @Override public void resyncSound() {
-            OurTool.unimplemented();
+            if(soundSource.isPresent()) {
+                soundSource.get().resync(getExpectedSoundPositionInSeconds());
+            }
         }
-
     }
-
 }

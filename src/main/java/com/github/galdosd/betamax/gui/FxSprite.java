@@ -47,7 +47,7 @@ public final class FxSprite extends FxRow<SpriteName> {
         setSndLvl(sprite.getSoundPauseLevel());
         setLocation(sprite.getLocation().toShortString());
         setSoundRemarks( sprite.getSoundRemarks() );
-        setSoundDrift( String.format("%+.2fs", sprite.getSoundDrift()) );
+        setSoundDrift( String.format("%+.3fs", sprite.getSoundDrift()) );
     }
 
     @Override public SpriteName getID() {
