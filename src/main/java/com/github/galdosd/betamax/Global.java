@@ -58,5 +58,10 @@ public final class Global {
      *   We're still not factoring in the actual double buffering / V sync / monitor refresh time though. I think it's
      *   a wash for us though
      */
-    public static final int maxSoundDriftInMs = fromProperty("betamax.maxSoundDriftInMs", 35);
+    public static final int maxSoundDriftMillis = fromProperty("betamax.maxSoundDriftInMs", 35);
+    /** Once we detect there's sound/video drift, how long will we wait to see if it um, goes away on its own?
+     *  This is necessary because if there's ever a laggy video/logic frame which there may be here and then, it'll
+     *  show as drift, but it will self correct right away. We don't want to thrash back and forth!
+     */
+    public static final int driftTolerancePeriodFrames = fromProperty("betamax.driftTolerancePeriodFrames", 6);
 }
