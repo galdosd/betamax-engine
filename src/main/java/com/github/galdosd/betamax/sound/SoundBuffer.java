@@ -120,6 +120,10 @@ import static org.lwjgl.stb.STBVorbis.stb_vorbis_decode_memory;
     }
 
     public int totalSamples () {
-        return bytes / channels / sampleRate / Short.BYTES;
+        return bytes / channels / Short.BYTES;
+    }
+
+    public float totalSeconds() {
+        return (float)totalSamples() / (float)sampleRate;
     }
 }

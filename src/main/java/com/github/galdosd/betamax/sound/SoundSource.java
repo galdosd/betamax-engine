@@ -49,8 +49,23 @@ import static org.lwjgl.openal.AL10.*;
         alSourcei(handle, AL10.AL_BUFFER, soundBuffer.getHandle());
         SoundWorld.checkAlError();
         alSourcePlay(handle);
+        SoundWorld.checkAlError();
         setPitch(currentGlobalPitch);
         SoundWorld.checkAlError();
+    }
+
+    public String getRemarks() {
+        float secOffset = getSecOffset();
+        return String.format("%s %.1fs of %.1fs", getSourceStateString(), secOffset, buffer.totalSeconds());
+    }
+
+    private float getSecOffset() {
+        if(getSourceState() == AL_STOPPED) {
+            return buffer.totalSeconds();
+        }
+        float offset = alGetSourcef(handle, AL11.AL_SEC_OFFSET);
+        SoundWorld.checkAlError();
+        return offset;
     }
 
     public void seek(float seconds) {
@@ -59,6 +74,7 @@ import static org.lwjgl.openal.AL10.*;
         if(requestingEnd) {
             LOG.debug("Seeked to end and stopped {}", this);
             alSourceStop(handle);
+            SoundWorld.checkAlError();
         } else {
             if(AL_STOPPED==getSourceState()) {
                 alSourcePlay(handle);
@@ -72,6 +88,7 @@ import static org.lwjgl.openal.AL10.*;
                 LOG.debug("Seeked playing source to {}: {}", seconds, this);
             }
             alSourcef(handle, AL11.AL_SAMPLE_OFFSET, samples);
+            SoundWorld.checkAlError();
         }
     }
 
@@ -108,6 +125,17 @@ import static org.lwjgl.openal.AL10.*;
         return sourceState;
     }
 
+    private String getSourceStateString() {
+        int sourceState = getSourceState();
+        switch(sourceState) {
+            case AL_INITIAL:    return "INITIAL";
+            case AL_PLAYING:    return "PLAYING";
+            case AL_PAUSED:     return "PAUSED";
+            case AL_STOPPED:    return "STOPPED";
+            default:            return "UNKNOWN=" + sourceState;
+        }
+    }
+
     public void pause() {
         checkState(pauseLevel>=0);
         if(pauseLevel == 0) {
@@ -122,11 +150,13 @@ import static org.lwjgl.openal.AL10.*;
     public void mute() {
         LOG.debug("Mute {}", this);
         alSourcef(handle, AL_GAIN, 0f);
+        SoundWorld.checkAlError();
     }
 
     public void unmute() {
         LOG.debug("Unmute {}", this);
         alSourcef(handle, AL_GAIN, 1f);
+        SoundWorld.checkAlError();
     }
 
     public static void globalPitch(float newPitch) {
@@ -136,10 +166,27 @@ import static org.lwjgl.openal.AL10.*;
 
     private void setPitch(float newPitch) {
         alSourcef(handle, AL_PITCH, newPitch);
+        SoundWorld.checkAlError();
     }
 
     public int getPauseLevel() {
         checkState(pauseLevel>=0);
         return pauseLevel;
+    }
+
+    /** Given expected seeked position, return how far off we actually are (positive means actual playing sound
+     *  is ahead of expectation, negative means it's behind.
+     *
+     *  We notionally think of a sound playing once and then continuing on with dead silence infinitely long,
+     *  so naturally if the sound is already successfully over (AL_STOPPED) and the expected position is past
+     *  the end of the soundtrack, then our drift is of course 0.0. Of course, if the sound is stopped (over) and
+     *  the expected position is earlier than the end, then we do have a little drift.
+     */
+    public float getDrift(float expectedPositionInSeconds) {
+        if(getSourceState()==AL_STOPPED && expectedPositionInSeconds > buffer.totalSeconds()) {
+            return 0.0f;
+        } else {
+            return getSecOffset() - expectedPositionInSeconds;
+        }
     }
 }

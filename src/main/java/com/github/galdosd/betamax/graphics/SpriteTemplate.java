@@ -247,6 +247,16 @@ public final class SpriteTemplate implements  AutoCloseable {
             checkArgument(location.isValid(), "Out of bounds location %s", location);
             this.location = location;
         }
+
+        @Override public String getSoundRemarks() {
+            return soundSource.isPresent() ? soundSource.get().getRemarks() : "n/a";
+        }
+
+        @Override public float getSoundDrift() {
+            int expectedPositionInFrames = frameClock.getCurrentFrame() - initialSoundFrame;
+            float expectedPositionInSeconds = (float)expectedPositionInFrames / (float)Global.targetFps;
+            return soundSource.isPresent() ? soundSource.get().getDrift(expectedPositionInSeconds) : 0.0f;
+        }
     }
 
 }

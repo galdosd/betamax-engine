@@ -16,15 +16,21 @@ public final class FxSprite extends FxRow<SpriteName> {
     SimpleStringProperty spriteName = new SimpleStringProperty();
     SimpleStringProperty template = new SimpleStringProperty();
     SimpleIntegerProperty moment = new SimpleIntegerProperty();
+    @ColumnWidth(60)
     SimpleIntegerProperty length = new SimpleIntegerProperty();
     SimpleIntegerProperty age = new SimpleIntegerProperty();
     SimpleIntegerProperty layer = new SimpleIntegerProperty();
+    @ColumnWidth(60)
     SimpleIntegerProperty serial = new SimpleIntegerProperty();
     SimpleIntegerProperty reps = new SimpleIntegerProperty();
     SimpleBooleanProperty hidden = new SimpleBooleanProperty();
     SimpleBooleanProperty paused = new SimpleBooleanProperty();
+    @ColumnWidth(60)
     SimpleIntegerProperty sndLvl = new SimpleIntegerProperty();
     SimpleStringProperty location = new SimpleStringProperty();
+    @ColumnWidth(200)
+    SimpleStringProperty soundRemarks = new SimpleStringProperty();
+    SimpleStringProperty soundDrift = new SimpleStringProperty();
 
     public FxSprite(int tableIndex, Sprite sprite) {
         this.tableIndex = tableIndex;
@@ -40,11 +46,16 @@ public final class FxSprite extends FxRow<SpriteName> {
         setPaused(sprite.getPaused());
         setSndLvl(sprite.getSoundPauseLevel());
         setLocation(sprite.getLocation().toShortString());
+        setSoundRemarks( sprite.getSoundRemarks() );
+        setSoundDrift( String.format("%+.2fs", sprite.getSoundDrift()) );
     }
 
     @Override public SpriteName getID() {
         return new SpriteName(getSpriteName());
     }
+
+    public String getSoundDrift() { return soundDrift.get(); }
+    public void setSoundDrift(String soundDrift) { this.soundDrift.set(soundDrift); }
 
     public String getLocation() { return location.get(); }
     public void setLocation(String location) { this.location.set(location); }
@@ -125,4 +136,7 @@ public final class FxSprite extends FxRow<SpriteName> {
     public void setSndLvl(int sndLvl) {
         this.sndLvl.set(sndLvl);
     }
+
+    public String getSoundRemarks() { return soundRemarks.get(); }
+    public void setSoundRemarks(String soundRemarks) { this.soundRemarks.set(soundRemarks); }
 }
