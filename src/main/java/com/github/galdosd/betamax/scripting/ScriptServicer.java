@@ -150,6 +150,7 @@ public final class ScriptServicer {
 
     private String globalShaderName = null;
     public void setGlobalShader(String shaderName) {
+        checkInit();
         globalShaderName = shaderName;
     }
 }
