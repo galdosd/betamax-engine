@@ -3,6 +3,8 @@ package com.github.galdosd.betamax.sprite;
 import com.codahale.metrics.Timer;
 import com.github.galdosd.betamax.Global;
 import com.github.galdosd.betamax.engine.FrameClock;
+import com.github.galdosd.betamax.engine.GameplaySnapshot;
+import com.github.galdosd.betamax.graphics.SpriteTemplate;
 import com.github.galdosd.betamax.graphics.SpriteTemplateRegistry;
 import com.github.galdosd.betamax.opengl.TextureCoordinate;
 import com.github.galdosd.betamax.scripting.EventType;
@@ -68,6 +70,15 @@ public class SpriteRegistry implements AutoCloseable {
         SpriteName name = sprite.getName();
         checkArgument(!registeredSprites.containsKey(name), "duplicate sprite name: " + name);
         registeredSprites.put(name, sprite);
+    }
+
+    public void restoreSnapshot(List<GameplaySnapshot.SpriteSnapshot> spriteSnapshots) {
+        for(GameplaySnapshot.SpriteSnapshot snapshot: spriteSnapshots) {
+            SpriteTemplate template = spriteTemplateRegistry.getTemplate(snapshot.getTemplateName());
+            Sprite sprite = template.createFromSnapshot(snapshot, frameClock);
+            addSprite(sprite);
+        }
+
     }
 
     public Sprite getSpriteByName(SpriteName spriteName) {

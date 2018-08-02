@@ -38,6 +38,8 @@ public final class Global {
      * needs this property too, and not any others
      */
     public final static String textureCacheDir = fromProperty("betamax.textureCacheDir");
+    /** Where JSON game save files are saved */
+    public final static String snapshotDir = fromProperty("betamax.snapshotDir");
     /** sound is neither loaded nor played if disabled */
     public static final boolean enableSound = fromProperty("betamax.enableSound", true);
     /** Any sprite with less than this many frames will stay in memory forever, other sprites will be evicted as

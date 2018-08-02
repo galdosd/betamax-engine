@@ -11,7 +11,8 @@ Main Screen keys
     Ctrl + Page Down - Halve the framerate
     F5 - Reload python scripts (You must Build > Build Project in IntelliJ first)
     Ctrl+F5 - Reload python scripts and also restart game history
-    Ctrl+Home - Manually force a resync of sound position to animation position
+    Home - load a snapshot of game progress
+    End - save a snapshot of game progress
     Right click on sprite - Highlight sprite
     Right click on sprite already highlighted - Unhighlight sprite
 

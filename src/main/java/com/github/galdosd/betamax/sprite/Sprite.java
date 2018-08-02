@@ -1,5 +1,6 @@
 package com.github.galdosd.betamax.sprite;
 
+import com.github.galdosd.betamax.engine.GameplaySnapshot;
 import com.github.galdosd.betamax.graphics.TextureName;
 import com.github.galdosd.betamax.opengl.ShaderProgram;
 import com.github.galdosd.betamax.opengl.TextureCoordinate;
@@ -51,4 +52,6 @@ public interface Sprite extends AutoCloseable {
     float getSoundDrift();
 
     void resyncSound();
+
+    GameplaySnapshot.SpriteSnapshot toSnapshot();
 }

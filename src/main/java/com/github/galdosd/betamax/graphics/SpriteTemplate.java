@@ -4,6 +4,7 @@ import com.codahale.metrics.Timer;
 import com.github.galdosd.betamax.Global;
 import com.github.galdosd.betamax.OurTool;
 import com.github.galdosd.betamax.engine.FrameClock;
+import com.github.galdosd.betamax.engine.GameplaySnapshot;
 import com.github.galdosd.betamax.imageio.SpriteTemplateManifest;
 import com.github.galdosd.betamax.opengl.ShaderProgram;
 import com.github.galdosd.betamax.opengl.TextureCoordinate;
@@ -83,6 +84,10 @@ public final class SpriteTemplate implements  AutoCloseable {
         textures.forEach(Texture::close);
     }
 
+    public Sprite createFromSnapshot(GameplaySnapshot.SpriteSnapshot snapshot, FrameClock frameClock) {
+       return new SpriteImpl(snapshot,frameClock);
+    }
+
     // FIXME break out SpriteImpl
     /**
      * A specific instance of a particular sprite template
@@ -109,15 +114,36 @@ public final class SpriteTemplate implements  AutoCloseable {
         private SpriteImpl(SpriteName name, FrameClock frameClock){
             this.frameClock = frameClock;
             this.name = name;
-            if(soundBuffer.isPresent()) {
-                LOG.debug("Playing sound for sprite {}", getName());
-                soundSource = Optional.of(soundBuffer.get().beginPlaying());
-            } else {
-                checkState(!soundName.isPresent(), "Sound was not loaded!");
-                soundSource = Optional.empty();
-            }
             initialFrame = initialSoundFrame = frameClock.getCurrentFrame();
             creationSerial = nextCreationSerial++;
+            soundSource = setupSound();
+        }
+
+        private Optional<SoundSource> setupSound() {
+            if(soundBuffer.isPresent()) {
+                LOG.debug("Playing sound for sprite {}", getName());
+                return Optional.of(soundBuffer.get().beginPlaying());
+            } else {
+                checkState(!soundName.isPresent(), "Sound was not loaded!");
+                return Optional.empty();
+            }
+        }
+
+        public SpriteImpl(GameplaySnapshot.SpriteSnapshot snapshot, FrameClock frameClock) {
+            this.frameClock = frameClock;
+            this.name = snapshot.getName();
+            this.creationSerial = snapshot.getCreationSerial();
+            this.initialFrame = snapshot.getInitialFrame();
+            this.initialSoundFrame = snapshot.getInitialSoundFrame();
+            this.clickableEverywhere = snapshot.isClickableEverywhere();
+            this.layer = snapshot.getLayer();
+            this.repetitions = snapshot.getRepetitions();
+            this.pinnedToCursor = snapshot.isPinnedToCursor();
+            this.paused = snapshot.isPaused();
+            this.hidden = snapshot.isHidden();
+            this.pausedFrame = snapshot.getPausedFrame();
+            this.location = snapshot.getLocation();
+            soundSource = setupSound();
         }
 
         @Override public void render(ShaderProgram shaderProgram) {
@@ -269,6 +295,24 @@ public final class SpriteTemplate implements  AutoCloseable {
             if(soundSource.isPresent()) {
                 soundSource.get().resync(getExpectedSoundPositionInSeconds());
             }
+        }
+
+        @Override public GameplaySnapshot.SpriteSnapshot toSnapshot() {
+            return new GameplaySnapshot.SpriteSnapshot(
+                    templateName,
+                    name,
+                    creationSerial,
+                    initialFrame,
+                    initialSoundFrame,
+                    clickableEverywhere,
+                    layer,
+                    repetitions,
+                    pinnedToCursor,
+                    paused,
+                    hidden,
+                    pausedFrame,
+                    location
+            );
         }
     }
 }

@@ -104,4 +104,14 @@ public class ScriptWorld implements LogicHandler {
     public String getGlobalShader() {
         return servicer.getGlobalShaderName();
     }
+
+    public void setGlobalShader(String globalShader) {
+        servicer.setGlobalShader(globalShader);
+    }
+
+    public void setStateVariables(Map<String, String> scriptVariables) {
+        scriptVariables.entrySet().stream().forEach(entry -> {
+            servicer.setStateVariable(entry.getKey(), entry.getValue());
+        });
+    }
 }

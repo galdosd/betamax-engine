@@ -4,6 +4,8 @@ import com.google.common.base.Charsets;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.CharStreams;
 import com.google.common.io.Files;
+import javafx.application.Platform;
+import javafx.scene.control.ChoiceDialog;
 import lombok.NonNull;
 import org.lwjgl.system.MemoryUtil;
 
@@ -17,6 +19,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
@@ -158,6 +162,18 @@ public final class OurTool {
     public static void unimplemented() {
         throw new UnsupportedOperationException("FIX"+"ME: This is not yet implemented. This should never be called "+
                 "in release code! Search for all accesses of OurTool#unimplemented before a release.");
+    }
+
+    public static Future<Optional<String>> guiChoose(String prompt, List<String> choices) {
+        CompletableFuture<Optional<String>> chosenString = new CompletableFuture<>();
+        Platform.runLater(() -> {
+            ChoiceDialog<String> dialog = new ChoiceDialog<>(choices.get(0), choices);
+            dialog.setTitle("Choice");
+            dialog.setHeaderText(prompt);
+            dialog.setContentText("Choice");
+            chosenString.complete(dialog.showAndWait());
+        });
+        return chosenString;
     }
 }
 

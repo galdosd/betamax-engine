@@ -3,6 +3,7 @@ package com.github.galdosd.betamax.engine;
 
 import com.codahale.metrics.Timer;
 import com.github.galdosd.betamax.Global;
+import com.github.galdosd.betamax.OurTool;
 import com.github.galdosd.betamax.graphics.SpriteTemplateRegistry;
 import com.github.galdosd.betamax.graphics.Texture;
 import com.github.galdosd.betamax.graphics.TextureLoadAdvisor;
@@ -18,13 +19,19 @@ import com.github.galdosd.betamax.sprite.Sprite;
 import com.github.galdosd.betamax.sprite.SpriteEvent;
 import com.github.galdosd.betamax.sprite.SpriteName;
 import com.github.galdosd.betamax.sprite.SpriteRegistry;
+import com.google.common.collect.ImmutableMap;
 import lombok.Value;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import static com.google.common.base.Preconditions.checkState;
+import static java.util.stream.Collectors.toList;
 import static org.lwjgl.opengl.GL11.*;
 
 /** Main entry point of BETAMAX game engine
@@ -181,24 +188,13 @@ public class BetamaxGlProgram extends GlProgramBase {
         }
         else if (key == GLFW.GLFW_KEY_HOME && controlKeyPressed) {
             soundSyncer.needResync();
+        } else if (key == GLFW.GLFW_KEY_HOME && !controlKeyPressed) {
+            loadGame();
+        } else if (key == GLFW.GLFW_KEY_END) {
+            saveGame();
         }
         else if (key == GLFW.GLFW_KEY_PAUSE) {
-            checkState(getFrameClock().getPaused() || !crashed);
-            checkState(getFrameClock().getPaused() || !loading);
-            if (crashed) {
-                LOG.error("You can't unpause your way out of a crash. Use hotloading (F5 or Ctrl+F5) instead");
-            } else if(loading) {
-                LOG.warn("Cannot unpause until loading is done");
-            } else {
-                getFrameClock().setPaused(!getFrameClock().getPaused());
-                if (getFrameClock().getPaused()) {
-                    soundWorld.globalPause();
-                }
-                else {
-                    soundWorld.globalUnpause();
-                    soundSyncer.needResync();
-                }
-            }
+            hitPauseKey();
             // FIXME this will fuck up the metrics,we need a cooked Clock for Metrics to ignore
             // the passage of time during pause
             // page up/down to change target FPS
@@ -222,6 +218,62 @@ public class BetamaxGlProgram extends GlProgramBase {
             // if debug mode is off, this always just restarts the world and place-in-time script reloading is
             // prevented
             newWorld(controlKeyPressed || !getDebugMode());
+        }
+    }
+
+    private void loadGame() {
+        List<String> saveFiles = Arrays.asList(new File(Global.snapshotDir).list());
+        Future<Optional<String>> futureGameFile = OurTool.guiChoose("Choose save game file", saveFiles);
+        try {
+
+            Optional<String> optionalGameFile = futureGameFile.get();
+            if(optionalGameFile.isPresent()) {
+                GameplaySnapshot snapshot;
+                try {
+                    snapshot = GameplaySnapshot.readFromFile(Global.snapshotDir + optionalGameFile.get());
+                } catch (IOException e) {
+                    LOG.error("Could not load snapshot", e);
+                    return;
+                }
+                LOG.info("Restoring file {} created {}", snapshot.getMnemonicName(), snapshot.getCreationDate());
+                newWorld(true);
+                scriptWorld.setGlobalShader(snapshot.getGlobalShader());
+                getFrameClock().setCurrentFrame(snapshot.getCurrentFrame());
+                spriteRegistry.restoreSnapshot(snapshot.getSprites());
+                scriptWorld.setStateVariables(snapshot.getScriptVariables());
+                LOG.info("Game state restore complete!");
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void hitPauseKey() {
+        checkState(getFrameClock().getPaused() || !crashed);
+        checkState(getFrameClock().getPaused() || !loading);
+        if (crashed) {
+            LOG.error("You can't unpause your way out of a crash. Use hotloading (F5 or Ctrl+F5) instead");
+        } else if(loading) {
+            LOG.warn("Cannot unpause until loading is done");
+        } else {
+            getFrameClock().setPaused(!getFrameClock().getPaused());
+            if (getFrameClock().getPaused()) {
+                soundWorld.globalPause();
+            }
+            else {
+                soundWorld.globalUnpause();
+                soundSyncer.needResync();
+            }
+        }
+    }
+
+    private void saveGame() {
+        GameplaySnapshot snapshot = createSnapshot();
+        try {
+            LOG.debug("Created snapshot {}", snapshot.writeToFile());
+        } catch (IOException e) {
+            // FIXME for steam prod this should be kinder (GUI)
+            LOG.error("Could not write snapshot to file!", e);
         }
     }
 
@@ -405,7 +457,7 @@ public class BetamaxGlProgram extends GlProgramBase {
         crashed = true;
     }
 
-    @Override protected String getWindowTitle() { return "BETAMAX DEMO"; }
+    @Override protected String getWindowTitle() { return "MUTE"; }
     @Override protected int getWindowHeight() { return 540; }
     @Override protected int getWindowWidth() { return 960; }
     @Override protected boolean getDebugMode() { return Global.debugMode; }
@@ -416,6 +468,18 @@ public class BetamaxGlProgram extends GlProgramBase {
             spriteRegistry.close();
         }
         spriteTemplateRegistry.close();
+    }
+
+    private GameplaySnapshot createSnapshot() {
+        List<GameplaySnapshot.SpriteSnapshot> spriteSnapshots =
+                spriteRegistry.getSpritesInRenderOrder().stream()
+                        .map(Sprite::toSnapshot)
+                        .collect(toList());
+        return new GameplaySnapshot(
+                scriptWorld.getGlobalShader(),
+                getFrameClock().getCurrentFrame(),
+                spriteSnapshots, ImmutableMap.copyOf(scriptWorld.getStateVariables())
+        );
     }
 }
 
