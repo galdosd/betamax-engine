@@ -139,11 +139,11 @@ public final class SpriteTemplate implements  AutoCloseable {
             this.layer = snapshot.getLayer();
             this.repetitions = snapshot.getRepetitions();
             this.pinnedToCursor = snapshot.isPinnedToCursor();
-            this.paused = snapshot.isPaused();
-            this.hidden = snapshot.isHidden();
             this.pausedFrame = snapshot.getPausedFrame();
             this.location = snapshot.getLocation();
             soundSource = setupSound();
+            setHidden(snapshot.isHidden());
+            setPaused(snapshot.isPaused());
         }
 
         @Override public void render(ShaderProgram shaderProgram) {
