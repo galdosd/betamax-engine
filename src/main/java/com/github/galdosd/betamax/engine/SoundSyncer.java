@@ -41,9 +41,11 @@ public class SoundSyncer {
     private void computeIfResyncNeeded(List<Sprite> sprites) {
         float maxDrift = 0.0f;
         for(Sprite sprite: sprites) {
-            float soundDrift = Math.abs(sprite.getSoundDrift());
-            if (soundDrift > maxDrift) {
-                maxDrift = soundDrift;
+            if(!sprite.getPaused()) {
+                float soundDrift = Math.abs(sprite.getSoundDrift());
+                if (soundDrift > maxDrift) {
+                    maxDrift = soundDrift;
+                }
             }
         }
         if(maxDrift < (Global.maxSoundDriftMillis / 1000.0f)) {
