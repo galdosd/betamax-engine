@@ -100,4 +100,8 @@ public class ScriptWorld implements LogicHandler {
     public Map<String, String> getStateVariables() {
         return servicer.getAllStateVariables();
     }
+
+    public String getGlobalShader() {
+        return servicer.getGlobalShaderName();
+    }
 }

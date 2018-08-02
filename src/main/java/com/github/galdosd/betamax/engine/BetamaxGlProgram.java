@@ -8,6 +8,7 @@ import com.github.galdosd.betamax.graphics.Texture;
 import com.github.galdosd.betamax.graphics.TextureLoadAdvisor;
 import com.github.galdosd.betamax.graphics.TextureRegistry;
 import com.github.galdosd.betamax.gui.DevConsole;
+import com.github.galdosd.betamax.opengl.ShaderProgram;
 import com.github.galdosd.betamax.opengl.TextureCoordinate;
 import com.github.galdosd.betamax.scripting.EventType;
 import com.github.galdosd.betamax.scripting.ScriptWorld;
@@ -340,6 +341,7 @@ public class BetamaxGlProgram extends GlProgramBase {
     }
 
     private void renderAllSprites(List<Sprite> spritesInRenderOrder) {
+        ShaderProgram globalShaderProgram = ourShaders.getShaderProgram(scriptWorld.getGlobalShader());
         try(Timer.Context ignored = lateTextureUploadPhaseTimer.time()) {
             for (Sprite sprite : spritesInRenderOrder) {
                 sprite.uploadCurrentFrame();
@@ -352,7 +354,7 @@ public class BetamaxGlProgram extends GlProgramBase {
                             && selectedSprite.isPresent()
                             && sprite.getName().equals(selectedSprite.get());
             updatePinnedToCursorSprite(sprite);
-            sprite.render(highlightSprite ? ourShaders.HIGHLIGHT : ourShaders.DEFAULT);
+            sprite.render(highlightSprite ? ourShaders.HIGHLIGHT : globalShaderProgram);
         }
     }
 

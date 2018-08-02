@@ -6,6 +6,7 @@ import com.github.galdosd.betamax.sprite.SpriteEvent;
 import com.github.galdosd.betamax.sprite.SpriteName;
 import com.github.galdosd.betamax.sprite.SpriteRegistry;
 import com.google.common.base.Preconditions;
+import lombok.Getter;
 import lombok.NonNull;
 import org.slf4j.LoggerFactory;
 
@@ -141,5 +142,14 @@ public final class ScriptServicer {
         String val = stateVariables.get(key);
         checkArgument(null!=val, "No such state variable: %s", key);
         return val;
+    }
+
+    public String getGlobalShaderName() {
+        return globalShaderName;
+    }
+
+    private String globalShaderName = null;
+    public void setGlobalShader(String shaderName) {
+        globalShaderName = shaderName;
     }
 }
