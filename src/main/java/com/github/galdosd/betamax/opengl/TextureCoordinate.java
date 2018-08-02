@@ -1,5 +1,6 @@
 package com.github.galdosd.betamax.opengl;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Value;
 
 /** Origin is in the southwest corner. 1,1 is the northeast corner
@@ -15,6 +16,7 @@ import lombok.Value;
     public static final TextureCoordinate CENTER = new TextureCoordinate(0.5,0.5);
     double x, y;
 
+    @JsonIgnore
     public boolean isValid() {
         return x >= 0.0 && x <= 1.0 && y >= 0.0 && y <= 1.0;
     }

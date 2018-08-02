@@ -78,6 +78,8 @@ public class SpriteRegistry implements AutoCloseable {
             Sprite sprite = template.createFromSnapshot(snapshot, frameClock);
             addSprite(sprite);
         }
+        // XXX this is disgusting, are you serious?
+        alreadyBegun = true;
 
     }
 
