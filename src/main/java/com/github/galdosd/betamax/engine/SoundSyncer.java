@@ -64,7 +64,7 @@ public class SoundSyncer {
         }
         if(framesTracked > Global.driftTolerancePeriodFrames) {
             float meanDrift = meanDriftTimesFramesTracked / (float)framesTracked;
-            LOG.debug("Detected and scheduled fix for desynced sound: %d ms", (int)meanDrift * 1000);
+            LOG.debug("Detected and scheduled fix for desynced sound: {} ms", (int)(meanDrift * 1000));
             resyncNeeded = true;
         }
     }
