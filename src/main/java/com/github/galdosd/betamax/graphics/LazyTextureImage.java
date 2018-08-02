@@ -92,12 +92,12 @@ public class LazyTextureImage implements  AutoCloseable {
     }
 
     private void checkLoaded() {
-        if(Global.debugMode) {
-            checkState(getLoaded(), "Runtime RAM load: %s", getName());
-        } else {
+        //if(Global.debugMode) {
+         //   checkState(getLoaded(), "Runtime RAM load: %s", getName());
+       // } else {
             if(!getLoaded()) LOG.error("Runtime RAM load: {}", getName());
             setLoaded(true);
-        }
+       // }
     }
 
     public TextureName getName() {
