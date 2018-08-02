@@ -34,7 +34,6 @@ import java.util.Map;
         SpriteName name;
         int creationSerial;
         int initialFrame;
-        int initialSoundFrame;
         boolean clickableEverywhere;
         int layer;
         int repetitions;

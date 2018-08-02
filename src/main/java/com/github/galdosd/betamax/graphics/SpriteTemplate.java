@@ -100,7 +100,6 @@ public final class SpriteTemplate implements  AutoCloseable {
         private final FrameClock frameClock;
         @Getter private final int creationSerial;
         private int initialFrame;
-        private final int initialSoundFrame;
         private boolean clickableEverywhere = false;
         @Getter private int layer = 0;
         @Getter private int repetitions = 1;
@@ -114,7 +113,7 @@ public final class SpriteTemplate implements  AutoCloseable {
         private SpriteImpl(SpriteName name, FrameClock frameClock){
             this.frameClock = frameClock;
             this.name = name;
-            initialFrame = initialSoundFrame = frameClock.getCurrentFrame();
+            initialFrame = frameClock.getCurrentFrame();
             creationSerial = nextCreationSerial++;
             soundSource = setupSound();
         }
@@ -134,7 +133,6 @@ public final class SpriteTemplate implements  AutoCloseable {
             this.name = snapshot.getName();
             this.creationSerial = snapshot.getCreationSerial();
             this.initialFrame = snapshot.getInitialFrame();
-            this.initialSoundFrame = snapshot.getInitialSoundFrame();
             this.clickableEverywhere = snapshot.isClickableEverywhere();
             this.layer = snapshot.getLayer();
             this.repetitions = snapshot.getRepetitions();
@@ -152,7 +150,7 @@ public final class SpriteTemplate implements  AutoCloseable {
 
         @Override public int getCurrentFrame() {
             if(paused) {
-                return pausedFrame;
+                return (pausedFrame - initialFrame) % getTotalFrames();
             } else {
                 return (frameClock.getCurrentFrame() - initialFrame) % getTotalFrames();
             }
@@ -206,8 +204,11 @@ public final class SpriteTemplate implements  AutoCloseable {
             return templateName;
         }
 
+        /** accurate for sprites without sound and sprites with sound that never have setPaused(true)
+         *  FIXME: have a initialCreationFrame, used for nothing but useful for general dev info
+         **/
         @Override public int getAge() {
-            return frameClock.getCurrentFrame() - initialSoundFrame;
+            return frameClock.getCurrentFrame() - initialFrame;
         }
 
         @Override public boolean getPaused() {
@@ -226,13 +227,15 @@ public final class SpriteTemplate implements  AutoCloseable {
         }
 
         private void doUnpause() {
-            initialFrame = frameClock.getCurrentFrame() - pausedFrame;
+            initialFrame += frameClock.getCurrentFrame() - pausedFrame;
             pausedFrame = 0;
-            if(soundSource.isPresent()) soundSource.get().resume();
+            if(soundSource.isPresent()) {
+                soundSource.get().resume();
+            }
         }
 
         private void doPause() {
-            pausedFrame = getCurrentFrame();
+            pausedFrame = frameClock.getCurrentFrame();
             if(soundSource.isPresent()) soundSource.get().pause();
         }
 
@@ -287,7 +290,8 @@ public final class SpriteTemplate implements  AutoCloseable {
         }
 
         private float getExpectedSoundPositionInSeconds() {
-            int expectedPositionInFrames = frameClock.getCurrentFrame() - initialSoundFrame;
+            int expectedPositionInFrames = frameClock.getCurrentFrame() - initialFrame;
+            checkState(expectedPositionInFrames >= 0, "Negative expected audio position (current frame %s, initial frame %s)", frameClock.getCurrentFrame(), initialFrame);
             return (float)expectedPositionInFrames / (float) Global.targetFps;
         }
 
@@ -303,7 +307,6 @@ public final class SpriteTemplate implements  AutoCloseable {
                     name,
                     creationSerial,
                     initialFrame,
-                    initialSoundFrame,
                     clickableEverywhere,
                     layer,
                     repetitions,
