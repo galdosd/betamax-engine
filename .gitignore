@@ -6,3 +6,4 @@ hs_err_*.log
 *.ogg
 *.psd
 *.png
+src/main/resources/com/github/galdosd/betamax/sprites/*
