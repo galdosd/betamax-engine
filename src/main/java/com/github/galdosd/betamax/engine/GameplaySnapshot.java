@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.github.galdosd.betamax.Global;
 import com.github.galdosd.betamax.opengl.TextureCoordinate;
+import com.github.galdosd.betamax.sprite.Sprite;
 import com.github.galdosd.betamax.sprite.SpriteName;
 import org.kohsuke.randname.RandomNameGenerator;
 import lombok.Value;
@@ -28,13 +29,12 @@ import java.util.Map;
     Date creationDate = new Date();
     String mnemonicName = NAME_GENERATOR.next();
 
-
     @Value public static class SpriteSnapshot {
         String templateName;
         SpriteName name;
         int creationSerial;
         int initialFrame;
-        boolean clickableEverywhere;
+        Sprite.Clickability clickability;
         int layer;
         int repetitions;
         boolean pinnedToCursor;

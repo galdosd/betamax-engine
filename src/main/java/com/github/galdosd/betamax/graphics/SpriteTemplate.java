@@ -100,7 +100,7 @@ public final class SpriteTemplate implements  AutoCloseable {
         private final FrameClock frameClock;
         @Getter private final int creationSerial;
         private int initialFrame;
-        private boolean clickableEverywhere = false;
+        private Clickability clickability = Clickability.TRANSPARENCY_BASED;
         @Getter private int layer = 0;
         @Getter private int repetitions = 1;
         private boolean pinnedToCursor = false;
@@ -133,7 +133,7 @@ public final class SpriteTemplate implements  AutoCloseable {
             this.name = snapshot.getName();
             this.creationSerial = snapshot.getCreationSerial();
             this.initialFrame = snapshot.getInitialFrame();
-            this.clickableEverywhere = snapshot.isClickableEverywhere();
+            this.clickability = snapshot.getClickability();
             this.layer = snapshot.getLayer();
             this.repetitions = snapshot.getRepetitions();
             this.pinnedToCursor = snapshot.isPinnedToCursor();
@@ -161,15 +161,18 @@ public final class SpriteTemplate implements  AutoCloseable {
         }
 
         @Override public boolean isClickableAtCoordinate(TextureCoordinate coord) {
-            if(clickableEverywhere) {
+            if(clickability == Clickability.EVERYWHERE) {
                 return true;
+            } else if (clickability == Clickability.NOWHERE) {
+                return false;
+            } else{
+                Texture texture = textures.get(getRenderedTexture());
+                TextureCoordinate translatedCoord = coord.minus(location.minus(TextureCoordinate.CENTER));
+                boolean transparentAtCoordinate =
+                        !translatedCoord.isValid() || texture.isTransparentAtCoordinate(translatedCoord);
+                LOG.trace("{}.isClickableAtCoordinate({}) == {}", this, coord, !transparentAtCoordinate);
+                return !transparentAtCoordinate;
             }
-            Texture texture = textures.get(getRenderedTexture());
-            TextureCoordinate translatedCoord = coord.minus(location.minus(TextureCoordinate.CENTER));
-            boolean transparentAtCoordinate =
-                    !translatedCoord.isValid() || texture.isTransparentAtCoordinate(translatedCoord);
-            LOG.trace("{}.isClickableAtCoordinate({}) == {}", this, coord, !transparentAtCoordinate);
-            return !transparentAtCoordinate;
         }
 
         private int getRenderedTexture() {
@@ -180,9 +183,8 @@ public final class SpriteTemplate implements  AutoCloseable {
             return textures.get((getCurrentFrame() + framesAhead)% textureCount).getName();
         }
 
-        @Override public void setClickableEverywhere(boolean clickableEverywhere) {
-            LOG.debug("{}.setClickableEverywhere({})", this, clickableEverywhere);
-            this.clickableEverywhere = clickableEverywhere;
+        @Override public void setClickability(Clickability clickability) {
+            this.clickability = clickability;
         }
 
         @Override public void setLayer(int layer) {
@@ -307,7 +309,7 @@ public final class SpriteTemplate implements  AutoCloseable {
                     name,
                     creationSerial,
                     initialFrame,
-                    clickableEverywhere,
+                    clickability,
                     layer,
                     repetitions,
                     pinnedToCursor,

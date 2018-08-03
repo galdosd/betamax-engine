@@ -1,5 +1,7 @@
 package com.github.galdosd.betamax.imageio;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.galdosd.betamax.Global;
 import com.github.galdosd.betamax.OurTool;
 import com.github.galdosd.betamax.graphics.TextureName;
@@ -104,6 +106,17 @@ import static java.util.stream.Collectors.toMap;
         List<SoundName> soundFilenames = reflections.getResources(OGG_PATTERN)
                 .stream().sorted().map(SoundName::new).collect(toList());
         return new SpriteTemplateManifest(templateName, spriteFilenames, soundFilenames);
+    }
+
+    /** just for fucking jackson don't use it yourself */
+    @JsonCreator
+    private SpriteTemplateManifest(
+            @JsonProperty("templateName") String templateName,
+            @JsonProperty("spriteFilenames") List<TextureName> spriteFilenames,
+            @JsonProperty("soundName") Optional<SoundName> soundName) {
+        this.templateName = templateName;
+        this.spriteFilenames = spriteFilenames;
+        this.soundName = soundName;
     }
 
     private SpriteTemplateManifest(
