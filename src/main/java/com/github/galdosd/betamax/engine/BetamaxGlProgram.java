@@ -350,6 +350,10 @@ public class BetamaxGlProgram extends GlProgramBase {
         showPauseScreen();
         updateDevConsole();
         processKeyEvents();
+        // FIXME last minute messy code
+        if(scriptWorld.shouldWeRebootEverything()) {
+            newWorld(true);
+        }
     }
     private void enterLoadingMode() {
         if(!loading) {

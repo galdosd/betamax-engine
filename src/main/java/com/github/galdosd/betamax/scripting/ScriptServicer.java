@@ -153,4 +153,11 @@ public final class ScriptServicer {
         checkInit();
         globalShaderName = shaderName;
     }
+
+    // FIXME 13am code
+    public boolean rebootEverythingFlag = false;
+    public void rebootEverything() {
+        rebootEverythingFlag = true;
+        LOG.info("Rebooting everything (scheduled)");
+    }
 }

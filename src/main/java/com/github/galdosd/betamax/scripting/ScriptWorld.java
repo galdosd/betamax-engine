@@ -114,4 +114,7 @@ public class ScriptWorld implements LogicHandler {
             servicer.setStateVariable(entry.getKey(), entry.getValue());
         });
     }
+    public boolean shouldWeRebootEverything () {
+        return servicer.rebootEverythingFlag;
+    }
 }
