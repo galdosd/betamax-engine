@@ -30,7 +30,7 @@ public class GlProgramBaseTest {
         for(String shaderName: shaderNames) Shader.loadAndCompileShader(shaderName, /*FIXME*/ 0);
     }
 
-    @Test public void testBasic() throws Exception {
+    @Test @Ignore public void testBasic() throws Exception {
         new GlProgramBase() {
 
             private boolean startedThread;
