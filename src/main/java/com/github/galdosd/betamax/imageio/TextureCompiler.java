@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.Map;
 
 import static java.util.stream.Collectors.toList;
 
@@ -22,7 +23,10 @@ public final class TextureCompiler {
             LoggerFactory.getLogger(new Object(){}.getClass().getEnclosingClass());
 
     public static void main(String[] args) throws IOException, URISyntaxException {
-        LOG.info("Collecting filenames");
+        LOG.info("Compiling manifests");
+        ManifestsPackage.compile().writeToFile();
+
+        LOG.info("Collecting texture filenames");
         Reflections reflections = new Reflections(Global.spritePackageBase, new ResourcesScanner());
         List<TextureName> textureNames = reflections.getResources(SpriteTemplateManifest.TIF_PATTERN)
                 .stream().sorted().map(TextureName::new).collect(toList());

@@ -3,6 +3,8 @@ package com.github.galdosd.betamax;
 import com.codahale.metrics.MetricRegistry;
 import com.github.galdosd.betamax.graphics.TextureName;
 
+import java.io.File;
+
 import static com.github.galdosd.betamax.OurTool.fromProperty;
 
 /** It's not what it looks like honey!
@@ -84,4 +86,6 @@ public final class Global {
      *  show as drift, but it will self correct right away. We don't want to thrash back and forth!
      */
     public static final int driftTolerancePeriodFrames = fromProperty("betamax.driftTolerancePeriodFrames", 6);
+    public static final File manifestsPackageFilename = new File(fromProperty("betamax.manifestsPackageFilename"));
+    public static final boolean usePrecompiledManifests = fromProperty("betamax.usePrecompiledManifests", true);
 }

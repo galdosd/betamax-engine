@@ -2,10 +2,12 @@ package com.github.galdosd.betamax.graphics;
 
 import com.codahale.metrics.Counter;
 import com.github.galdosd.betamax.Global;
+import com.github.galdosd.betamax.imageio.ManifestsPackage;
 import com.github.galdosd.betamax.imageio.SpriteTemplateManifest;
 import com.github.galdosd.betamax.sound.SoundRegistry;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -40,7 +42,20 @@ public final class SpriteTemplateRegistry implements AutoCloseable {
         checkArgument(registeredManifests.size()==0);
         checkArgument(registeredTemplates.size()==0);
         LOG.info("Preloading all sprite template manifests and sounds");
-        registeredManifests.putAll( SpriteTemplateManifest.preloadEverything() );
+        if(Global.usePrecompiledManifests) {
+            LOG.info("Using precompiled manifests file {}", Global.manifestsPackageFilename);
+            try {
+                registeredManifests.putAll(SpriteTemplateManifest.preloadEverythingPrecompiled());
+            } catch (IOException e) {
+                throw new RuntimeException(
+                        "Could not load Global.manifestsPackageFilename: "
+                                + Global.manifestsPackageFilename, e
+                );
+            }
+        } else {
+            LOG.info("Compiling manifests from resources");
+            registeredManifests.putAll(SpriteTemplateManifest.preloadEverything());
+        }
         for(SpriteTemplateManifest manifest: registeredManifests.values()) {
             SpriteTemplate template = new SpriteTemplate(manifest, textureRegistry);
             registeredTemplates.put(manifest.getTemplateName(), template);

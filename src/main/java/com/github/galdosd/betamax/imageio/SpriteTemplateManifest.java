@@ -12,6 +12,7 @@ import org.reflections.Reflections;
 import org.reflections.scanners.ResourcesScanner;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -38,6 +39,10 @@ import static java.util.stream.Collectors.toMap;
     String templateName;
     List<TextureName> spriteFilenames;
     Optional<SoundName> soundName;
+
+    public static Map<String,SpriteTemplateManifest> preloadEverythingPrecompiled() throws IOException {
+        return ManifestsPackage.readFromFile().getManifestsMap();
+    }
 
     private static final class DraftManifest {
         private final List<TextureName> textureNames = new ArrayList<>();
