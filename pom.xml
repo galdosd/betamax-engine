@@ -151,6 +151,15 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>**/betamax/sprites/**</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
                     <source>1.8</source>
@@ -165,9 +174,10 @@
                             <mainClass>com.github.galdosd.betamax.engine.BetamaxGlProgram</mainClass>
                         </manifest>
                     </archive>
-                    <descriptorRefs>
+                    <!-- <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
+                    </descriptorRefs> -->
+                    <descriptor>src/assembly.xml</descriptor>
                 </configuration>
                 <executions>
                     <execution>
