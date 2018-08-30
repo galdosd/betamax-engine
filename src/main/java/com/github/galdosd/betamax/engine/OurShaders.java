@@ -10,4 +10,5 @@ public final class OurShaders extends OurShadersBase {
     public final ShaderProgram DEFAULT = prepareShaderProgram("default.vert", "default.frag");
     public final ShaderProgram HIGHLIGHT = prepareShaderProgram("default.vert", "highlight.frag");
     public final ShaderProgram NIGHT = prepareShaderProgram("default.vert", "night.frag");
+    public final ShaderProgram NIGHT2 = prepareShaderProgram("default.vert", "night_more_saturation.frag");
 }
