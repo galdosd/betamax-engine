@@ -13,4 +13,5 @@ public final class OurShaders extends OurShadersBase {
     public final ShaderProgram NIGHT2 = prepareShaderProgram("default.vert", "night_more_saturation.frag");
     public final ShaderProgram DARKEN = prepareShaderProgram("default.vert", "darken.frag");
     public final ShaderProgram NIGHT_COMBINED = prepareShaderProgram("default.vert", "night_combined.frag");
+    public final ShaderProgram UPWIPE_TEST = prepareShaderProgram("upwipe.vert", "default.frag");
 }
