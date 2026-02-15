@@ -198,7 +198,9 @@ SOFTWARE.
                     <!-- <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs> -->
-                    <descriptor>src/assembly.xml</descriptor>
+                    <descriptors>
+                        <descriptor>src/assembly.xml</descriptor>
+                    </descriptors>
                 </configuration>
                 <executions>
                     <execution>
