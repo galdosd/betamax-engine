@@ -1,0 +1,5 @@
+target/
+.git/
+*.tif
+*.ogg
+*.psd

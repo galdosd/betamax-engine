@@ -176,9 +176,7 @@ SOFTWARE.
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <configuration>
-                    <excludes>
-                        <exclude>**/betamax/sprites/**</exclude>
-                    </excludes>
+                    <!-- sprite exclusion removed for end-to-end testing with built-in test sprites -->
                 </configuration>
             </plugin>
             <plugin>
@@ -200,7 +198,9 @@ SOFTWARE.
                     <!-- <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs> -->
-                    <descriptor>src/assembly.xml</descriptor>
+                    <descriptors>
+                        <descriptor>src/assembly.xml</descriptor>
+                    </descriptors>
                 </configuration>
                 <executions>
                     <execution>
@@ -222,7 +222,7 @@ SOFTWARE.
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.16.6</version>
+            <version>1.18.6</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -274,6 +274,23 @@ SOFTWARE.
             <groupId>org.kohsuke</groupId>
             <artifactId>wordnet-random-name</artifactId>
             <version>1.3</version>
+        </dependency>
+
+        <!-- JavaFX (removed from JDK after Java 10; needed for DevConsole) -->
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-controls</artifactId>
+            <version>11.0.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-graphics</artifactId>
+            <version>11.0.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-base</artifactId>
+            <version>11.0.2</version>
         </dependency>
 
         <!-- all the lwjgl crap -->

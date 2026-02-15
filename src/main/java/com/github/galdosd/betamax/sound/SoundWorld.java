@@ -25,35 +25,25 @@ public final class SoundWorld implements AutoCloseable {
     private final long context, device;
     private final ALCapabilities alCapabilities;
     private final ALCCapabilities alcCapabilities;
-
-//    public static void main(String[] args) {
-//        try(SoundWorld soundRegistry = new SoundWorld()) {
-//            try (SoundBuffer soundBuffer = soundRegistry.loadSound(new SoundName("com/github/galdosd/betamax/sprites/demowalk/test2.ogg"))) {
-//                try(SoundSource source = soundRegistry.newSource()) {
-//                    source.playSound(soundBuffer);
-//                    OurTool.sleepUntilPrecisely(System.currentTimeMillis() + 9000);
-//                }
-//            }
-//        }
-//    }
+    private final boolean disabled;
 
     public SoundSource newSource() {
         return new SoundSource();
     }
 
     public void globalPause() {
-        SoundSource.globalPause();
+        if (!disabled) SoundSource.globalPause();
     }
 
     public void globalUnpause() {
-        SoundSource.globalUnpause();
+        if (!disabled) SoundSource.globalUnpause();
     }
 
     public void globalPitch(float newPitch) {
-        SoundSource.globalPitch(newPitch);
+        if (!disabled) SoundSource.globalPitch(newPitch);
     }
     public SoundBuffer loadSound(SoundName filename) {
-        // we wrap the package private SoundBuffer#loadSoundFromFile because it should not be called of openal is not initialized
+        if (disabled) return null;
         try(Timer.Context ignored = soundLoadTimer.time()) {
             SoundBuffer soundBuffer = SoundBuffer.loadSoundFromFile(filename.getName());
             checkAlcError();
@@ -62,6 +52,16 @@ public final class SoundWorld implements AutoCloseable {
     }
 
     public SoundWorld() {
+        if (!Global.enableSound) {
+            LOG.info("Sound disabled, skipping OpenAL initialization");
+            disabled = true;
+            device = 0;
+            context = 0;
+            alcCapabilities = null;
+            alCapabilities = null;
+            return;
+        }
+        disabled = false;
         synchronized ($LOCK) {
             checkState(!initialized, "OpenAL was already initialized previously");
             initialized = true;
@@ -80,6 +80,7 @@ public final class SoundWorld implements AutoCloseable {
 
 
     private void checkAlcError() {
+        if (disabled) return;
         int alcError = alcGetError(device);
         checkState(alcError==ALC_NO_ERROR, "OpenALC error " + alcError);
         checkAlError();
@@ -91,9 +92,8 @@ public final class SoundWorld implements AutoCloseable {
     }
 
     @Override public void close() {
+        if (disabled) return;
         checkAlcError();
-        // after this alGetError can no longer be called, or it will generate a "spurious" error"
-        // https://github.com/LWJGL/lwjgl3/issues/219
         alcMakeContextCurrent(MemoryUtil.NULL);
         alcDestroyContext(context);
         alcCloseDevice(device);
