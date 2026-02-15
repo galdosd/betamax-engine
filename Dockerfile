@@ -16,7 +16,12 @@ RUN pip3 install --break-system-packages Pillow
 WORKDIR /build
 COPY . /build/
 
-# Generate test sprite assets
+# Generate game sprite assets (platformer or smoketest based on build arg)
+ARG GAME_SCRIPT=platformer.py
+RUN python3 tools/generate_platformer_assets.py && \
+    echo "Platformer assets generated"
+
+# Also generate test sprites for smoketest compatibility
 RUN python3 -c "\
 from PIL import Image; \
 import os; \
@@ -53,6 +58,9 @@ COPY --from=builder /build/target/betamax-engine-1.0-SNAPSHOT-betamax-assembly.j
 # Create directories for cache and snapshots
 RUN mkdir -p /tmp/betamax-cache /tmp/betamax-snapshots /tmp/betamax-screenshots
 
+# Game script to run (default: platformer.py, can override to smoketest.py)
+ENV GAME_SCRIPT=platformer.py
+
 # Entrypoint script that starts Xvfb and runs the engine
 COPY <<'ENTRYPOINT_SCRIPT' /app/run.sh
 #!/bin/bash
@@ -63,9 +71,9 @@ Xvfb :99 -screen 0 1280x720x24 +extension GLX +render -noreset &
 sleep 2
 export DISPLAY=:99
 
-echo "Starting Betamax engine..."
+echo "Starting Betamax engine with script: $GAME_SCRIPT"
 java \
-  -Dbetamax.mainScript=smoketest.py \
+  -Dbetamax.mainScript=$GAME_SCRIPT \
   -Dbetamax.textureCacheDir=/tmp/betamax-cache/ \
   -Dbetamax.snapshotDir=/tmp/betamax-snapshots/ \
   -Dbetamax.usePrecompiledManifests=false \
@@ -83,10 +91,12 @@ sleep 12
 if kill -0 $ENGINE_PID 2>/dev/null; then
     echo "Engine is running. Taking screenshots..."
     import -window root /tmp/betamax-screenshots/screenshot1.png
-    sleep 2
+    sleep 3
     import -window root /tmp/betamax-screenshots/screenshot2.png
-    sleep 2
+    sleep 5
     import -window root /tmp/betamax-screenshots/screenshot3.png
+    sleep 5
+    import -window root /tmp/betamax-screenshots/screenshot4.png
     echo "Screenshots saved to /tmp/betamax-screenshots/"
     echo "Engine running successfully! Press Ctrl+C to stop."
     wait $ENGINE_PID
