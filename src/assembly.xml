@@ -20,9 +20,7 @@
         <fileSet>
             <outputDirectory>/</outputDirectory>
             <directory>${project.build.outputDirectory}</directory>
-            <excludes>
-                <exclude>com/github/galdosd/betamax/sprites/**/*.tif</exclude>
-            </excludes>
+            <!-- sprite TIF exclusion removed for end-to-end testing with built-in test sprites -->
         </fileSet>
     </fileSets>
 </assembly>

@@ -87,7 +87,7 @@ public abstract class GlProgramBase implements AutoCloseable {
             }
         } finally {
             GlWindow.shutdownGlfw();
-            Platform.exit();
+            try { Platform.exit(); } catch (Exception e) { /* JavaFX not initialized when debugMode=false */ }
         }
     }
 
